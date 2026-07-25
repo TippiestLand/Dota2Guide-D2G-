@@ -18,7 +18,7 @@
         { name: 'Huskar', attribute: 'strength', icon: 'huskar' },
         { name: 'Kunkka', attribute: 'strength', icon: 'kunkka' },
         { name: 'Largo', attribute: 'strength', icon: 'largo' },
-        { name: 'Legion Commander', attribute: 'strength', icon: 'legion_commander' },
+        { name: 'Legion Commander', attribute: 'strength', icon: 'legion_common' },
         { name: 'Lifestealer', attribute: 'strength', icon: 'life_stealer' },
         { name: 'Lycan', attribute: 'strength', icon: 'lycan' },
         { name: 'Mars', attribute: 'strength', icon: 'mars' },
@@ -61,7 +61,7 @@
         { name: 'Monkey King', attribute: 'agility', icon: 'monkey_king' },
         { name: 'Morphling', attribute: 'agility', icon: 'morphling' },
         { name: 'Naga Siren', attribute: 'agility', icon: 'naga_siren' },
-        { name: 'Phantom Assassin', attribute: 'agility', icon: 'phantom_assassin' },
+        { name: 'Phantom Assassin', attribute: 'agility', icon: 'phantom_assassi' },
         { name: 'Phantom Lancer', attribute: 'agility', icon: 'phantom_lancer' },
         { name: 'Razor', attribute: 'agility', icon: 'razor' },
         { name: 'Riki', attribute: 'agility', icon: 'riki' },
@@ -88,7 +88,7 @@
         { name: 'Grimstroke', attribute: 'intelligence', icon: 'grimstroke' },
         { name: 'Invoker', attribute: 'intelligence', icon: 'invoker' },
         { name: 'Jakiro', attribute: 'intelligence', icon: 'jakiro' },
-        { name: 'Keeper of the Light', attribute: 'intelligence', icon: 'keeper_of_the_light' },
+        { name: 'Keeper of the Light', attribute: 'intelligence', icon: 'keeper_of_the_lights' },
         { name: 'Leshrac', attribute: 'intelligence', icon: 'leshrac' },
         { name: 'Lich', attribute: 'intelligence', icon: 'lich' },
         { name: 'Lina', attribute: 'intelligence', icon: 'lina' },
@@ -96,7 +96,7 @@
         { name: 'Muerta', attribute: 'intelligence', icon: 'muerta' },
         { name: 'Necrophos', attribute: 'intelligence', icon: 'necrolyte' },
         { name: 'Oracle', attribute: 'intelligence', icon: 'oracle' },
-        { name: 'Outworld Destroyer', attribute: 'intelligence', icon: 'obsidian_destroyer' },
+        { name: 'Outworld Destroyer', attribute: 'intelligence', icon: 'obsidian_destroy' },
         { name: 'Puck', attribute: 'intelligence', icon: 'puck' },
         { name: 'Pugna', attribute: 'intelligence', icon: 'pugna' },
         { name: 'Queen of Pain', attribute: 'intelligence', icon: 'queenofpain' },
@@ -180,7 +180,7 @@
             return `
                 <div class="hero-item ${attrClass}" data-hero="${hero.name}" data-attribute="${hero.attribute}">
                     <div class="tilt-wrap">
-                        <img src="/assets/icons/${iconFile}" alt="${hero.name}" loading="lazy" 
+                        <img src="/static/assets/icons/${iconFile}" alt="${hero.name}" loading="lazy" 
                              onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\'>${hero.name.charAt(0)}</span>'">
                     </div>
                     <div class="hero-hover">
@@ -328,15 +328,6 @@
             if (pageId) navigateTo(pageId);
         });
     });
-
-    const authModal = document.getElementById('authModal');
-    const openAuth = document.getElementById('openAuth');
-    const closeAuth = document.getElementById('closeAuth');
-    const authTabs = document.querySelectorAll('.auth-tab');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-
-    // Авторизация уже обрабатывается в auth.js
 
     const fadeElements = document.querySelectorAll('.scroll-fade');
     if ('IntersectionObserver' in window) {
