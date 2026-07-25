@@ -20,8 +20,6 @@ services:
         value: tippi
       - key: FLASK_ENV
         value: production
-      - key: PYTHON_VERSION
-        value: 3.12.0
 
 databases:
   - name: dota2-guide-db
