@@ -1,18 +1,20 @@
 import sqlite3
-import json
 from datetime import datetime
 import os
 
+# ===== ПУТЬ К БД =====
+# На Render используем папку data
 DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'dota2.db')
 
+# Создаём папку data если её нет
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+
 def get_db():
-    """Подключение к SQLite"""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
-    """Создание таблиц"""
     try:
         conn = get_db()
         cursor = conn.cursor()
@@ -45,7 +47,6 @@ def init_db():
         ''')
         
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_news_timestamp ON news(timestamp DESC)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_news_type ON news(type)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
         
@@ -124,9 +125,11 @@ def add_user(username, email, password_hash):
             INSERT INTO users (username, email, password_hash)
             VALUES (?, ?, ?)
         ''', (username, email, password_hash))
+        
         user_id = cursor.lastrowid
         conn.commit()
         conn.close()
+        
         return {
             'id': user_id,
             'username': username,
@@ -134,7 +137,6 @@ def add_user(username, email, password_hash):
             'role': 'user'
         }
     except sqlite3.IntegrityError:
-        print(f"❌ Пользователь {username} уже существует")
         return None
     except Exception as e:
         print(f"❌ Ошибка добавления пользователя: {e}")
@@ -149,7 +151,6 @@ def get_user_by_username(username):
         conn.close()
         return dict(row) if row else None
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
         return None
 
 def get_user_by_email(email):
@@ -161,7 +162,6 @@ def get_user_by_email(email):
         conn.close()
         return dict(row) if row else None
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
         return None
 
 def delete_all_users():
@@ -174,7 +174,6 @@ def delete_all_users():
         conn.close()
         return deleted
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
         return 0
 
 def promote_to_admin(username):
@@ -187,7 +186,6 @@ def promote_to_admin(username):
         conn.close()
         return updated
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
         return False
 
 if __name__ == '__main__':

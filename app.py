@@ -15,9 +15,11 @@ load_dotenv()
 app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
 
+# ===== КОНФИГ =====
 SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'tippi')
 
+# ===== ИНИЦИАЛИЗАЦИЯ БД =====
 db.init_db()
 
 def admin_required(f):
