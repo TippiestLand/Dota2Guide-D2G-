@@ -1,10 +1,8 @@
 (function() {
     'use strict';
 
-    /* ===== ПОЛНЫЙ СПИСОК ВСЕХ ГЕРОЕВ DOTA 2 (127 ГЕРОЕВ) ===== */
-    /* Данные строго по твоему списку */
     const heroesData = [
-        // ===== СИЛА (36 героев) =====
+        // ===== СИЛА =====
         { name: 'Alchemist', attribute: 'strength', icon: 'alchemist' },
         { name: 'Axe', attribute: 'strength', icon: 'axe' },
         { name: 'Bristleback', attribute: 'strength', icon: 'bristleback' },
@@ -42,7 +40,7 @@
         { name: 'Undying', attribute: 'strength', icon: 'undying' },
         { name: 'Wraith King', attribute: 'strength', icon: 'skeleton_king' },
         
-        // ===== ЛОВКОСТЬ (36 героев) =====
+        // ===== ЛОВКОСТЬ =====
         { name: 'Anti-Mage', attribute: 'agility', icon: 'antimage' },
         { name: 'Bloodseeker', attribute: 'agility', icon: 'bloodseeker' },
         { name: 'Bounty Hunter', attribute: 'agility', icon: 'bounty_hunter' },
@@ -79,7 +77,7 @@
         { name: 'Viper', attribute: 'agility', icon: 'viper' },
         { name: 'Weaver', attribute: 'agility', icon: 'weaver' },
         
-        // ===== ИНТЕЛЛЕКТ (33 героя) =====
+        // ===== ИНТЕЛЛЕКТ =====
         { name: 'Ancient Apparition', attribute: 'intelligence', icon: 'ancient_apparition' },
         { name: 'Chen', attribute: 'intelligence', icon: 'chen' },
         { name: 'Crystal Maiden', attribute: 'intelligence', icon: 'crystal_maiden' },
@@ -115,7 +113,7 @@
         { name: 'Witch Doctor', attribute: 'intelligence', icon: 'witch_doctor' },
         { name: 'Zeus', attribute: 'intelligence', icon: 'zuus' },
         
-        // ===== УНИВЕРСАЛЬНЫЕ (22 героя) =====
+        // ===== УНИВЕРСАЛЬНЫЕ =====
         { name: 'Abaddon', attribute: 'universal', icon: 'abaddon' },
         { name: 'Arc Warden', attribute: 'universal', icon: 'arc_warden' },
         { name: 'Bane', attribute: 'universal', icon: 'bane' },
@@ -140,14 +138,11 @@
         { name: 'Windranger', attribute: 'universal', icon: 'windrunner' }
     ];
 
-    /* ===== УДАЛЯЕМ ДУБЛИКАТЫ ===== */
     const heroMap = new Map();
     heroesData.forEach(hero => {
         if (heroMap.has(hero.name)) {
             const existing = heroMap.get(hero.name);
-            if (hero.attribute === 'universal') {
-                heroMap.set(hero.name, hero);
-            }
+            if (hero.attribute === 'universal') heroMap.set(hero.name, hero);
         } else {
             heroMap.set(hero.name, hero);
         }
@@ -156,13 +151,6 @@
     const uniqueHeroes = Array.from(heroMap.values());
     uniqueHeroes.sort((a, b) => a.name.localeCompare(b.name));
 
-    console.log('Всего героев загружено: ' + uniqueHeroes.length + ' (127)');
-    console.log('Сила: ' + uniqueHeroes.filter(h => h.attribute === 'strength').length);
-    console.log('Ловкость: ' + uniqueHeroes.filter(h => h.attribute === 'agility').length);
-    console.log('Интеллект: ' + uniqueHeroes.filter(h => h.attribute === 'intelligence').length);
-    console.log('Универсальные: ' + uniqueHeroes.filter(h => h.attribute === 'universal').length);
-
-    /* ===== ОТОБРАЖЕНИЕ ГЕРОЕВ ===== */
     const heroList = document.getElementById('heroList');
     const attributeGlow = document.getElementById('attributeGlow');
     let currentFilter = 'all';
@@ -170,12 +158,7 @@
     let isTransitioning = false;
 
     function getAttributeClass(attribute) {
-        const classes = {
-            'strength': 'strength',
-            'agility': 'agility',
-            'intelligence': 'intelligence',
-            'universal': 'universal'
-        };
+        const classes = { 'strength': 'strength', 'agility': 'agility', 'intelligence': 'intelligence', 'universal': 'universal' };
         return classes[attribute] || '';
     }
 
@@ -187,18 +170,13 @@
         });
 
         if (filtered.length === 0) {
-            heroList.innerHTML = `
-                <div class="no-heroes">
-                    <p>Герои не найдены</p>
-                </div>
-            `;
+            heroList.innerHTML = `<div class="no-heroes"><p>Герои не найдены</p></div>`;
             return;
         }
 
         heroList.innerHTML = filtered.map(hero => {
             const iconFile = hero.icon + '.png';
             const attrClass = getAttributeClass(hero.attribute);
-            
             return `
                 <div class="hero-item ${attrClass}" data-hero="${hero.name}" data-attribute="${hero.attribute}">
                     <div class="tilt-wrap">
@@ -212,37 +190,28 @@
             `;
         }).join('');
 
-        /* ===== ЭФФЕКТ 3D НАКЛОНА ===== */
         document.querySelectorAll('.hero-item').forEach(item => {
             const tiltWrap = item.querySelector('.tilt-wrap');
-            
             item.addEventListener('mousemove', (e) => {
                 const rect = item.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / rect.width;
                 const y = (e.clientY - rect.top) / rect.height;
-                
                 if (tiltWrap) {
                     const rotateX = (y - 0.5) * 25;
                     const rotateY = (x - 0.5) * -25;
                     tiltWrap.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                 }
-                
                 const shineX = x * 100;
                 const shineY = y * 100;
                 item.style.setProperty('--shine-x', shineX + '%');
                 item.style.setProperty('--shine-y', shineY + '%');
             });
-            
             item.addEventListener('mouseleave', () => {
-                if (tiltWrap) {
-                    tiltWrap.style.transform = 'rotateX(0) rotateY(0)';
-                }
+                if (tiltWrap) tiltWrap.style.transform = 'rotateX(0) rotateY(0)';
             });
         });
     }
 
-    /* ===== ФИЛЬТРАЦИЯ ===== */
-    /* Снимаем активную кнопку по умолчанию */
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -250,17 +219,13 @@
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const filterValue = btn.dataset.filter;
-            
-            /* ===== СБРОС ФИЛЬТРА ===== */
             if (btn.classList.contains('active')) {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 currentFilter = 'all';
                 attributeGlow.className = 'attribute-glow';
-                
                 isTransitioning = true;
                 heroList.style.opacity = '0';
                 heroList.style.transform = 'scale(0.95)';
-                
                 setTimeout(() => {
                     renderHeroes();
                     heroList.style.opacity = '1';
@@ -269,23 +234,15 @@
                 }, 300);
                 return;
             }
-            
             if (isTransitioning) return;
-            
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             currentFilter = filterValue;
-            
             attributeGlow.className = 'attribute-glow';
-            if (currentFilter !== 'all') {
-                attributeGlow.classList.add(currentFilter);
-            }
-            
+            if (currentFilter !== 'all') attributeGlow.classList.add(currentFilter);
             isTransitioning = true;
             heroList.style.opacity = '0';
             heroList.style.transform = 'scale(0.95)';
-            
             setTimeout(() => {
                 renderHeroes();
                 heroList.style.opacity = '1';
@@ -296,11 +253,7 @@
     });
 
     const style = document.createElement('style');
-    style.textContent = `
-        .hero-grid {
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-    `;
+    style.textContent = `.hero-grid { transition: opacity 0.3s ease, transform 0.3s ease; }`;
     document.head.appendChild(style);
 
     document.getElementById('heroSearch').addEventListener('input', (e) => {
@@ -310,7 +263,6 @@
 
     renderHeroes();
 
-    /* ===== КАСТОМНЫЙ КУРСОР ===== */
     const cursor = document.createElement('div');
     cursor.className = 'custom-cursor';
     document.body.appendChild(cursor);
@@ -320,7 +272,6 @@
         cursor.style.top = e.clientY + 'px';
     });
 
-    /* ===== ЧАСТИЦЫ НА ФОНЕ ===== */
     const particlesContainer = document.createElement('div');
     particlesContainer.className = 'particles';
     document.body.prepend(particlesContainer);
@@ -332,24 +283,17 @@
         const left = Math.random() * 100;
         const duration = Math.random() * 20 + 15;
         const delay = Math.random() * 10;
-        
         particle.style.width = size + 'px';
         particle.style.height = size + 'px';
         particle.style.left = left + '%';
         particle.style.animationDuration = duration + 's';
         particle.style.animationDelay = delay + 's';
         particle.style.opacity = Math.random() * 0.5 + 0.1;
-        
         particlesContainer.appendChild(particle);
-        
-        setTimeout(() => {
-            particle.remove();
-        }, (duration + delay) * 1000);
+        setTimeout(() => { particle.remove(); }, (duration + delay) * 1000);
     }
-
     setInterval(createParticle, 200);
 
-    /* ===== НАВИГАЦИЯ ===== */
     const navLinks = document.querySelectorAll('nav a');
     const pages = {
         home: document.getElementById('page-home'),
@@ -360,21 +304,12 @@
     };
 
     function navigateTo(pageId) {
-        Object.values(pages).forEach(page => {
-            if (page) page.classList.remove('active');
-        });
-        
-        if (pages[pageId]) {
-            pages[pageId].classList.add('active');
-        }
-        
+        Object.values(pages).forEach(page => { if (page) page.classList.remove('active'); });
+        if (pages[pageId]) pages[pageId].classList.add('active');
         navLinks.forEach(link => {
             link.classList.remove('active');
-            if (link.dataset.page === pageId) {
-                link.classList.add('active');
-            }
+            if (link.dataset.page === pageId) link.classList.add('active');
         });
-        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -382,9 +317,7 @@
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const pageId = link.dataset.page;
-            if (pageId) {
-                navigateTo(pageId);
-            }
+            if (pageId) navigateTo(pageId);
         });
     });
 
@@ -392,13 +325,10 @@
         el.addEventListener('click', (e) => {
             e.preventDefault();
             const pageId = el.dataset.page;
-            if (pageId) {
-                navigateTo(pageId);
-            }
+            if (pageId) navigateTo(pageId);
         });
     });
 
-    /* ===== МОДАЛЬНОЕ ОКНО ===== */
     const authModal = document.getElementById('authModal');
     const openAuth = document.getElementById('openAuth');
     const closeAuth = document.getElementById('closeAuth');
@@ -406,108 +336,26 @@
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
 
-    openAuth.addEventListener('click', () => {
-        authModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    });
+    // Авторизация уже обрабатывается в auth.js
 
-    closeAuth.addEventListener('click', () => {
-        authModal.classList.remove('active');
-        document.body.style.overflow = '';
-    });
-
-    authModal.addEventListener('click', (e) => {
-        if (e.target === authModal) {
-            authModal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
-
-    authTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            authTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            const tabName = tab.dataset.tab;
-            if (tabName === 'login') {
-                loginForm.classList.add('active');
-                registerForm.classList.remove('active');
-            } else {
-                registerForm.classList.add('active');
-                loginForm.classList.remove('active');
-            }
-        });
-    });
-
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        
-        if (email && password) {
-            alert('Вход выполнен! Добро пожаловать, ' + email);
-            authModal.classList.remove('active');
-            document.body.style.overflow = '';
-            loginForm.reset();
-        } else {
-            alert('Пожалуйста, заполните все поля');
-        }
-    });
-
-    registerForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = document.getElementById('regUsername').value;
-        const email = document.getElementById('regEmail').value;
-        const password = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regConfirm').value;
-        
-        if (username && email && password && confirm) {
-            if (password !== confirm) {
-                alert('Пароли не совпадают!');
-                return;
-            }
-            if (password.length < 6) {
-                alert('Пароль должен содержать минимум 6 символов');
-                return;
-            }
-            alert('Регистрация успешна! Добро пожаловать, ' + username);
-            authModal.classList.remove('active');
-            document.body.style.overflow = '';
-            registerForm.reset();
-        } else {
-            alert('Пожалуйста, заполните все поля');
-        }
-    });
-
-    /* ===== АНИМАЦИЯ ПРИ СКРОЛЛЕ ===== */
     const fadeElements = document.querySelectorAll('.scroll-fade');
-
     if ('IntersectionObserver' in window) {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
+                if (entry.isIntersecting) entry.target.classList.add('visible');
             });
-        }, {
-            threshold: 0.15,
-            rootMargin: '0px 0px -50px 0px'
-        });
-
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
         fadeElements.forEach(el => observer.observe(el));
     } else {
         fadeElements.forEach(el => el.classList.add('visible'));
     }
 
-    console.log('Dota 2 Guide — ваш путь к мастерству');
-    console.log('Загружено героев: ' + uniqueHeroes.length);
+    console.log('Dota 2 Guide loaded successfully');
 
     if (localStorage.getItem('dotaGuideVisits')) {
         let visits = parseInt(localStorage.getItem('dotaGuideVisits')) + 1;
         localStorage.setItem('dotaGuideVisits', visits);
-        console.log('Это ваше ' + visits + '-е посещение');
     } else {
         localStorage.setItem('dotaGuideVisits', '1');
-        console.log('Добро пожаловать впервые!');
     }
 })();

@@ -1,4 +1,3 @@
-// ===== js/admin.js =====
 (function() {
     'use strict';
 
@@ -31,7 +30,6 @@
         try {
             const token = localStorage.getItem('adminToken');
             if (!token) return false;
-            
             const res = await fetch(API_URL + '/verify', {
                 headers: { 'X-Admin-Auth': token }
             });
@@ -53,24 +51,19 @@
             adminBtn.style.borderColor = show ? '#ff6b6b' : '#4ecdc4';
             adminBtn.style.color = show ? '#ff6b6b' : '#4ecdc4';
         }
-        if (show) {
-            loadAdminNews();
-        }
+        if (show) loadAdminNews();
     }
 
     async function loadAdminNews() {
         const list = document.getElementById('adminNewsList');
         if (!list) return;
-        
         try {
             const res = await fetch(API_URL + '/news');
             const data = await res.json();
-            
             if (!data || data.length === 0) {
                 list.innerHTML = '<p style="color:#888; text-align:center; padding:10px;">Новостей нет</p>';
                 return;
             }
-            
             list.innerHTML = data.map(n => `
                 <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 14px; margin-bottom:8px; border-left:3px solid #f0b90b;">
                     <div>
@@ -80,7 +73,6 @@
                     <button class="delete-news-btn" data-id="${n.id}" style="padding:4px 14px; border-radius:6px; border:1px solid #ff6b6b; background:transparent; color:#ff6b6b; cursor:pointer;">Удалить</button>
                 </div>
             `).join('');
-            
             list.querySelectorAll('.delete-news-btn').forEach(btn => {
                 btn.addEventListener('click', async function() {
                     const id = this.dataset.id;
@@ -168,18 +160,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        checkAdminStatus().then(admin => {
-            if (admin) {
-                showAdminPanel(true);
-            }
-        });
+        checkAdminStatus().then(admin => { if (admin) showAdminPanel(true); });
 
         const adminBtn = document.getElementById('adminBtn');
         if (adminBtn) {
             adminBtn.addEventListener('click', function() {
-                if (isAdmin) {
-                    adminLogout();
-                } else {
+                if (isAdmin) { adminLogout(); }
+                else {
                     document.getElementById('adminAuthModal').classList.add('active');
                     document.getElementById('adminLoginError').style.display = 'none';
                 }
@@ -210,12 +197,10 @@
             const content = document.getElementById('newsContent').value.trim();
             const type = document.getElementById('newsType').value;
             const link = document.getElementById('newsLink').value.trim();
-            
             if (!title || !content) {
                 showToast('Заполните заголовок и текст', 'error');
                 return;
             }
-            
             addNews(title, content, type, link).then(success => {
                 if (success) {
                     document.getElementById('newsTitle').value = '';
@@ -236,5 +221,4 @@
         div.textContent = text;
         return div.innerHTML;
     }
-
 })();

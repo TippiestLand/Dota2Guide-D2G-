@@ -60,12 +60,12 @@ def init_db():
         c.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
         conn.commit()
         conn.close()
+        print('✅ DB initialized')
         return True
     except Exception as e:
         print(f"DB init error: {e}")
         return False
 
-# Инициализация БД
 init_db()
 
 # ===== ФУНКЦИИ БД =====
@@ -214,7 +214,7 @@ def serve_assets(path):
 def static_files(path):
     return send_from_directory('public', path)
 
-# ===== API: РЕГИСТРАЦИЯ =====
+# ===== API =====
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
@@ -253,7 +253,6 @@ def register():
         'message': 'Регистрация успешна!'
     })
 
-# ===== API: ВХОД =====
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -286,7 +285,6 @@ def login():
         'message': 'Вход выполнен!'
     })
 
-# ===== API: ПРОВЕРКА =====
 @app.route('/api/verify', methods=['GET'])
 def verify():
     auth = request.headers.get('X-Admin-Auth')
@@ -310,7 +308,6 @@ def verify():
     except:
         return jsonify({'valid': False}), 401
 
-# ===== API: НОВОСТИ =====
 @app.route('/api/news', methods=['GET'])
 def get_news():
     return jsonify(get_all_news())
@@ -342,7 +339,6 @@ def delete_news_route(news_id):
         return jsonify({'success': True})
     return jsonify({'error': 'Новость не найдена'}), 404
 
-# ===== АДМИН =====
 @app.route('/api/admin/clear_users', methods=['DELETE'])
 @admin_required
 def clear_users():

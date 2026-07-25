@@ -3,7 +3,10 @@ __pycache__/
 *.pyc
 *.db
 *.sqlite
+*.sqlite3
+data/
 .venv/
 venv/
 .DS_Store
 *.log
+*.pid
