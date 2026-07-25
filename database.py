@@ -3,10 +3,7 @@ from datetime import datetime
 import os
 
 # ===== ПУТЬ К БД =====
-# На Render используем папку data
 DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'dota2.db')
-
-# Создаём папку data если её нет
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 def get_db():
@@ -125,11 +122,9 @@ def add_user(username, email, password_hash):
             INSERT INTO users (username, email, password_hash)
             VALUES (?, ?, ?)
         ''', (username, email, password_hash))
-        
         user_id = cursor.lastrowid
         conn.commit()
         conn.close()
-        
         return {
             'id': user_id,
             'username': username,

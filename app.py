@@ -43,7 +43,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ===== СТАТИКА =====
 @app.route('/')
 def index():
     return send_from_directory('public', 'index.html')
@@ -62,7 +61,6 @@ def serve_assets(path):
 
 @app.route('/<path:path>')
 def static_files(path):
-    # Если файл существует в public — отдаём
     if os.path.exists(os.path.join('public', path)):
         return send_from_directory('public', path)
     return jsonify({'error': 'Not found'}), 404
