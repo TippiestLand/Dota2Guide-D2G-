@@ -15,11 +15,9 @@ load_dotenv()
 app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
 
-# ===== КОНФИГ =====
 SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'tippi')
 
-# ИНИЦИАЛИЗАЦИЯ
 db.init_db()
 
 def admin_required(f):
@@ -179,14 +177,14 @@ def delete_news(news_id):
         return jsonify({'success': True})
     return jsonify({'error': 'Новость не найдена'}), 404
 
-# ===== АДМИН: ОЧИСТКА ПОЛЬЗОВАТЕЛЕЙ =====
+# ===== АДМИН: ОЧИСТКА =====
 @app.route('/api/admin/clear_users', methods=['DELETE'])
 @admin_required
 def clear_users():
     deleted = db.delete_all_users()
     return jsonify({'success': True, 'deleted': deleted})
 
-# ===== АДМИН: СДЕЛАТЬ ПОЛЬЗОВАТЕЛЯ АДМИНОМ =====
+# ===== АДМИН: ПОВЫШЕНИЕ =====
 @app.route('/api/admin/promote', methods=['POST'])
 @admin_required
 def promote_user():
@@ -198,13 +196,6 @@ def promote_user():
     if success:
         return jsonify({'success': True, 'message': f'Пользователь {username} стал админом'})
     return jsonify({'error': 'Пользователь не найден'}), 404
-
-# ===== ЗАЩИТА ОТ ДОС/DDOS =====
-@app.before_request
-def limit_requests():
-    # Ограничение на количество запросов с одного IP (простая защита)
-    # В продакшене лучше использовать Redis или rate-limiting библиотеку
-    pass
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

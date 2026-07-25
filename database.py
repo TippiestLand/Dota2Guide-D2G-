@@ -1,48 +1,69 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, BigInteger, DateTime, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import psycopg2
+import psycopg2.extras
 from datetime import datetime
 import os
 import urllib.parse
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
-
-if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-
-if not DATABASE_URL:
-    DATABASE_URL = "postgresql://dota2_user:123456@localhost:5432/dota2_guide"
-
-engine = create_engine(DATABASE_URL, echo=False)
-SessionLocal = sessionmaker(bind=engine)
-Base = declarative_base()
-
-class News(Base):
-    __tablename__ = 'news'
-    id = Column(Integer, primary_key=True)
-    title = Column(Text, nullable=False)
-    content = Column(Text, nullable=False)
-    preview = Column(Text)
-    type = Column(String, default='update')
-    date = Column(String, nullable=False)
-    link = Column(String)
-    author = Column(String, default='Admin')
-    timestamp = Column(BigInteger, nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    role = Column(String, default='user')
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.now)
+# ===== ПОДКЛЮЧЕНИЕ К БД =====
+def get_db_connection():
+    """Подключение к PostgreSQL"""
+    database_url = os.environ.get('DATABASE_URL')
+    
+    if database_url and database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    if database_url:
+        return psycopg2.connect(database_url)
+    
+    # Локальные настройки (если нет DATABASE_URL)
+    return psycopg2.connect(
+        dbname='dota2_guide',
+        user='postgres',
+        password='123456',
+        host='localhost',
+        port='5432'
+    )
 
 def init_db():
+    """Создание таблиц"""
     try:
-        Base.metadata.create_all(engine)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS news (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                preview TEXT,
+                type TEXT DEFAULT 'update',
+                date TEXT NOT NULL,
+                link TEXT,
+                author TEXT DEFAULT 'Admin',
+                timestamp BIGINT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_news_timestamp ON news(timestamp DESC)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_news_type ON news(type)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
+        
+        conn.commit()
+        conn.close()
         print('✅ Таблицы созданы в PostgreSQL')
         return True
     except Exception as e:
@@ -51,72 +72,81 @@ def init_db():
 
 def get_all_news():
     try:
-        session = SessionLocal()
-        news = session.query(News).order_by(News.timestamp.desc()).all()
-        session.close()
-        return [{
-            'id': n.id, 'title': n.title, 'content': n.content,
-            'preview': n.preview, 'type': n.type, 'date': n.date,
-            'link': n.link, 'author': n.author, 'timestamp': n.timestamp
-        } for n in news]
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute('SELECT * FROM news ORDER BY timestamp DESC')
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         return []
 
 def add_news(title, content, type='update', link='', author='Admin'):
     try:
-        session = SessionLocal()
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
         preview = content[:300] + ('...' if len(content) > 300 else '')
         date = datetime.now().strftime('%d %B %Y')
         timestamp = int(datetime.now().timestamp() * 1000)
         
-        news = News(
-            title=title, content=content, preview=preview,
-            type=type, date=date, link=link, author=author, timestamp=timestamp
-        )
-        session.add(news)
-        session.commit()
-        session.refresh(news)
-        session.close()
-        return {
-            'id': news.id, 'title': news.title, 'content': news.content,
-            'preview': news.preview, 'type': news.type, 'date': news.date,
-            'link': news.link, 'author': news.author, 'timestamp': news.timestamp
-        }
+        cursor.execute('''
+            INSERT INTO news (title, content, preview, type, date, link, author, timestamp)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        ''', (title, content, preview, type, date, link, author, timestamp))
+        
+        news_id = cursor.fetchone()['id']
+        conn.commit()
+        conn.close()
+        return get_news_by_id(news_id)
     except Exception as e:
         print(f"❌ Ошибка добавления: {e}")
         return None
 
+def get_news_by_id(news_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute('SELECT * FROM news WHERE id = %s', (news_id,))
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        return None
+
 def delete_news(news_id):
     try:
-        session = SessionLocal()
-        deleted = session.query(News).filter(News.id == news_id).delete()
-        session.commit()
-        session.close()
-        return deleted > 0
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM news WHERE id = %s', (news_id,))
+        deleted = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        return deleted
     except Exception as e:
         print(f"❌ Ошибка удаления: {e}")
         return False
 
 def add_user(username, email, password_hash):
     try:
-        session = SessionLocal()
-        user = User(
-            username=username,
-            email=email,
-            password_hash=password_hash,
-            role='user',
-            is_active=True
-        )
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-        session.close()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO users (username, email, password_hash)
+            VALUES (%s, %s, %s)
+            RETURNING id, username, email, role
+        ''', (username, email, password_hash))
+        row = cursor.fetchone()
+        conn.commit()
+        conn.close()
         return {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'role': user.role
+            'id': row[0],
+            'username': row[1],
+            'email': row[2],
+            'role': row[3]
         }
     except Exception as e:
         print(f"❌ Ошибка добавления пользователя: {e}")
@@ -124,61 +154,54 @@ def add_user(username, email, password_hash):
 
 def get_user_by_username(username):
     try:
-        session = SessionLocal()
-        user = session.query(User).filter(User.username == username).first()
-        session.close()
-        if user:
-            return {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'password_hash': user.password_hash,
-                'role': user.role
-            }
-        return None
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         return None
 
 def get_user_by_email(email):
     try:
-        session = SessionLocal()
-        user = session.query(User).filter(User.email == email).first()
-        session.close()
-        if user:
-            return {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'password_hash': user.password_hash,
-                'role': user.role
-            }
-        return None
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         return None
 
 def delete_all_users():
     try:
-        session = SessionLocal()
-        deleted = session.query(User).delete()
-        session.commit()
-        session.close()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM users')
+        deleted = cursor.rowcount
+        conn.commit()
+        conn.close()
         return deleted
     except Exception as e:
-        print(f"❌ Ошибка удаления пользователей: {e}")
+        print(f"❌ Ошибка: {e}")
         return 0
 
 def promote_to_admin(username):
     try:
-        session = SessionLocal()
-        user = session.query(User).filter(User.username == username).first()
-        if user:
-            user.role = 'admin'
-            session.commit()
-            session.close()
-            return True
-        return False
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET role = %s WHERE username = %s', ('admin', username))
+        updated = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        return updated
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         return False
+
+if __name__ == '__main__':
+    init_db()
+    print('✅ База данных готова!')
