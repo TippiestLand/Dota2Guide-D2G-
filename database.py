@@ -1,38 +1,25 @@
-import psycopg2
-import psycopg2.extras
+import sqlite3
+import json
 from datetime import datetime
 import os
-import urllib.parse
 
-# ===== ПОДКЛЮЧЕНИЕ К БД =====
-def get_db_connection():
-    """Подключение к PostgreSQL"""
-    database_url = os.environ.get('DATABASE_URL')
-    
-    if database_url and database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql://', 1)
-    
-    if database_url:
-        return psycopg2.connect(database_url)
-    
-    # Локальные настройки (если нет DATABASE_URL)
-    return psycopg2.connect(
-        dbname='dota2_guide',
-        user='postgres',
-        password='123456',
-        host='localhost',
-        port='5432'
-    )
+DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'dota2.db')
+
+def get_db():
+    """Подключение к SQLite"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
     """Создание таблиц"""
     try:
-        conn = get_db_connection()
+        conn = get_db()
         cursor = conn.cursor()
         
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS news (
-                id SERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 content TEXT NOT NULL,
                 preview TEXT,
@@ -40,19 +27,19 @@ def init_db():
                 date TEXT NOT NULL,
                 link TEXT,
                 author TEXT DEFAULT 'Admin',
-                timestamp BIGINT NOT NULL,
+                timestamp INTEGER NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
         
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 role TEXT DEFAULT 'user',
-                is_active BOOLEAN DEFAULT TRUE,
+                is_active INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -64,7 +51,7 @@ def init_db():
         
         conn.commit()
         conn.close()
-        print('✅ Таблицы созданы в PostgreSQL')
+        print('✅ Таблицы созданы в SQLite')
         return True
     except Exception as e:
         print(f"❌ Ошибка создания таблиц: {e}")
@@ -72,8 +59,8 @@ def init_db():
 
 def get_all_news():
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        conn = get_db()
+        cursor = conn.cursor()
         cursor.execute('SELECT * FROM news ORDER BY timestamp DESC')
         rows = cursor.fetchall()
         conn.close()
@@ -84,8 +71,8 @@ def get_all_news():
 
 def add_news(title, content, type='update', link='', author='Admin'):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        conn = get_db()
+        cursor = conn.cursor()
         
         preview = content[:300] + ('...' if len(content) > 300 else '')
         date = datetime.now().strftime('%d %B %Y')
@@ -93,11 +80,10 @@ def add_news(title, content, type='update', link='', author='Admin'):
         
         cursor.execute('''
             INSERT INTO news (title, content, preview, type, date, link, author, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', (title, content, preview, type, date, link, author, timestamp))
         
-        news_id = cursor.fetchone()['id']
+        news_id = cursor.lastrowid
         conn.commit()
         conn.close()
         return get_news_by_id(news_id)
@@ -107,9 +93,9 @@ def add_news(title, content, type='update', link='', author='Admin'):
 
 def get_news_by_id(news_id):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute('SELECT * FROM news WHERE id = %s', (news_id,))
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM news WHERE id = ?', (news_id,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
@@ -119,9 +105,9 @@ def get_news_by_id(news_id):
 
 def delete_news(news_id):
     try:
-        conn = get_db_connection()
+        conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM news WHERE id = %s', (news_id,))
+        cursor.execute('DELETE FROM news WHERE id = ?', (news_id,))
         deleted = cursor.rowcount > 0
         conn.commit()
         conn.close()
@@ -132,31 +118,33 @@ def delete_news(news_id):
 
 def add_user(username, email, password_hash):
     try:
-        conn = get_db_connection()
+        conn = get_db()
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO users (username, email, password_hash)
-            VALUES (%s, %s, %s)
-            RETURNING id, username, email, role
+            VALUES (?, ?, ?)
         ''', (username, email, password_hash))
-        row = cursor.fetchone()
+        user_id = cursor.lastrowid
         conn.commit()
         conn.close()
         return {
-            'id': row[0],
-            'username': row[1],
-            'email': row[2],
-            'role': row[3]
+            'id': user_id,
+            'username': username,
+            'email': email,
+            'role': 'user'
         }
+    except sqlite3.IntegrityError:
+        print(f"❌ Пользователь {username} уже существует")
+        return None
     except Exception as e:
         print(f"❌ Ошибка добавления пользователя: {e}")
         return None
 
 def get_user_by_username(username):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
@@ -166,9 +154,9 @@ def get_user_by_username(username):
 
 def get_user_by_email(email):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
@@ -178,7 +166,7 @@ def get_user_by_email(email):
 
 def delete_all_users():
     try:
-        conn = get_db_connection()
+        conn = get_db()
         cursor = conn.cursor()
         cursor.execute('DELETE FROM users')
         deleted = cursor.rowcount
@@ -191,9 +179,9 @@ def delete_all_users():
 
 def promote_to_admin(username):
     try:
-        conn = get_db_connection()
+        conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('UPDATE users SET role = %s WHERE username = %s', ('admin', username))
+        cursor.execute('UPDATE users SET role = ? WHERE username = ?', ('admin', username))
         updated = cursor.rowcount > 0
         conn.commit()
         conn.close()
@@ -204,4 +192,4 @@ def promote_to_admin(username):
 
 if __name__ == '__main__':
     init_db()
-    print('✅ База данных готова!')
+    print('✅ База данных SQLite готова!')
