@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
 import hashlib
 import hmac
@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__, static_folder='public', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
 # ===== КОНФИГ =====
@@ -43,29 +43,16 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
+# ===== СТРАНИЦЫ =====
 @app.route('/')
 def index():
-    return send_from_directory('public', 'index.html')
+    return render_template('index.html')
 
-@app.route('/css/<path:path>')
-def serve_css(path):
-    return send_from_directory('public/css', path)
-
-@app.route('/js/<path:path>')
-def serve_js(path):
-    return send_from_directory('public/js', path)
-
-@app.route('/assets/<path:path>')
-def serve_assets(path):
-    return send_from_directory('public/assets', path)
-
-@app.route('/<path:path>')
+@app.route('/static/<path:path>')
 def static_files(path):
-    if os.path.exists(os.path.join('public', path)):
-        return send_from_directory('public', path)
-    return jsonify({'error': 'Not found'}), 404
+    return send_from_directory('static', path)
 
-# ===== РЕГИСТРАЦИЯ =====
+# ===== API =====
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
@@ -104,7 +91,6 @@ def register():
         'message': 'Регистрация успешна!'
     })
 
-# ===== ВХОД =====
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -137,7 +123,6 @@ def login():
         'message': 'Вход выполнен!'
     })
 
-# ===== ПРОВЕРКА ТОКЕНА =====
 @app.route('/api/verify', methods=['GET'])
 def verify():
     auth = request.headers.get('X-Admin-Auth')
@@ -161,7 +146,6 @@ def verify():
     except:
         return jsonify({'valid': False}), 401
 
-# ===== НОВОСТИ =====
 @app.route('/api/news', methods=['GET'])
 def get_news():
     return jsonify(db.get_all_news())
@@ -193,14 +177,12 @@ def delete_news(news_id):
         return jsonify({'success': True})
     return jsonify({'error': 'Новость не найдена'}), 404
 
-# ===== АДМИН: ОЧИСТКА =====
 @app.route('/api/admin/clear_users', methods=['DELETE'])
 @admin_required
 def clear_users():
     deleted = db.delete_all_users()
     return jsonify({'success': True, 'deleted': deleted})
 
-# ===== АДМИН: ПОВЫШЕНИЕ =====
 @app.route('/api/admin/promote', methods=['POST'])
 @admin_required
 def promote_user():
