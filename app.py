@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
 import hashlib
 import hmac
@@ -10,7 +10,7 @@ import re
 import sqlite3
 from datetime import datetime
 
-app = Flask(__name__, static_folder='public', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
 # ===== КОНФИГ =====
@@ -196,23 +196,11 @@ def admin_required(f):
 # ===== СТРАНИЦЫ =====
 @app.route('/')
 def index():
-    return send_from_directory('public', 'index.html')
+    return render_template('index.html')
 
-@app.route('/css/<path:path>')
-def serve_css(path):
-    return send_from_directory('public/css', path)
-
-@app.route('/js/<path:path>')
-def serve_js(path):
-    return send_from_directory('public/js', path)
-
-@app.route('/assets/<path:path>')
-def serve_assets(path):
-    return send_from_directory('public/assets', path)
-
-@app.route('/<path:path>')
-def static_files(path):
-    return send_from_directory('public', path)
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
 
 # ===== API =====
 @app.route('/api/register', methods=['POST'])

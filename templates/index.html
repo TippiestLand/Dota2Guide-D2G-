@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dota 2 Guide — Путь Героя</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 
@@ -78,10 +78,10 @@
                     <input type="text" id="heroSearch" placeholder="Поиск героя...">
                 </div>
                 <div class="hero-filters">
-                    <button class="filter-btn" data-filter="strength"><img src="/assets/icons/Strength_attribute_symbol.png" alt="Сила" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="agility"><img src="/assets/icons/Agility_attribute_symbol.png" alt="Ловкость" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="intelligence"><img src="/assets/icons/Intelligence_attribute_symbol.png" alt="Интеллект" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="universal"><img src="/assets/icons/Dota2_Universal_icon_solid_allmode.png" alt="Универсальный" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="strength"><img src="/static/assets/icons/Strength_attribute_symbol.png" alt="Сила" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="agility"><img src="/static/assets/icons/Agility_attribute_symbol.png" alt="Ловкость" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="intelligence"><img src="/static/assets/icons/Intelligence_attribute_symbol.png" alt="Интеллект" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="universal"><img src="/static/assets/icons/Dota2_Universal_icon_solid_allmode.png" alt="Универсальный" class="filter-icon"></button>
                 </div>
             </div>
             <div class="hero-grid" id="heroList"></div>
@@ -174,9 +174,27 @@
         </div>
     </div>
 
-    <script src="/js/auth.js"></script>
-    <script src="/js/news.js"></script>
-    <script src="/js/script.js"></script>
-    <script src="/js/admin.js"></script>
+    <div class="auth-modal" id="adminAuthModal">
+        <div class="auth-content">
+            <button class="auth-close" id="closeAdminAuth">✕</button>
+            <div class="auth-header">
+                <h2>🔐 Вход в админ-панель</h2>
+                <p>Введите данные администратора</p>
+            </div>
+            <div class="auth-body">
+                <form id="adminLoginForm">
+                    <div class="form-group"><label for="adminLogin">Логин</label><input type="text" id="adminLogin" placeholder="admin" value="admin"></div>
+                    <div class="form-group"><label for="adminPassword">Пароль</label><input type="password" id="adminPassword" placeholder="••••••••" value="admin123"></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Войти в админку</button>
+                    <p id="adminLoginError" style="color:#ff6b6b; text-align:center; margin-top:10px; display:none;">Неверный логин или пароль</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/news.js"></script>
+    <script src="/static/js/script.js"></script>
+    <script src="/static/js/admin.js"></script>
 </body>
 </html>
