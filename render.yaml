@@ -2,11 +2,11 @@ services:
   - type: web
     name: dota2-guide
     runtime: python
-    repo: https://github.com/ТВОЙ_ЛОГИН/dota2-guide
+    repo: https://github.com/TippiestLand/dota2-guide
     plan: free
     region: frankfurt
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn api_server:app
+    startCommand: gunicorn app:app  # ← ИЗМЕНЕНО С api_server:app НА app:app
     envVars:
       - key: DATABASE_URL
         fromDatabase:
