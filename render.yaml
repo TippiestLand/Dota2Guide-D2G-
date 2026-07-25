@@ -6,9 +6,11 @@ services:
     plan: free
     region: frankfurt
     buildCommand: |
+      apt-get update
+      apt-get install -y build-essential libpq-dev
       pip install --upgrade pip
       pip install -r requirements.txt
-    startCommand: gunicorn api_server:app
+    startCommand: gunicorn app:app
     envVars:
       - key: DATABASE_URL
         fromDatabase:
