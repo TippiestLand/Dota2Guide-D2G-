@@ -43,13 +43,29 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
+# ===== СТАТИКА =====
 @app.route('/')
 def index():
     return send_from_directory('public', 'index.html')
 
+@app.route('/css/<path:path>')
+def serve_css(path):
+    return send_from_directory('public/css', path)
+
+@app.route('/js/<path:path>')
+def serve_js(path):
+    return send_from_directory('public/js', path)
+
+@app.route('/assets/<path:path>')
+def serve_assets(path):
+    return send_from_directory('public/assets', path)
+
 @app.route('/<path:path>')
 def static_files(path):
-    return send_from_directory('public', path)
+    # Если файл существует в public — отдаём
+    if os.path.exists(os.path.join('public', path)):
+        return send_from_directory('public', path)
+    return jsonify({'error': 'Not found'}), 404
 
 # ===== РЕГИСТРАЦИЯ =====
 @app.route('/api/register', methods=['POST'])
