@@ -18,7 +18,7 @@
         { name: 'Huskar', attribute: 'strength', icon: 'huskar' },
         { name: 'Kunkka', attribute: 'strength', icon: 'kunkka' },
         { name: 'Largo', attribute: 'strength', icon: 'largo' },
-        { name: 'Legion Commander', attribute: 'strength', icon: 'legion_common' },
+        { name: 'Legion Commander', attribute: 'strength', icon: 'legion_commander' },
         { name: 'Lifestealer', attribute: 'strength', icon: 'life_stealer' },
         { name: 'Lycan', attribute: 'strength', icon: 'lycan' },
         { name: 'Mars', attribute: 'strength', icon: 'mars' },
@@ -61,7 +61,7 @@
         { name: 'Monkey King', attribute: 'agility', icon: 'monkey_king' },
         { name: 'Morphling', attribute: 'agility', icon: 'morphling' },
         { name: 'Naga Siren', attribute: 'agility', icon: 'naga_siren' },
-        { name: 'Phantom Assassin', attribute: 'agility', icon: 'phantom_assassi' },
+        { name: 'Phantom Assassin', attribute: 'agility', icon: 'phantom_assassin' },
         { name: 'Phantom Lancer', attribute: 'agility', icon: 'phantom_lancer' },
         { name: 'Razor', attribute: 'agility', icon: 'razor' },
         { name: 'Riki', attribute: 'agility', icon: 'riki' },
@@ -88,7 +88,7 @@
         { name: 'Grimstroke', attribute: 'intelligence', icon: 'grimstroke' },
         { name: 'Invoker', attribute: 'intelligence', icon: 'invoker' },
         { name: 'Jakiro', attribute: 'intelligence', icon: 'jakiro' },
-        { name: 'Keeper of the Light', attribute: 'intelligence', icon: 'keeper_of_the_lights' },
+        { name: 'Keeper of the Light', attribute: 'intelligence', icon: 'keeper_of_the_light' },
         { name: 'Leshrac', attribute: 'intelligence', icon: 'leshrac' },
         { name: 'Lich', attribute: 'intelligence', icon: 'lich' },
         { name: 'Lina', attribute: 'intelligence', icon: 'lina' },
@@ -96,7 +96,7 @@
         { name: 'Muerta', attribute: 'intelligence', icon: 'muerta' },
         { name: 'Necrophos', attribute: 'intelligence', icon: 'necrolyte' },
         { name: 'Oracle', attribute: 'intelligence', icon: 'oracle' },
-        { name: 'Outworld Destroyer', attribute: 'intelligence', icon: 'obsidian_destroy' },
+        { name: 'Outworld Destroyer', attribute: 'intelligence', icon: 'obsidian_destroyer' },
         { name: 'Puck', attribute: 'intelligence', icon: 'puck' },
         { name: 'Pugna', attribute: 'intelligence', icon: 'pugna' },
         { name: 'Queen of Pain', attribute: 'intelligence', icon: 'queenofpain' },
@@ -263,36 +263,60 @@
 
     renderHeroes();
 
+    // ===== ОПТИМИЗИРОВАННЫЙ КУРСОР =====
     const cursor = document.createElement('div');
     cursor.className = 'custom-cursor';
     document.body.appendChild(cursor);
 
+    // Используем requestAnimationFrame для плавности
+    let cursorX = 0, cursorY = 0;
+    let targetX = 0, targetY = 0;
+
     document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
+        targetX = e.clientX;
+        targetY = e.clientY;
+        cursor.style.left = targetX + 'px';
+        cursor.style.top = targetY + 'px';
     });
 
+    // Убираем cursor на телефонах (touch devices)
+    if ('ontouchstart' in window) {
+        cursor.style.display = 'none';
+        document.body.style.cursor = 'default';
+    }
+
+    // ===== ОПТИМИЗИРОВАННЫЕ ЧАСТИЦЫ (для телефонов — меньше) =====
     const particlesContainer = document.createElement('div');
     particlesContainer.className = 'particles';
     document.body.prepend(particlesContainer);
 
+    // Меньше частиц на телефонах
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 5 : 12;
+    const particleInterval = isMobile ? 800 : 300;
+
     function createParticle() {
         const particle = document.createElement('div');
         particle.className = 'particle';
-        const size = Math.random() * 3 + 1;
+        const size = Math.random() * 2 + 1;
         const left = Math.random() * 100;
-        const duration = Math.random() * 20 + 15;
+        const duration = Math.random() * 15 + 10;
         const delay = Math.random() * 10;
         particle.style.width = size + 'px';
         particle.style.height = size + 'px';
         particle.style.left = left + '%';
         particle.style.animationDuration = duration + 's';
         particle.style.animationDelay = delay + 's';
-        particle.style.opacity = Math.random() * 0.5 + 0.1;
+        particle.style.opacity = Math.random() * 0.3 + 0.1;
         particlesContainer.appendChild(particle);
         setTimeout(() => { particle.remove(); }, (duration + delay) * 1000);
     }
-    setInterval(createParticle, 200);
+
+    // Создаём начальные частицы
+    for (let i = 0; i < particleCount; i++) {
+        setTimeout(createParticle, i * 100);
+    }
+    setInterval(createParticle, particleInterval);
 
     const navLinks = document.querySelectorAll('nav a');
     const pages = {
@@ -329,11 +353,14 @@
         });
     });
 
+    // ===== ОПТИМИЗИРОВАННЫЙ OBSERVER =====
     const fadeElements = document.querySelectorAll('.scroll-fade');
     if ('IntersectionObserver' in window) {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('visible');
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
             });
         }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
         fadeElements.forEach(el => observer.observe(el));
@@ -341,7 +368,7 @@
         fadeElements.forEach(el => el.classList.add('visible'));
     }
 
-    console.log('Dota 2 Guide loaded successfully');
+    console.log('Dota 2 Guide loaded');
 
     if (localStorage.getItem('dotaGuideVisits')) {
         let visits = parseInt(localStorage.getItem('dotaGuideVisits')) + 1;
