@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 Flask==2.3.3
-=======
-Flask==3.0.0
->>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
 flask-cors==4.0.0
 requests==2.31.0
 gunicorn==21.2.0
