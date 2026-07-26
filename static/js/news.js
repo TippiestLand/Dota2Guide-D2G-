@@ -62,7 +62,7 @@
             var news = sorted[i];
             var newsDate = escapeHtml(news.date);
             var newsTitle = escapeHtml(news.title);
-            var newsContent = escapeHtml(news.content || '');
+            var newsContent = news.content || '';
             var newsLink = news.link ? escapeHtml(news.link) : '';
             var newsId = news.id || i;
 
@@ -71,9 +71,17 @@
                 linkHtml = '<a href="' + newsLink + '" target="_blank" class="news-read-more">Steam →</a>';
             }
 
-            // Проверяем, нужно ли обрезать текст
-            var isLong = newsContent.length > 500;
-            var shortContent = isLong ? newsContent.substring(0, 500) + '...' : newsContent;
+            // Проверяем длину (без HTML тегов для подсчёта)
+            var plainText = newsContent.replace(/<[^>]+>/g, '');
+            var isLong = plainText.length > 500;
+            
+            // Для короткого текста — обрезаем по словам
+            var shortContent = newsContent;
+            if (isLong) {
+                var shortPlain = plainText.substring(0, 500) + '...';
+                // Вставляем короткий текст в HTML
+                shortContent = shortPlain.replace(/\n/g, '<br>');
+            }
 
             html += '<div class="news-card-vk" data-id="' + newsId + '">';
             html += '    <div class="news-card-header">';
@@ -84,12 +92,12 @@
             html += '        <div class="news-content">';
 
             if (isLong) {
-                html += '            <p class="news-preview" id="news-text-' + newsId + '">' + shortContent + '</p>';
+                html += '            <div class="news-preview" id="news-text-' + newsId + '">' + shortContent + '</div>';
                 html += '            <button class="news-toggle-btn" data-id="' + newsId + '" data-full="' + escapeHtml(newsContent) + '" data-short="' + shortContent + '">';
                 html += '                <span class="toggle-icon">▼</span> Развернуть';
                 html += '            </button>';
             } else {
-                html += '            <p class="news-preview">' + newsContent + '</p>';
+                html += '            <div class="news-preview">' + newsContent + '</div>';
             }
 
             html += '        </div>';
@@ -109,19 +117,16 @@
                 var btn = this;
                 var id = btn.dataset.id;
                 var textEl = document.getElementById('news-text-' + id);
-                var icon = btn.querySelector('.toggle-icon');
 
                 if (!textEl) return;
 
                 if (btn.classList.contains('expanded')) {
-                    textEl.textContent = btn.dataset.short;
+                    textEl.innerHTML = btn.dataset.short;
                     btn.classList.remove('expanded');
-                    icon.textContent = '▼';
                     btn.innerHTML = '<span class="toggle-icon">▼</span> Развернуть';
                 } else {
-                    textEl.textContent = btn.dataset.full;
+                    textEl.innerHTML = btn.dataset.full;
                     btn.classList.add('expanded');
-                    icon.textContent = '▲';
                     btn.innerHTML = '<span class="toggle-icon">▲</span> Свернуть';
                 }
             });

@@ -84,31 +84,71 @@ def translate_title(title):
     return title
 
 def format_news_content(text):
-    """Форматирует текст новости как в Steam — с точками в начале строк"""
+    """
+    Преобразует текст новости в HTML с правильными списками.
+    - Строки с точками в начале → <ul><li>...</li></ul>
+    - Обычные строки → <p>...</p>
+    - Пустые строки → <br>
+    """
     lines = text.split('\n')
-    formatted_lines = []
+    html_parts = []
+    in_list = False
+    list_items = []
     
     for line in lines:
         line = line.strip()
-        if line:
-            if line.startswith('- '):
-                formatted_lines.append('• ' + line[2:])
-            elif line.startswith('* '):
-                formatted_lines.append('• ' + line[2:])
-            elif line.startswith('— '):
-                formatted_lines.append('• ' + line[2:])
-            elif line.startswith('• '):
-                formatted_lines.append(line)
-            elif line.startswith('1.') or line.startswith('2.') or line.startswith('3.'):
-                formatted_lines.append(line)
-            elif line.startswith('Fixed'):
-                formatted_lines.append('• Исправлено: ' + line[6:])
-            elif line.startswith('Fixed '):
-                formatted_lines.append('• Исправлено: ' + line[6:])
-            else:
-                formatted_lines.append(line)
+        
+        if not line:
+            # Пустая строка — закрываем список, если он был открыт
+            if in_list:
+                html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
+                list_items = []
+                in_list = False
+            html_parts.append('<br>')
+            continue
+        
+        # Проверяем, начинается ли строка с маркера списка
+        is_list_item = False
+        clean_text = line
+        
+        if line.startswith('• '):
+            is_list_item = True
+            clean_text = line[2:]
+        elif line.startswith('- '):
+            is_list_item = True
+            clean_text = line[2:]
+        elif line.startswith('* '):
+            is_list_item = True
+            clean_text = line[2:]
+        elif line.startswith('— '):
+            is_list_item = True
+            clean_text = line[2:]
+        elif line.startswith('Fixed'):
+            is_list_item = True
+            clean_text = 'Исправлено: ' + line[6:]
+        elif line.startswith('Fixed '):
+            is_list_item = True
+            clean_text = 'Исправлено: ' + line[6:]
+        
+        if is_list_item:
+            if not in_list:
+                in_list = True
+                list_items = []
+            list_items.append('  <li>' + clean_text + '</li>')
+        else:
+            # Закрываем список, если он был открыт
+            if in_list:
+                html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
+                list_items = []
+                in_list = False
+            # Обычная строка как отдельный абзац
+            html_parts.append('<p>' + clean_text + '</p>')
     
-    return '\n'.join(formatted_lines)
+    # Закрываем список, если он остался открытым
+    if in_list:
+        html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
+    
+    return '\n'.join(html_parts)
 
 def fetch_rss_news():
     try:
@@ -150,7 +190,7 @@ def fetch_rss_news():
 
             # Очищаем HTML
             desc_clean = re.sub(r'<[^>]+>', '', desc_text)
-            # Форматируем как в Steam (с точками)
+            # Форматируем как в Steam (с точками и списками)
             desc_clean = format_news_content(desc_clean)
 
             hash_id = int(hashlib.md5(title_text.encode('utf-8')).hexdigest()[:8], 16)
@@ -222,7 +262,7 @@ def initialize_news():
             'id': 1,
             'title': 'Добро пожаловать в Dota 2 Guide!',
             'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
-            'content': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.\n• Все новости будут переведены на русский язык\n• Дата и время — по Московскому времени\n• Форматирование — как в официальных новостях Steam',
+            'content': '<p>Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.</p><ul><li>Все новости будут переведены на русский язык</li><li>Дата и время — по Московскому времени</li><li>Форматирование — как в официальных новостях Steam</li></ul>',
             'link': 'https://store.steampowered.com/news/app/570',
             'timestamp': int(datetime.now().timestamp() * 1000),
             'source': 'manual'
