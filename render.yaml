@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: dota2-guide
+    runtime: python
+    repo: https://github.com/TippiestLand/dota2-guide
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: tippi
+      - key: FLASK_ENV
+        value: production
+
+  - type: cron
+    name: rss-updater
+    repo: https://github.com/TippiestLand/dota2-guide
+    schedule: "*/5 * * * *"
+    command: python rss_updater.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
