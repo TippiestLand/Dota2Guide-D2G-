@@ -1,30 +1,21 @@
 (function() {
     'use strict';
 
-    // ============================================================
-    // 1. КОНФИГУРАЦИЯ
-    // ============================================================
     var API_URL = '/api/news';
     var newsFeed = document.getElementById('newsFeed');
 
-    // ============================================================
-    // 2. ПОЛУЧЕНИЕ НОВОСТЕЙ С СЕРВЕРА
-    // ============================================================
     function fetchNews() {
         if (!newsFeed) {
             console.warn('Элемент #newsFeed не найден на странице');
             return;
         }
 
-        // Показываем индикатор загрузки
-        newsFeed.innerHTML = `
-            <div class="news-loading">
-                <div class="loader"></div>
-                <p>Загрузка новостей...</p>
-            </div>
-        `;
+        newsFeed.innerHTML = '' +
+            '<div class="news-loading">' +
+            '    <div class="loader"></div>' +
+            '    <p>Загрузка новостей...</p>' +
+            '</div>';
 
-        // Запрос к серверу
         fetch(API_URL + '?t=' + Date.now())
             .then(function(response) {
                 if (!response.ok) {
@@ -36,43 +27,36 @@
                 if (data && data.length > 0) {
                     renderNews(data);
                 } else {
-                    newsFeed.innerHTML = `
-                        <div class="news-empty">
-                            <p>Новостей пока нет</p>
-                            <p style="font-size:0.8rem; color:#666; margin-top:8px;">
-                                Новости появятся здесь автоматически
-                            </p>
-                        </div>
-                    `;
+                    newsFeed.innerHTML = '' +
+                        '<div class="news-empty">' +
+                        '    <p>Новостей пока нет</p>' +
+                        '    <p style="font-size:0.8rem; color:#666; margin-top:8px;">' +
+                        '        Новости появятся здесь автоматически' +
+                        '    </p>' +
+                        '</div>';
                 }
             })
             .catch(function(error) {
                 console.error('Ошибка загрузки новостей:', error);
-                newsFeed.innerHTML = `
-                    <div class="news-empty">
-                        <p>Не удалось загрузить новости</p>
-                        <button onclick="location.reload()" 
-                                class="btn btn-secondary" 
-                                style="margin-top:15px; padding:8px 24px; font-size:0.8rem;">
-                            Обновить
-                        </button>
-                    </div>
-                `;
+                newsFeed.innerHTML = '' +
+                    '<div class="news-empty">' +
+                    '    <p>Не удалось загрузить новости</p>' +
+                    '    <button onclick="location.reload()" ' +
+                    '            class="btn btn-secondary" ' +
+                    '            style="margin-top:15px; padding:8px 24px; font-size:0.8rem;">' +
+                    '        Обновить' +
+                    '    </button>' +
+                    '</div>';
             });
     }
 
-    // ============================================================
-    // 3. ОТРИСОВКА НОВОСТЕЙ
-    // ============================================================
     function renderNews(newsItems) {
         if (!newsFeed) return;
 
-        // Сортируем по дате (новые сверху)
         var sorted = newsItems.slice().sort(function(a, b) {
             return (b.timestamp || 0) - (a.timestamp || 0);
         });
 
-        // Собираем HTML
         var html = '';
         for (var i = 0; i < sorted.length; i++) {
             var news = sorted[i];
@@ -85,7 +69,7 @@
             var newsTitle = escapeHtml(news.title);
             var newsPreview = escapeHtml(news.preview || news.content);
             var newsLink = news.link ? escapeHtml(news.link) : '';
-            
+
             var rssBadge = '';
             if (news.source === 'rss') {
                 rssBadge = '<span style="font-size:0.6rem; background:rgba(78,205,196,0.15); color:#4ecdc4; padding:2px 10px; border-radius:12px; margin-left:8px;">📡</span>';
@@ -127,9 +111,6 @@
         newsFeed.innerHTML = html;
     }
 
-    // ============================================================
-    // 4. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-    // ============================================================
     function escapeHtml(text) {
         if (!text) return '';
         var div = document.createElement('div');
@@ -170,15 +151,9 @@
         return labels[type] || 'Новость';
     }
 
-    // ============================================================
-    // 5. ЗАПУСК
-    // ============================================================
-    // Делаем функцию доступной глобально для других скриптов
     window.fetchNews = fetchNews;
 
-    // Запускаем загрузку при загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
-        // Проверяем, появился ли элемент #newsFeed
         var checkInterval = setInterval(function() {
             var feed = document.getElementById('newsFeed');
             if (feed) {
@@ -187,7 +162,6 @@
             }
         }, 100);
 
-        // Если элемент уже есть на странице
         if (document.getElementById('newsFeed')) {
             clearInterval(checkInterval);
             fetchNews();
