@@ -2,6 +2,10 @@
     'use strict';
 
     const heroesData = [
+<<<<<<< HEAD
+=======
+        // ===== СИЛА =====
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         { name: 'Alchemist', attribute: 'strength', icon: 'alchemist' },
         { name: 'Axe', attribute: 'strength', icon: 'axe' },
         { name: 'Bristleback', attribute: 'strength', icon: 'bristleback' },
@@ -16,6 +20,10 @@
         { name: 'Elder Titan', attribute: 'strength', icon: 'elder_titan' },
         { name: 'Huskar', attribute: 'strength', icon: 'huskar' },
         { name: 'Kunkka', attribute: 'strength', icon: 'kunkka' },
+<<<<<<< HEAD
+=======
+        { name: 'Largo', attribute: 'strength', icon: 'largo' },
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         { name: 'Legion Commander', attribute: 'strength', icon: 'legion_commander' },
         { name: 'Lifestealer', attribute: 'strength', icon: 'life_stealer' },
         { name: 'Lycan', attribute: 'strength', icon: 'lycan' },
@@ -37,6 +45,11 @@
         { name: 'Underlord', attribute: 'strength', icon: 'abyssal_underlord' },
         { name: 'Undying', attribute: 'strength', icon: 'undying' },
         { name: 'Wraith King', attribute: 'strength', icon: 'skeleton_king' },
+<<<<<<< HEAD
+=======
+        
+        // ===== ЛОВКОСТЬ =====
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         { name: 'Anti-Mage', attribute: 'agility', icon: 'antimage' },
         { name: 'Bloodseeker', attribute: 'agility', icon: 'bloodseeker' },
         { name: 'Bounty Hunter', attribute: 'agility', icon: 'bounty_hunter' },
@@ -48,6 +61,10 @@
         { name: 'Gyrocopter', attribute: 'agility', icon: 'gyrocopter' },
         { name: 'Hoodwink', attribute: 'agility', icon: 'hoodwink' },
         { name: 'Juggernaut', attribute: 'agility', icon: 'juggernaut' },
+<<<<<<< HEAD
+=======
+        { name: 'Kez', attribute: 'agility', icon: 'kez' },
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         { name: 'Lone Druid', attribute: 'agility', icon: 'lone_druid' },
         { name: 'Luna', attribute: 'agility', icon: 'luna' },
         { name: 'Medusa', attribute: 'agility', icon: 'medusa' },
@@ -71,6 +88,11 @@
         { name: 'Vengeful Spirit', attribute: 'agility', icon: 'vengefulspirit' },
         { name: 'Viper', attribute: 'agility', icon: 'viper' },
         { name: 'Weaver', attribute: 'agility', icon: 'weaver' },
+<<<<<<< HEAD
+=======
+        
+        // ===== ИНТЕЛЛЕКТ =====
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         { name: 'Ancient Apparition', attribute: 'intelligence', icon: 'ancient_apparition' },
         { name: 'Chen', attribute: 'intelligence', icon: 'chen' },
         { name: 'Crystal Maiden', attribute: 'intelligence', icon: 'crystal_maiden' },
@@ -105,6 +127,11 @@
         { name: 'Winter Wyvern', attribute: 'intelligence', icon: 'winter_wyvern' },
         { name: 'Witch Doctor', attribute: 'intelligence', icon: 'witch_doctor' },
         { name: 'Zeus', attribute: 'intelligence', icon: 'zuus' },
+<<<<<<< HEAD
+=======
+        
+        // ===== УНИВЕРСАЛЬНЫЕ =====
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         { name: 'Abaddon', attribute: 'universal', icon: 'abaddon' },
         { name: 'Arc Warden', attribute: 'universal', icon: 'arc_warden' },
         { name: 'Bane', attribute: 'universal', icon: 'bane' },
@@ -117,7 +144,11 @@
         { name: 'Io', attribute: 'universal', icon: 'wisp' },
         { name: 'Magnus', attribute: 'universal', icon: 'magnataur' },
         { name: 'Marci', attribute: 'universal', icon: 'marci' },
+<<<<<<< HEAD
         { name: "Nature's Prophet", attribute: 'universal', icon: 'furion' },
+=======
+        { name: 'Nature\'s Prophet', attribute: 'universal', icon: 'furion' },
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         { name: 'Nyx Assassin', attribute: 'universal', icon: 'nyx_assassin' },
         { name: 'Pangolier', attribute: 'universal', icon: 'pangolier' },
         { name: 'Sand King', attribute: 'universal', icon: 'sand_king' },
@@ -130,6 +161,7 @@
     ];
 
     const heroMap = new Map();
+<<<<<<< HEAD
     heroesData.forEach(function(hero) {
         if (!heroMap.has(hero.name)) {
             heroMap.set(hero.name, hero);
@@ -148,18 +180,47 @@
 
     function getAttributeClass(attribute) {
         var classes = { 'strength': 'strength', 'agility': 'agility', 'intelligence': 'intelligence', 'universal': 'universal' };
+=======
+    heroesData.forEach(hero => {
+        if (heroMap.has(hero.name)) {
+            const existing = heroMap.get(hero.name);
+            if (hero.attribute === 'universal') heroMap.set(hero.name, hero);
+        } else {
+            heroMap.set(hero.name, hero);
+        }
+    });
+    
+    const uniqueHeroes = Array.from(heroMap.values());
+    uniqueHeroes.sort((a, b) => a.name.localeCompare(b.name));
+
+    const heroList = document.getElementById('heroList');
+    const attributeGlow = document.getElementById('attributeGlow');
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let isTransitioning = false;
+
+    function getAttributeClass(attribute) {
+        const classes = { 'strength': 'strength', 'agility': 'agility', 'intelligence': 'intelligence', 'universal': 'universal' };
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         return classes[attribute] || '';
     }
 
     function renderHeroes() {
+<<<<<<< HEAD
         if (!heroList) return;
         var filtered = uniqueHeroes.filter(function(hero) {
             var matchesFilter = currentFilter === 'all' || hero.attribute === currentFilter;
             var matchesSearch = hero.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
+=======
+        const filtered = uniqueHeroes.filter(hero => {
+            const matchesFilter = currentFilter === 'all' || hero.attribute === currentFilter;
+            const matchesSearch = hero.name.toLowerCase().includes(searchQuery.toLowerCase());
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
             return matchesFilter && matchesSearch;
         });
 
         if (filtered.length === 0) {
+<<<<<<< HEAD
             heroList.innerHTML = '<div class="no-heroes"><p>Герои не найдены</p></div>';
             return;
         }
@@ -249,10 +310,100 @@
 
     var searchInput = document.getElementById('heroSearch');
     searchInput.addEventListener('input', function(e) {
+=======
+            heroList.innerHTML = `<div class="no-heroes"><p>Герои не найдены</p></div>`;
+            return;
+        }
+
+        heroList.innerHTML = filtered.map(hero => {
+            const iconFile = hero.icon + '.png';
+            const attrClass = getAttributeClass(hero.attribute);
+            return `
+                <div class="hero-item ${attrClass}" data-hero="${hero.name}" data-attribute="${hero.attribute}">
+                    <div class="tilt-wrap">
+                        <img src="/static/assets/icons/${iconFile}" alt="${hero.name}" loading="lazy" 
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\'>${hero.name.charAt(0)}</span>'">
+                    </div>
+                    <div class="hero-hover">
+                        <div class="name">${hero.name}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.hero-item').forEach(item => {
+            const tiltWrap = item.querySelector('.tilt-wrap');
+            item.addEventListener('mousemove', (e) => {
+                const rect = item.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                if (tiltWrap) {
+                    const rotateX = (y - 0.5) * 25;
+                    const rotateY = (x - 0.5) * -25;
+                    tiltWrap.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                }
+                const shineX = x * 100;
+                const shineY = y * 100;
+                item.style.setProperty('--shine-x', shineX + '%');
+                item.style.setProperty('--shine-y', shineY + '%');
+            });
+            item.addEventListener('mouseleave', () => {
+                if (tiltWrap) tiltWrap.style.transform = 'rotateX(0) rotateY(0)';
+            });
+        });
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filterValue = btn.dataset.filter;
+            if (btn.classList.contains('active')) {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                currentFilter = 'all';
+                attributeGlow.className = 'attribute-glow';
+                isTransitioning = true;
+                heroList.style.opacity = '0';
+                heroList.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    renderHeroes();
+                    heroList.style.opacity = '1';
+                    heroList.style.transform = 'scale(1)';
+                    setTimeout(() => { isTransitioning = false; }, 300);
+                }, 300);
+                return;
+            }
+            if (isTransitioning) return;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = filterValue;
+            attributeGlow.className = 'attribute-glow';
+            if (currentFilter !== 'all') attributeGlow.classList.add(currentFilter);
+            isTransitioning = true;
+            heroList.style.opacity = '0';
+            heroList.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                renderHeroes();
+                heroList.style.opacity = '1';
+                heroList.style.transform = 'scale(1)';
+                setTimeout(() => { isTransitioning = false; }, 300);
+            }, 300);
+        });
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `.hero-grid { transition: opacity 0.3s ease, transform 0.3s ease; }`;
+    document.head.appendChild(style);
+
+    document.getElementById('heroSearch').addEventListener('input', (e) => {
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         searchQuery = e.target.value;
         renderHeroes();
     });
 
+<<<<<<< HEAD
     var styleEl = document.createElement('style');
     styleEl.textContent = '.hero-grid { transition: opacity 0.3s ease, transform 0.3s ease; }';
     document.head.appendChild(styleEl);
@@ -261,6 +412,67 @@
 
     var navLinks = document.querySelectorAll('nav a');
     var pages = {
+=======
+    renderHeroes();
+
+    // ===== ОПТИМИЗИРОВАННЫЙ КУРСОР =====
+    const cursor = document.createElement('div');
+    cursor.className = 'custom-cursor';
+    document.body.appendChild(cursor);
+
+    // Используем requestAnimationFrame для плавности
+    let cursorX = 0, cursorY = 0;
+    let targetX = 0, targetY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        cursor.style.left = targetX + 'px';
+        cursor.style.top = targetY + 'px';
+    });
+
+    // Убираем cursor на телефонах (touch devices)
+    if ('ontouchstart' in window) {
+        cursor.style.display = 'none';
+        document.body.style.cursor = 'default';
+    }
+
+    // ===== ОПТИМИЗИРОВАННЫЕ ЧАСТИЦЫ (для телефонов — меньше) =====
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles';
+    document.body.prepend(particlesContainer);
+
+    // Меньше частиц на телефонах
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 5 : 12;
+    const particleInterval = isMobile ? 800 : 300;
+
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const size = Math.random() * 2 + 1;
+        const left = Math.random() * 100;
+        const duration = Math.random() * 15 + 10;
+        const delay = Math.random() * 10;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.left = left + '%';
+        particle.style.animationDuration = duration + 's';
+        particle.style.animationDelay = delay + 's';
+        particle.style.opacity = Math.random() * 0.3 + 0.1;
+        particlesContainer.appendChild(particle);
+        setTimeout(() => { particle.remove(); }, (duration + delay) * 1000);
+    }
+
+    // Создаём начальные частицы
+    for (let i = 0; i < particleCount; i++) {
+        setTimeout(createParticle, i * 100);
+    }
+    setInterval(createParticle, particleInterval);
+
+    const navLinks = document.querySelectorAll('nav a');
+    const pages = {
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
         home: document.getElementById('page-home'),
         heroes: document.getElementById('page-heroes'),
         items: document.getElementById('page-items'),
@@ -269,6 +481,7 @@
     };
 
     function navigateTo(pageId) {
+<<<<<<< HEAD
         var pageKeys = Object.keys(pages);
         for (var pk = 0; pk < pageKeys.length; pk++) {
             var key = pageKeys[pk];
@@ -388,4 +601,54 @@
     }
 
     console.log('🚀 Dota 2 Guide loaded');
+=======
+        Object.values(pages).forEach(page => { if (page) page.classList.remove('active'); });
+        if (pages[pageId]) pages[pageId].classList.add('active');
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.dataset.page === pageId) link.classList.add('active');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = link.dataset.page;
+            if (pageId) navigateTo(pageId);
+        });
+    });
+
+    document.querySelectorAll('[data-page]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = el.dataset.page;
+            if (pageId) navigateTo(pageId);
+        });
+    });
+
+    // ===== ОПТИМИЗИРОВАННЫЙ OBSERVER =====
+    const fadeElements = document.querySelectorAll('.scroll-fade');
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+        fadeElements.forEach(el => observer.observe(el));
+    } else {
+        fadeElements.forEach(el => el.classList.add('visible'));
+    }
+
+    console.log('Dota 2 Guide loaded');
+
+    if (localStorage.getItem('dotaGuideVisits')) {
+        let visits = parseInt(localStorage.getItem('dotaGuideVisits')) + 1;
+        localStorage.setItem('dotaGuideVisits', visits);
+    } else {
+        localStorage.setItem('dotaGuideVisits', '1');
+    }
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
 })();

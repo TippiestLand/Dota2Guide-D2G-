@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -129,3 +130,60 @@
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
+=======
+<!-- ===== СТРАНИЦА: НОВОСТИ ===== -->
+<section class="page" id="page-news">
+    <h2 class="section-title"><span>Новости</span> Dota 2</h2>
+    
+    <!-- ===== АДМИН-ПАНЕЛЬ ===== -->
+    <div id="adminPanel" style="display:none; max-width:900px; margin:0 auto 30px; background:rgba(20,20,30,0.85); backdrop-filter:blur(16px); border-radius:16px; padding:28px; border:1px solid rgba(240,185,11,0.15);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="color:#f0b90b; font-size:1.3rem; font-family:'Orbitron',sans-serif;">🛠️ Управление новостями</h3>
+            <div style="display:flex; gap:10px;">
+                <button id="updateRssBtn" style="padding:10px 20px; border-radius:10px; border:none; background:linear-gradient(135deg,#4ecdc4,#44b39d); color:#0a0a0f; font-weight:600; font-size:0.85rem; cursor:pointer; font-family:'Inter',sans-serif;">
+                    📡 Обновить из RSS
+                </button>
+                <span style="color:#666; font-size:0.75rem; display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:0 14px; border-radius:8px;">
+                    Автоматически каждые 5 мин
+                </span>
+            </div>
+        </div>
+        
+        <div style="display:grid; gap:15px;">
+            <input type="text" id="newsTitle" placeholder="Заголовок новости" style="padding:14px 18px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; font-family:'Inter',sans-serif;">
+            <textarea id="newsContent" placeholder="Текст новости..." style="min-height:150px; padding:14px 18px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; resize:vertical; font-family:'Inter',sans-serif;"></textarea>
+            
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <select id="newsType" style="flex:1; min-width:150px; padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:0.95rem; font-family:'Inter',sans-serif;">
+                    <option value="update">⚙️ Обновление</option>
+                    <option value="event">🎪 Событие</option>
+                    <option value="tournament">🏆 Турнир</option>
+                    <option value="hero">🦸 Новый герой</option>
+                    <option value="feature">✨ Новинка</option>
+                </select>
+                <input type="text" id="newsLink" placeholder="Ссылка (опционально)" style="flex:2; min-width:200px; padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; font-family:'Inter',sans-serif;">
+            </div>
+            
+            <button id="addNewsBtn" style="padding:14px; border-radius:12px; border:none; background:linear-gradient(135deg,#f0b90b,#d49b0a); color:#0a0a0f; font-weight:700; font-size:1rem; cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.3s;">
+                ➕ Добавить новость
+            </button>
+        </div>
+        
+        <div style="margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h4 style="color:#b0b0c0; font-size:0.9rem; font-weight:400;">📰 Все новости <span style="color:#666; font-size:0.8rem;" id="newsCount"></span></h4>
+                <span style="font-size:0.7rem; color:#666;">📡 RSS · ✏️ Ручные</span>
+            </div>
+            <div id="adminNewsList" style="max-height:400px; overflow-y:auto;"></div>
+        </div>
+    </div>
+    
+    <!-- ===== БЛОК НОВОСТЕЙ ===== -->
+    <div class="news-feed" id="newsFeed">
+        <div class="news-loading">
+            <div class="loader"></div>
+            <p>Загрузка новостей...</p>
+        </div>
+    </div>
+</section>
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+// ===== js/admin.js =====
+>>>>>>> 0dcf12cec57fadbd617e8373f8f0b613138eb342
 (function() {
     'use strict';
 
