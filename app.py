@@ -23,9 +23,15 @@ MSK = timezone(timedelta(hours=3))
 
 os.makedirs(os.path.dirname(NEWS_FILE), exist_ok=True)
 
-if not os.path.exists(NEWS_FILE):
-    with open(NEWS_FILE, 'w', encoding='utf-8') as f:
-        json.dump([], f, ensure_ascii=False, indent=4)
+# ===== ВАЖНО: ПРИНУДИТЕЛЬНО УДАЛЯЕМ СТАРЫЙ ФАЙЛ ПРИ ЗАПУСКЕ =====
+# Это гарантирует, что новости пересоберутся с правильным форматированием
+if os.path.exists(NEWS_FILE):
+    print("🗑️ Удаляем старый файл новостей для пересборки...")
+    os.remove(NEWS_FILE)
+
+# Создаём новый пустой файл
+with open(NEWS_FILE, 'w', encoding='utf-8') as f:
+    json.dump([], f, ensure_ascii=False, indent=4)
 
 @app.route('/static/<path:path>')
 def serve_static(path):
