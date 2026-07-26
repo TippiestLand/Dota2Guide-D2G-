@@ -57,7 +57,7 @@
                             ${escapeHtml(news.author || 'Valve')}
                             ${news.source === 'rss' 
                                 ? '<span style="font-size:0.6rem; background:rgba(78,205,196,0.15); color:#4ecdc4; padding:2px 10px; border-radius:12px; margin-left:8px;">📡</span>' 
-                                : '<span style="font-size:0.6rem; background:rgba(240,185,11,0.15); color:#f0b90b; padding:2px 10px; border-radius:12px; margin-left:8px;">✏️</span>'
+                                : ''
                             }
                         </div>
                         <div class="news-date">${escapeHtml(news.date)}</div>

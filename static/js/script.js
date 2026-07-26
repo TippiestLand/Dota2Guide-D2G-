@@ -2,7 +2,6 @@
     'use strict';
 
     const heroesData = [
-        // ===== СИЛА =====
         { name: 'Alchemist', attribute: 'strength', icon: 'alchemist' },
         { name: 'Axe', attribute: 'strength', icon: 'axe' },
         { name: 'Bristleback', attribute: 'strength', icon: 'bristleback' },
@@ -17,7 +16,6 @@
         { name: 'Elder Titan', attribute: 'strength', icon: 'elder_titan' },
         { name: 'Huskar', attribute: 'strength', icon: 'huskar' },
         { name: 'Kunkka', attribute: 'strength', icon: 'kunkka' },
-        { name: 'Largo', attribute: 'strength', icon: 'largo' },
         { name: 'Legion Commander', attribute: 'strength', icon: 'legion_commander' },
         { name: 'Lifestealer', attribute: 'strength', icon: 'life_stealer' },
         { name: 'Lycan', attribute: 'strength', icon: 'lycan' },
@@ -39,8 +37,6 @@
         { name: 'Underlord', attribute: 'strength', icon: 'abyssal_underlord' },
         { name: 'Undying', attribute: 'strength', icon: 'undying' },
         { name: 'Wraith King', attribute: 'strength', icon: 'skeleton_king' },
-        
-        // ===== ЛОВКОСТЬ =====
         { name: 'Anti-Mage', attribute: 'agility', icon: 'antimage' },
         { name: 'Bloodseeker', attribute: 'agility', icon: 'bloodseeker' },
         { name: 'Bounty Hunter', attribute: 'agility', icon: 'bounty_hunter' },
@@ -52,7 +48,6 @@
         { name: 'Gyrocopter', attribute: 'agility', icon: 'gyrocopter' },
         { name: 'Hoodwink', attribute: 'agility', icon: 'hoodwink' },
         { name: 'Juggernaut', attribute: 'agility', icon: 'juggernaut' },
-        { name: 'Kez', attribute: 'agility', icon: 'kez' },
         { name: 'Lone Druid', attribute: 'agility', icon: 'lone_druid' },
         { name: 'Luna', attribute: 'agility', icon: 'luna' },
         { name: 'Medusa', attribute: 'agility', icon: 'medusa' },
@@ -76,8 +71,6 @@
         { name: 'Vengeful Spirit', attribute: 'agility', icon: 'vengefulspirit' },
         { name: 'Viper', attribute: 'agility', icon: 'viper' },
         { name: 'Weaver', attribute: 'agility', icon: 'weaver' },
-        
-        // ===== ИНТЕЛЛЕКТ =====
         { name: 'Ancient Apparition', attribute: 'intelligence', icon: 'ancient_apparition' },
         { name: 'Chen', attribute: 'intelligence', icon: 'chen' },
         { name: 'Crystal Maiden', attribute: 'intelligence', icon: 'crystal_maiden' },
@@ -112,8 +105,6 @@
         { name: 'Winter Wyvern', attribute: 'intelligence', icon: 'winter_wyvern' },
         { name: 'Witch Doctor', attribute: 'intelligence', icon: 'witch_doctor' },
         { name: 'Zeus', attribute: 'intelligence', icon: 'zuus' },
-        
-        // ===== УНИВЕРСАЛЬНЫЕ =====
         { name: 'Abaddon', attribute: 'universal', icon: 'abaddon' },
         { name: 'Arc Warden', attribute: 'universal', icon: 'arc_warden' },
         { name: 'Bane', attribute: 'universal', icon: 'bane' },
@@ -126,7 +117,7 @@
         { name: 'Io', attribute: 'universal', icon: 'wisp' },
         { name: 'Magnus', attribute: 'universal', icon: 'magnataur' },
         { name: 'Marci', attribute: 'universal', icon: 'marci' },
-        { name: 'Nature\'s Prophet', attribute: 'universal', icon: 'furion' },
+        { name: "Nature's Prophet", attribute: 'universal', icon: 'furion' },
         { name: 'Nyx Assassin', attribute: 'universal', icon: 'nyx_assassin' },
         { name: 'Pangolier', attribute: 'universal', icon: 'pangolier' },
         { name: 'Sand King', attribute: 'universal', icon: 'sand_king' },
@@ -139,187 +130,137 @@
     ];
 
     const heroMap = new Map();
-    heroesData.forEach(hero => {
-        if (heroMap.has(hero.name)) {
-            const existing = heroMap.get(hero.name);
-            if (hero.attribute === 'universal') heroMap.set(hero.name, hero);
-        } else {
+    heroesData.forEach(function(hero) {
+        if (!heroMap.has(hero.name)) {
             heroMap.set(hero.name, hero);
         }
     });
-    
     const uniqueHeroes = Array.from(heroMap.values());
-    uniqueHeroes.sort((a, b) => a.name.localeCompare(b.name));
+    uniqueHeroes.sort(function(a, b) {
+        return a.name.localeCompare(b.name);
+    });
 
-    const heroList = document.getElementById('heroList');
-    const attributeGlow = document.getElementById('attributeGlow');
-    let currentFilter = 'all';
-    let searchQuery = '';
-    let isTransitioning = false;
+    var heroList = document.getElementById('heroList');
+    var attributeGlow = document.getElementById('attributeGlow');
+    var currentFilter = 'all';
+    var searchQuery = '';
+    var isTransitioning = false;
 
     function getAttributeClass(attribute) {
-        const classes = { 'strength': 'strength', 'agility': 'agility', 'intelligence': 'intelligence', 'universal': 'universal' };
+        var classes = { 'strength': 'strength', 'agility': 'agility', 'intelligence': 'intelligence', 'universal': 'universal' };
         return classes[attribute] || '';
     }
 
     function renderHeroes() {
-        const filtered = uniqueHeroes.filter(hero => {
-            const matchesFilter = currentFilter === 'all' || hero.attribute === currentFilter;
-            const matchesSearch = hero.name.toLowerCase().includes(searchQuery.toLowerCase());
+        if (!heroList) return;
+        var filtered = uniqueHeroes.filter(function(hero) {
+            var matchesFilter = currentFilter === 'all' || hero.attribute === currentFilter;
+            var matchesSearch = hero.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
             return matchesFilter && matchesSearch;
         });
 
         if (filtered.length === 0) {
-            heroList.innerHTML = `<div class="no-heroes"><p>Герои не найдены</p></div>`;
+            heroList.innerHTML = '<div class="no-heroes"><p>Герои не найдены</p></div>';
             return;
         }
 
-        heroList.innerHTML = filtered.map(hero => {
-            const iconFile = hero.icon + '.png';
-            const attrClass = getAttributeClass(hero.attribute);
-            return `
-                <div class="hero-item ${attrClass}" data-hero="${hero.name}" data-attribute="${hero.attribute}">
-                    <div class="tilt-wrap">
-                        <img src="/static/assets/icons/${iconFile}" alt="${hero.name}" loading="lazy" 
-                             onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\'>${hero.name.charAt(0)}</span>'">
-                    </div>
-                    <div class="hero-hover">
-                        <div class="name">${hero.name}</div>
-                    </div>
-                </div>
-            `;
-        }).join('');
+        var html = '';
+        for (var i = 0; i < filtered.length; i++) {
+            var hero = filtered[i];
+            var iconFile = hero.icon + '.png';
+            var attrClass = getAttributeClass(hero.attribute);
+            html += '<div class="hero-item ' + attrClass + '" data-hero="' + hero.name + '" data-attribute="' + hero.attribute + '">';
+            html += '    <div class="tilt-wrap">';
+            html += '        <img src="/static/assets/icons/' + iconFile + '" alt="' + hero.name + '" loading="lazy" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'<span style=\\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\\'>' + hero.name.charAt(0) + '</span>\'">';
+            html += '    </div>';
+            html += '    <div class="hero-hover">';
+            html += '        <div class="name">' + hero.name + '</div>';
+            html += '    </div>';
+            html += '</div>';
+        }
+        heroList.innerHTML = html;
 
-        document.querySelectorAll('.hero-item').forEach(item => {
-            const tiltWrap = item.querySelector('.tilt-wrap');
-            item.addEventListener('mousemove', (e) => {
-                const rect = item.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width;
-                const y = (e.clientY - rect.top) / rect.height;
-                if (tiltWrap) {
-                    const rotateX = (y - 0.5) * 25;
-                    const rotateY = (x - 0.5) * -25;
-                    tiltWrap.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        var items = document.querySelectorAll('.hero-item');
+        for (var j = 0; j < items.length; j++) {
+            var item = items[j];
+            var tiltWrap = item.querySelector('.tilt-wrap');
+            item.addEventListener('mousemove', function(e) {
+                var rect = this.getBoundingClientRect();
+                var x = (e.clientX - rect.left) / rect.width;
+                var y = (e.clientY - rect.top) / rect.height;
+                var tiltWrap2 = this.querySelector('.tilt-wrap');
+                if (tiltWrap2) {
+                    var rotateX = (y - 0.5) * 25;
+                    var rotateY = (x - 0.5) * -25;
+                    tiltWrap2.style.transform = 'rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
                 }
-                const shineX = x * 100;
-                const shineY = y * 100;
-                item.style.setProperty('--shine-x', shineX + '%');
-                item.style.setProperty('--shine-y', shineY + '%');
+                var shineX = x * 100;
+                var shineY = y * 100;
+                this.style.setProperty('--shine-x', shineX + '%');
+                this.style.setProperty('--shine-y', shineY + '%');
             });
-            item.addEventListener('mouseleave', () => {
-                if (tiltWrap) tiltWrap.style.transform = 'rotateX(0) rotateY(0)';
+            item.addEventListener('mouseleave', function() {
+                var tiltWrap3 = this.querySelector('.tilt-wrap');
+                if (tiltWrap3) {
+                    tiltWrap3.style.transform = 'rotateX(0) rotateY(0)';
+                }
             });
-        });
+        }
     }
 
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const filterValue = btn.dataset.filter;
-            if (btn.classList.contains('active')) {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    var filterBtns = document.querySelectorAll('.filter-btn');
+    for (var k = 0; k < filterBtns.length; k++) {
+        filterBtns[k].addEventListener('click', function() {
+            var filterValue = this.dataset.filter;
+            
+            if (this.classList.contains('active')) {
+                var allBtns = document.querySelectorAll('.filter-btn');
+                for (var b = 0; b < allBtns.length; b++) {
+                    allBtns[b].classList.remove('active');
+                }
                 currentFilter = 'all';
                 attributeGlow.className = 'attribute-glow';
-                isTransitioning = true;
-                heroList.style.opacity = '0';
-                heroList.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    renderHeroes();
-                    heroList.style.opacity = '1';
-                    heroList.style.transform = 'scale(1)';
-                    setTimeout(() => { isTransitioning = false; }, 300);
-                }, 300);
-                return;
+            } else {
+                var allBtns2 = document.querySelectorAll('.filter-btn');
+                for (var b2 = 0; b2 < allBtns2.length; b2++) {
+                    allBtns2[b2].classList.remove('active');
+                }
+                this.classList.add('active');
+                currentFilter = filterValue;
+                attributeGlow.className = 'attribute-glow';
+                if (currentFilter !== 'all') {
+                    attributeGlow.classList.add(currentFilter);
+                }
             }
-            if (isTransitioning) return;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = filterValue;
-            attributeGlow.className = 'attribute-glow';
-            if (currentFilter !== 'all') attributeGlow.classList.add(currentFilter);
+            
             isTransitioning = true;
             heroList.style.opacity = '0';
             heroList.style.transform = 'scale(0.95)';
-            setTimeout(() => {
+            setTimeout(function() {
                 renderHeroes();
                 heroList.style.opacity = '1';
                 heroList.style.transform = 'scale(1)';
-                setTimeout(() => { isTransitioning = false; }, 300);
+                setTimeout(function() {
+                    isTransitioning = false;
+                }, 300);
             }, 300);
         });
-    });
+    }
 
-    const style = document.createElement('style');
-    style.textContent = `.hero-grid { transition: opacity 0.3s ease, transform 0.3s ease; }`;
-    document.head.appendChild(style);
-
-    document.getElementById('heroSearch').addEventListener('input', (e) => {
+    var searchInput = document.getElementById('heroSearch');
+    searchInput.addEventListener('input', function(e) {
         searchQuery = e.target.value;
         renderHeroes();
     });
 
+    var styleEl = document.createElement('style');
+    styleEl.textContent = '.hero-grid { transition: opacity 0.3s ease, transform 0.3s ease; }';
+    document.head.appendChild(styleEl);
+
     renderHeroes();
 
-    // ===== ОПТИМИЗИРОВАННЫЙ КУРСОР =====
-    const cursor = document.createElement('div');
-    cursor.className = 'custom-cursor';
-    document.body.appendChild(cursor);
-
-    // Используем requestAnimationFrame для плавности
-    let cursorX = 0, cursorY = 0;
-    let targetX = 0, targetY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-        targetX = e.clientX;
-        targetY = e.clientY;
-        cursor.style.left = targetX + 'px';
-        cursor.style.top = targetY + 'px';
-    });
-
-    // Убираем cursor на телефонах (touch devices)
-    if ('ontouchstart' in window) {
-        cursor.style.display = 'none';
-        document.body.style.cursor = 'default';
-    }
-
-    // ===== ОПТИМИЗИРОВАННЫЕ ЧАСТИЦЫ (для телефонов — меньше) =====
-    const particlesContainer = document.createElement('div');
-    particlesContainer.className = 'particles';
-    document.body.prepend(particlesContainer);
-
-    // Меньше частиц на телефонах
-    const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 5 : 12;
-    const particleInterval = isMobile ? 800 : 300;
-
-    function createParticle() {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        const size = Math.random() * 2 + 1;
-        const left = Math.random() * 100;
-        const duration = Math.random() * 15 + 10;
-        const delay = Math.random() * 10;
-        particle.style.width = size + 'px';
-        particle.style.height = size + 'px';
-        particle.style.left = left + '%';
-        particle.style.animationDuration = duration + 's';
-        particle.style.animationDelay = delay + 's';
-        particle.style.opacity = Math.random() * 0.3 + 0.1;
-        particlesContainer.appendChild(particle);
-        setTimeout(() => { particle.remove(); }, (duration + delay) * 1000);
-    }
-
-    // Создаём начальные частицы
-    for (let i = 0; i < particleCount; i++) {
-        setTimeout(createParticle, i * 100);
-    }
-    setInterval(createParticle, particleInterval);
-
-    const navLinks = document.querySelectorAll('nav a');
-    const pages = {
+    var navLinks = document.querySelectorAll('nav a');
+    var pages = {
         home: document.getElementById('page-home'),
         heroes: document.getElementById('page-heroes'),
         items: document.getElementById('page-items'),
@@ -328,52 +269,123 @@
     };
 
     function navigateTo(pageId) {
-        Object.values(pages).forEach(page => { if (page) page.classList.remove('active'); });
-        if (pages[pageId]) pages[pageId].classList.add('active');
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.dataset.page === pageId) link.classList.add('active');
-        });
+        var pageKeys = Object.keys(pages);
+        for (var pk = 0; pk < pageKeys.length; pk++) {
+            var key = pageKeys[pk];
+            if (pages[key]) {
+                pages[key].classList.remove('active');
+            }
+        }
+        if (pages[pageId]) {
+            pages[pageId].classList.add('active');
+        }
+        for (var nl = 0; nl < navLinks.length; nl++) {
+            navLinks[nl].classList.remove('active');
+            if (navLinks[nl].dataset.page === pageId) {
+                navLinks[nl].classList.add('active');
+            }
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
+    for (var nl2 = 0; nl2 < navLinks.length; nl2++) {
+        navLinks[nl2].addEventListener('click', function(e) {
             e.preventDefault();
-            const pageId = link.dataset.page;
-            if (pageId) navigateTo(pageId);
+            var pageId = this.dataset.page;
+            if (pageId) {
+                navigateTo(pageId);
+            }
         });
+    }
+
+    var dataPageEls = document.querySelectorAll('[data-page]');
+    for (var dp = 0; dp < dataPageEls.length; dp++) {
+        dataPageEls[dp].addEventListener('click', function(e) {
+            e.preventDefault();
+            var pageId = this.dataset.page;
+            if (pageId) {
+                navigateTo(pageId);
+            }
+        });
+    }
+
+    var cursor = document.createElement('div');
+    cursor.className = 'custom-cursor';
+    document.body.appendChild(cursor);
+
+    var targetX = 0;
+    var targetY = 0;
+    document.addEventListener('mousemove', function(e) {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        cursor.style.left = targetX + 'px';
+        cursor.style.top = targetY + 'px';
     });
 
-    document.querySelectorAll('[data-page]').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = el.dataset.page;
-            if (pageId) navigateTo(pageId);
-        });
-    });
+    if ('ontouchstart' in window) {
+        cursor.style.display = 'none';
+        document.body.style.cursor = 'default';
+    }
 
-    // ===== ОПТИМИЗИРОВАННЫЙ OBSERVER =====
-    const fadeElements = document.querySelectorAll('.scroll-fade');
+    var hoverEls = document.querySelectorAll('a, button, .glass-card, .hero-item, .item-card, .guide-card, .news-card-vk');
+    for (var he = 0; he < hoverEls.length; he++) {
+        hoverEls[he].addEventListener('mouseenter', function() {
+            cursor.classList.add('hover');
+        });
+        hoverEls[he].addEventListener('mouseleave', function() {
+            cursor.classList.remove('hover');
+        });
+    }
+
+    var particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles';
+    document.body.prepend(particlesContainer);
+
+    var isMobile = window.innerWidth < 768;
+    var particleCount = isMobile ? 5 : 12;
+    var particleInterval = isMobile ? 800 : 300;
+
+    function createParticle() {
+        var particle = document.createElement('div');
+        particle.className = 'particle';
+        var size = Math.random() * 2 + 1;
+        var left = Math.random() * 100;
+        var duration = Math.random() * 15 + 10;
+        var delay = Math.random() * 10;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.left = left + '%';
+        particle.style.animationDuration = duration + 's';
+        particle.style.animationDelay = delay + 's';
+        particle.style.opacity = Math.random() * 0.3 + 0.1;
+        particlesContainer.appendChild(particle);
+        setTimeout(function() {
+            particle.remove();
+        }, (duration + delay) * 1000);
+    }
+
+    for (var pc = 0; pc < particleCount; pc++) {
+        setTimeout(createParticle, pc * 100);
+    }
+    setInterval(createParticle, particleInterval);
+
+    var fadeElements = document.querySelectorAll('.scroll-fade');
     if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+        var observer = new IntersectionObserver(function(entries) {
+            for (var fe = 0; fe < entries.length; fe++) {
+                if (entries[fe].isIntersecting) {
+                    entries[fe].target.classList.add('visible');
                 }
-            });
+            }
         }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-        fadeElements.forEach(el => observer.observe(el));
+        for (var fe2 = 0; fe2 < fadeElements.length; fe2++) {
+            observer.observe(fadeElements[fe2]);
+        }
     } else {
-        fadeElements.forEach(el => el.classList.add('visible'));
+        for (var fe3 = 0; fe3 < fadeElements.length; fe3++) {
+            fadeElements[fe3].classList.add('visible');
+        }
     }
 
-    console.log('Dota 2 Guide loaded');
-
-    if (localStorage.getItem('dotaGuideVisits')) {
-        let visits = parseInt(localStorage.getItem('dotaGuideVisits')) + 1;
-        localStorage.setItem('dotaGuideVisits', visits);
-    } else {
-        localStorage.setItem('dotaGuideVisits', '1');
-    }
+    console.log('🚀 Dota 2 Guide loaded');
 })();

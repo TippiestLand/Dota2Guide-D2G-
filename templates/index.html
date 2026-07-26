@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dota 2 Guide — Путь Героя</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
@@ -24,14 +24,9 @@
             <a href="#" data-page="news">Новости</a>
             <a href="#" data-page="guides">Гайды</a>
         </nav>
-        <div class="header-actions">
-            <button class="btn-auth" id="openAuth">Вход</button>
-            <button class="btn-auth admin-btn" id="adminBtn" style="display:none; border-color:#4ecdc4; color:#4ecdc4;">Админка</button>
-        </div>
     </header>
 
     <main id="app">
-        <!-- ===== СТРАНИЦА: ГЛАВНАЯ ===== -->
         <section class="page active" id="page-home">
             <div class="hero">
                 <div class="hero-content">
@@ -68,7 +63,6 @@
             </section>
         </section>
 
-        <!-- ===== СТРАНИЦА: ГЕРОИ ===== -->
         <section class="page" id="page-heroes">
             <div class="heroes-header">
                 <h2 class="section-title"><span>Выберите</span> героя</h2>
@@ -80,16 +74,15 @@
                     <input type="text" id="heroSearch" placeholder="Поиск героя...">
                 </div>
                 <div class="hero-filters">
-                    <button class="filter-btn" data-filter="strength"><img src="/static/assets/icons/Strength_attribute_symbol.png" alt="Сила" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="agility"><img src="/static/assets/icons/Agility_attribute_symbol.png" alt="Ловкость" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="intelligence"><img src="/static/assets/icons/Intelligence_attribute_symbol.png" alt="Интеллект" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="universal"><img src="/static/assets/icons/Dota2_Universal_icon_solid_allmode.png" alt="Универсальный" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="strength"><img src="{{ url_for('static', filename='assets/icons/Strength_attribute_symbol.png') }}" alt="Сила" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="agility"><img src="{{ url_for('static', filename='assets/icons/Agility_attribute_symbol.png') }}" alt="Ловкость" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="intelligence"><img src="{{ url_for('static', filename='assets/icons/Intelligence_attribute_symbol.png') }}" alt="Интеллект" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="universal"><img src="{{ url_for('static', filename='assets/icons/Dota2_Universal_icon_solid_allmode.png') }}" alt="Универсальный" class="filter-icon"></button>
                 </div>
             </div>
             <div class="hero-grid" id="heroList"></div>
         </section>
 
-        <!-- ===== СТРАНИЦА: ПРЕДМЕТЫ ===== -->
         <section class="page" id="page-items">
             <h2 class="section-title"><span>Все</span> предметы</h2>
             <div class="items-grid">
@@ -104,50 +97,8 @@
             </div>
         </section>
 
-        <!-- ===== СТРАНИЦА: НОВОСТИ ===== -->
         <section class="page" id="page-news">
             <h2 class="section-title"><span>Новости</span> Dota 2</h2>
-            
-            <!-- ===== АДМИН-ПАНЕЛЬ ===== -->
-            <div id="adminPanel" style="display:none; max-width:900px; margin:0 auto 30px; background:rgba(20,20,30,0.85); backdrop-filter:blur(16px); border-radius:16px; padding:28px; border:1px solid rgba(240,185,11,0.15);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="color:#f0b90b; font-size:1.3rem; font-family:'Orbitron',sans-serif;">🛠️ Управление новостями</h3>
-                    <div style="display:flex; gap:10px;">
-                        <button id="updateRssBtn" style="padding:10px 20px; border-radius:10px; border:none; background:linear-gradient(135deg,#4ecdc4,#44b39d); color:#0a0a0f; font-weight:600; font-size:0.85rem; cursor:pointer; font-family:'Inter',sans-serif;">
-                            📡 Обновить из RSS
-                        </button>
-                        <span style="color:#666; font-size:0.75rem; display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:0 14px; border-radius:8px;">Автоматически каждые 5 мин</span>
-                    </div>
-                </div>
-                
-                <div style="display:grid; gap:15px;">
-                    <input type="text" id="newsTitle" placeholder="Заголовок новости" style="padding:14px 18px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; font-family:'Inter',sans-serif;">
-                    <textarea id="newsContent" placeholder="Текст новости..." style="min-height:150px; padding:14px 18px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; resize:vertical; font-family:'Inter',sans-serif;"></textarea>
-                    
-                    <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                        <select id="newsType" style="flex:1; min-width:150px; padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:0.95rem; font-family:'Inter',sans-serif;">
-                            <option value="update">⚙️ Обновление</option>
-                            <option value="event">🎪 Событие</option>
-                            <option value="tournament">🏆 Турнир</option>
-                            <option value="hero">🦸 Новый герой</option>
-                            <option value="feature">✨ Новинка</option>
-                        </select>
-                        <input type="text" id="newsLink" placeholder="Ссылка (опционально)" style="flex:2; min-width:200px; padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; font-family:'Inter',sans-serif;">
-                    </div>
-                    
-                    <button id="addNewsBtn" style="padding:14px; border-radius:12px; border:none; background:linear-gradient(135deg,#f0b90b,#d49b0a); color:#0a0a0f; font-weight:700; font-size:1rem; cursor:pointer; font-family:'Inter',sans-serif;">➕ Добавить новость</button>
-                </div>
-                
-                <div style="margin-top:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <h4 style="color:#b0b0c0; font-size:0.9rem; font-weight:400;">📰 Все новости <span style="color:#666; font-size:0.8rem;" id="newsCount"></span></h4>
-                        <span style="font-size:0.7rem; color:#666;">📡 RSS · ✏️ Ручные</span>
-                    </div>
-                    <div id="adminNewsList" style="max-height:400px; overflow-y:auto;"></div>
-                </div>
-            </div>
-            
-            <!-- ===== БЛОК НОВОСТЕЙ ===== -->
             <div class="news-feed" id="newsFeed">
                 <div class="news-loading">
                     <div class="loader"></div>
@@ -156,7 +107,6 @@
             </div>
         </section>
 
-        <!-- ===== СТРАНИЦА: ГАЙДЫ ===== -->
         <section class="page" id="page-guides">
             <h2 class="section-title"><span>Гайды</span> для новичков</h2>
             <div class="guides-grid">
@@ -175,57 +125,7 @@
         <p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p>
     </footer>
 
-    <!-- ===== МОДАЛКИ ===== -->
-    <div class="auth-modal" id="authModal">
-        <div class="auth-content">
-            <button class="auth-close" id="closeAuth">✕</button>
-            <div class="auth-header">
-                <h2 id="authTitle">Добро пожаловать</h2>
-                <p id="authSubtitle">Войдите или создайте аккаунт</p>
-            </div>
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">Вход</button>
-                <button class="auth-tab" data-tab="register">Регистрация</button>
-            </div>
-            <div class="auth-body">
-                <form id="loginForm" class="auth-form active">
-                    <div class="form-group"><label for="loginEmail">Email или логин</label><input type="text" id="loginEmail" placeholder="example@email.com или username" required></div>
-                    <div class="form-group"><label for="loginPassword">Пароль</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;">Войти</button>
-                </form>
-                <form id="registerForm" class="auth-form">
-                    <div class="form-group"><label for="regUsername">Имя пользователя</label><input type="text" id="regUsername" placeholder="PlayerName" required></div>
-                    <div class="form-group"><label for="regEmail">Email</label><input type="email" id="regEmail" placeholder="example@email.com" required></div>
-                    <div class="form-group"><label for="regPassword">Пароль</label><input type="password" id="regPassword" placeholder="••••••••" required></div>
-                    <div class="form-group"><label for="regConfirm">Подтвердите пароль</label><input type="password" id="regConfirm" placeholder="••••••••" required></div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;">Создать аккаунт</button>
-                </form>
-            </div>
-            <div id="authMessage" style="text-align:center; margin-top:15px; color:#ff6b6b; display:none;"></div>
-        </div>
-    </div>
-
-    <div class="auth-modal" id="adminAuthModal">
-        <div class="auth-content">
-            <button class="auth-close" id="closeAdminAuth">✕</button>
-            <div class="auth-header">
-                <h2>🔐 Вход в админ-панель</h2>
-                <p>Введите данные администратора</p>
-            </div>
-            <div class="auth-body">
-                <form id="adminLoginForm">
-                    <div class="form-group"><label for="adminLogin">Логин</label><input type="text" id="adminLogin" placeholder="admin" value="admin"></div>
-                    <div class="form-group"><label for="adminPassword">Пароль</label><input type="password" id="adminPassword" placeholder="••••••••" value="admin123"></div>
-                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Войти в админку</button>
-                    <p id="adminLoginError" style="color:#ff6b6b; text-align:center; margin-top:10px; display:none;">Неверный логин или пароль</p>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script src="/static/js/auth.js"></script>
-    <script src="/static/js/news.js"></script>
-    <script src="/static/js/script.js"></script>
-    <script src="/static/js/admin.js"></script>
+    <script src="{{ url_for('static', filename='js/news.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
