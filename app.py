@@ -12,7 +12,6 @@ import xml.etree.ElementTree as ET
 from functools import wraps
 import re
 
-# ===== ПРАВИЛЬНАЯ НАСТРОЙКА FLASK =====
 app = Flask(__name__, 
             template_folder='templates',
             static_folder='static',
@@ -33,6 +32,11 @@ os.makedirs(os.path.dirname(NEWS_FILE), exist_ok=True)
 if not os.path.exists(NEWS_FILE):
     with open(NEWS_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f, ensure_ascii=False, indent=4)
+
+# ===== ЯВНАЯ РАЗДАЧА СТАТИКИ =====
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
 
 # ===== РАБОТА С JSON =====
 def load_news():
