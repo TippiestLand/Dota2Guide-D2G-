@@ -6,7 +6,8 @@ import hashlib
 import re
 import requests
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+import html
 
 app = Flask(__name__,
             template_folder='templates',
@@ -16,6 +17,9 @@ CORS(app)
 
 NEWS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'news.json')
 RSS_URL = 'https://store.steampowered.com/feeds/news/app/570/?l=russian'
+
+# Московское время (UTC+3)
+MSK = timezone(timedelta(hours=3))
 
 os.makedirs(os.path.dirname(NEWS_FILE), exist_ok=True)
 
@@ -39,6 +43,67 @@ def save_news(news):
     with open(NEWS_FILE, 'w', encoding='utf-8') as f:
         json.dump(news, f, ensure_ascii=False, indent=4)
 
+def translate_title(title):
+    """Переводит заголовки новостей на русский"""
+    translations = {
+        'Gameplay Update': 'Игровое обновление',
+        'Gameplay Patch': 'Игровой патч',
+        'Patch': 'Патч',
+        'Update': 'Обновление',
+        'Release': 'Релиз',
+        'Announcement': 'Объявление',
+        'Event': 'Событие',
+        'Tournament': 'Турнир',
+        'New Hero': 'Новый герой',
+        'Hero': 'Герой',
+        'Balance': 'Баланс',
+        'Fix': 'Исправление',
+        'Hotfix': 'Срочное исправление',
+        'Maintenance': 'Технические работы',
+        'Server': 'Сервер',
+        'Performance': 'Производительность',
+        'Optimization': 'Оптимизация',
+        'Security': 'Безопасность',
+        'Feature': 'Нововведение',
+        'Improvement': 'Улучшение',
+        'Change': 'Изменение',
+        'Adjustment': 'Корректировка',
+        'Refinement': 'Доработка',
+        'Enhancement': 'Усиление',
+        'Nerf': 'Ослабление',
+        'Buff': 'Усиление',
+        'Rework': 'Переработка',
+        'Redesign': 'Редизайн'
+    }
+    
+    for eng, rus in translations.items():
+        if eng in title:
+            return title.replace(eng, rus)
+    return title
+
+def format_news_content(text):
+    """Форматирует текст новости как в Steam — с точками в начале строк"""
+    lines = text.split('\n')
+    formatted_lines = []
+    
+    for line in lines:
+        line = line.strip()
+        if line:
+            if line.startswith('- '):
+                formatted_lines.append('• ' + line[2:])
+            elif line.startswith('* '):
+                formatted_lines.append('• ' + line[2:])
+            elif line.startswith('— '):
+                formatted_lines.append('• ' + line[2:])
+            elif line.startswith('• '):
+                formatted_lines.append(line)
+            elif line.startswith('1.') or line.startswith('2.') or line.startswith('3.'):
+                formatted_lines.append(line)
+            else:
+                formatted_lines.append(line)
+    
+    return '\n'.join(formatted_lines)
+
 def fetch_rss_news():
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
@@ -54,9 +119,19 @@ def fetch_rss_news():
         for item in root.findall('.//item')[:15]:
             title_element = item.find('title')
             title_text = title_element.text if title_element is not None else 'Без названия'
+            
+            # Переводим заголовок
+            title_text = translate_title(title_text)
 
             pub_date_element = item.find('pubDate')
-            date_text = pub_date_element.text if pub_date_element is not None else datetime.now().strftime('%d %B %Y')
+            
+            # Конвертируем дату в МСК
+            try:
+                date_obj = datetime.strptime(pub_date_element.text, '%a, %d %b %Y %H:%M:%S %Z')
+                date_obj_msk = date_obj.astimezone(MSK)
+                date_formatted = date_obj_msk.strftime('%d %B %Y, %H:%M МСК')
+            except:
+                date_formatted = datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК')
 
             link_element = item.find('link')
             link_text = link_element.text if link_element is not None else ''
@@ -67,15 +142,10 @@ def fetch_rss_news():
             else:
                 desc_text = title_text
 
-            # Удаляем HTML-теги для чистого текста
+            # Очищаем HTML
             desc_clean = re.sub(r'<[^>]+>', '', desc_text)
-            # НЕ обрезаем текст — полная версия
-
-            try:
-                date_obj = datetime.strptime(pub_date_element.text, '%a, %d %b %Y %H:%M:%S %Z')
-                date_formatted = date_obj.strftime('%d %B %Y')
-            except:
-                date_formatted = date_text
+            # Форматируем как в Steam (с точками)
+            desc_clean = format_news_content(desc_clean)
 
             hash_id = int(hashlib.md5(title_text.encode('utf-8')).hexdigest()[:8], 16)
 
@@ -83,11 +153,9 @@ def fetch_rss_news():
                 'id': hash_id,
                 'title': title_text,
                 'date': date_formatted,
-                'type': 'update',
-                'preview': desc_clean[:300] + '...' if len(desc_clean) > 300 else desc_clean,
-                'content': desc_clean,  # ПОЛНЫЙ текст
+                'content': desc_clean,
                 'link': link_text,
-                'author': 'Valve',
+                'author': 'Steam',  # Убираем Valve, ставим Steam
                 'timestamp': int(datetime.now().timestamp() * 1000),
                 'source': 'rss'
             })
@@ -148,12 +216,10 @@ def initialize_news():
         {
             'id': 1,
             'title': 'Добро пожаловать в Dota 2 Guide!',
-            'date': datetime.now().strftime('%d %B %Y'),
-            'type': 'feature',
-            'preview': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.',
-            'content': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam. Если вы видите это сообщение, значит сайт работает корректно. Следите за обновлениями!',
+            'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
+            'content': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.\n• Все новости будут переведены на русский язык\n• Дата и время — по Московскому времени\n• Форматирование — как в официальных новостях Steam',
             'link': 'https://store.steampowered.com/news/app/570',
-            'author': 'Dota 2 Guide',
+            'author': 'Steam',
             'timestamp': int(datetime.now().timestamp() * 1000),
             'source': 'manual'
         }

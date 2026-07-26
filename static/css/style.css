@@ -822,7 +822,7 @@ section {
 }
 
 /* ============================================================
-   НОВОСТИ (НОВЫЙ ДИЗАЙН)
+   НОВОСТИ (СТИЛЬ КАК В STEAM)
    ============================================================ */
 .news-feed {
     display: flex;
@@ -886,18 +886,6 @@ section {
     margin-bottom: 14px;
 }
 
-.news-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    background: rgba(240, 185, 11, 0.1);
-}
-
 .news-meta {
     flex: 1;
     display: flex;
@@ -908,7 +896,7 @@ section {
 .news-author {
     font-weight: 600;
     font-size: 1rem;
-    color: #fff;
+    color: #f0b90b;
     font-family: 'Inter', sans-serif;
     letter-spacing: 0.3px;
 }
@@ -917,20 +905,6 @@ section {
     font-size: 0.75rem;
     color: #8888a0;
     font-family: 'Inter', sans-serif;
-}
-
-.news-type-badge {
-    font-size: 0.65rem;
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-weight: 500;
-    flex-shrink: 0;
-    background: rgba(240, 185, 11, 0.1);
-    color: var(--gold);
-    border: 1px solid rgba(240, 185, 11, 0.1);
-    font-family: 'Inter', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .news-card-body {
@@ -961,6 +935,13 @@ section {
     word-break: break-word;
 }
 
+/* Стиль для маркированных списков (как в Steam) */
+.news-preview br {
+    display: block;
+    content: '';
+    margin: 0;
+}
+
 .news-toggle-btn {
     background: none;
     border: none;
@@ -984,10 +965,6 @@ section {
 .news-toggle-btn .toggle-icon {
     font-size: 0.7rem;
     transition: transform 0.3s ease;
-}
-
-.news-toggle-btn.expanded .toggle-icon {
-    transform: rotate(180deg);
 }
 
 .news-card-footer {
@@ -1307,12 +1284,6 @@ h1::before, h2::before {
         gap: 10px;
     }
 
-    .news-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
-    }
-
     .news-author {
         font-size: 0.9rem;
     }
@@ -1324,11 +1295,6 @@ h1::before, h2::before {
     .news-preview {
         font-size: 0.88rem;
         line-height: 1.7;
-    }
-
-    .news-type-badge {
-        font-size: 0.55rem;
-        padding: 3px 10px;
     }
 
     /* Отключаем кастомный курсор на телефонах */
@@ -1379,9 +1345,5 @@ h1::before, h2::before {
     .news-card-header {
         flex-wrap: wrap;
         gap: 8px;
-    }
-
-    .news-type-badge {
-        margin-left: auto;
     }
 }

@@ -60,36 +60,27 @@
         var html = '';
         for (var i = 0; i < sorted.length; i++) {
             var news = sorted[i];
-            var typeColor = getTypeColor(news.type);
-            var typeIcon = getTypeIcon(news.type);
-            var typeLabel = getTypeLabel(news.type);
-            var authorName = escapeHtml(news.author || 'Valve');
+            var authorName = news.author || 'Steam';
             var newsDate = escapeHtml(news.date);
             var newsTitle = escapeHtml(news.title);
-            var newsContent = escapeHtml(news.content || news.preview || '');
+            var newsContent = escapeHtml(news.content || '');
             var newsLink = news.link ? escapeHtml(news.link) : '';
             var newsId = news.id || i;
 
             var linkHtml = '';
             if (newsLink) {
-                linkHtml = '<a href="' + newsLink + '" target="_blank" class="news-read-more">Читать на Steam →</a>';
+                linkHtml = '<a href="' + newsLink + '" target="_blank" class="news-read-more">Steam →</a>';
             }
 
-            // Определяем, нужно ли показывать кнопку "Развернуть"
-            var isLong = newsContent.length > 400;
-            var shortContent = isLong ? newsContent.substring(0, 400) + '...' : newsContent;
+            // Проверяем, нужно ли обрезать текст
+            var isLong = newsContent.length > 500;
+            var shortContent = isLong ? newsContent.substring(0, 500) + '...' : newsContent;
 
             html += '<div class="news-card-vk" data-id="' + newsId + '">';
             html += '    <div class="news-card-header">';
-            html += '        <div class="news-avatar" style="background: ' + typeColor + '20; color: ' + typeColor + '">';
-            html += '            ' + typeIcon;
-            html += '        </div>';
             html += '        <div class="news-meta">';
             html += '            <div class="news-author">' + authorName + '</div>';
             html += '            <div class="news-date">' + newsDate + '</div>';
-            html += '        </div>';
-            html += '        <div class="news-type-badge" style="background: ' + typeColor + '20; color: ' + typeColor + '">';
-            html += '            ' + typeLabel;
             html += '        </div>';
             html += '    </div>';
             html += '    <div class="news-card-body">';
@@ -115,9 +106,7 @@
 
         newsFeed.innerHTML = html;
 
-        // ============================================================
-        // ОБРАБОТЧИКИ ДЛЯ КНОПОК "РАЗВЕРНУТЬ/СВЕРНУТЬ"
-        // ============================================================
+        // Обработчики для кнопок "Развернуть/Свернуть"
         var toggleBtns = document.querySelectorAll('.news-toggle-btn');
         for (var j = 0; j < toggleBtns.length; j++) {
             toggleBtns[j].addEventListener('click', function() {
@@ -129,13 +118,11 @@
                 if (!textEl) return;
 
                 if (btn.classList.contains('expanded')) {
-                    // Сворачиваем
                     textEl.textContent = btn.dataset.short;
                     btn.classList.remove('expanded');
                     icon.textContent = '▼';
                     btn.innerHTML = '<span class="toggle-icon">▼</span> Развернуть';
                 } else {
-                    // Разворачиваем
                     textEl.textContent = btn.dataset.full;
                     btn.classList.add('expanded');
                     icon.textContent = '▲';
@@ -150,39 +137,6 @@
         var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    function getTypeIcon(type) {
-        var icons = {
-            'update': '⚙️',
-            'event': '🎪',
-            'tournament': '🏆',
-            'hero': '🦸',
-            'feature': '✨'
-        };
-        return icons[type] || '📰';
-    }
-
-    function getTypeColor(type) {
-        var colors = {
-            'update': '#f0b90b',
-            'event': '#ff6b6b',
-            'tournament': '#4ecdc4',
-            'hero': '#a29bfe',
-            'feature': '#fd79a8'
-        };
-        return colors[type] || '#888';
-    }
-
-    function getTypeLabel(type) {
-        var labels = {
-            'update': 'Обновление',
-            'event': 'Событие',
-            'tournament': 'Турнир',
-            'hero': 'Новый герой',
-            'feature': 'Новинка'
-        };
-        return labels[type] || 'Новость';
     }
 
     window.fetchNews = fetchNews;
