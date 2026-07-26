@@ -12,7 +12,11 @@ import xml.etree.ElementTree as ET
 from functools import wraps
 import re
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+# ===== ПРАВИЛЬНАЯ НАСТРОЙКА FLASK =====
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='static',
+            static_url_path='/static')
 CORS(app)
 
 # ===== КОНФИГ =====
@@ -132,10 +136,6 @@ def admin_required(f):
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
 
 # ===== API: ВХОД =====
 @app.route('/api/admin/login', methods=['POST'])
