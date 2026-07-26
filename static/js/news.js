@@ -60,36 +60,32 @@
         var html = '';
         for (var i = 0; i < sorted.length; i++) {
             var news = sorted[i];
-            var sourceClass = news.source === 'rss' ? 'news-rss' : 'news-manual';
             var typeColor = getTypeColor(news.type);
             var typeIcon = getTypeIcon(news.type);
             var typeLabel = getTypeLabel(news.type);
             var authorName = escapeHtml(news.author || 'Valve');
             var newsDate = escapeHtml(news.date);
             var newsTitle = escapeHtml(news.title);
-            var newsPreview = escapeHtml(news.preview || news.content);
+            var newsContent = escapeHtml(news.content || news.preview || '');
             var newsLink = news.link ? escapeHtml(news.link) : '';
-
-            var rssBadge = '';
-            if (news.source === 'rss') {
-                rssBadge = '<span style="font-size:0.6rem; background:rgba(78,205,196,0.15); color:#4ecdc4; padding:2px 10px; border-radius:12px; margin-left:8px;">📡</span>';
-            }
+            var newsId = news.id || i;
 
             var linkHtml = '';
             if (newsLink) {
                 linkHtml = '<a href="' + newsLink + '" target="_blank" class="news-read-more">Читать на Steam →</a>';
             }
 
-            html += '<div class="news-card-vk ' + sourceClass + '">';
+            // Определяем, нужно ли показывать кнопку "Развернуть"
+            var isLong = newsContent.length > 400;
+            var shortContent = isLong ? newsContent.substring(0, 400) + '...' : newsContent;
+
+            html += '<div class="news-card-vk" data-id="' + newsId + '">';
             html += '    <div class="news-card-header">';
             html += '        <div class="news-avatar" style="background: ' + typeColor + '20; color: ' + typeColor + '">';
             html += '            ' + typeIcon;
             html += '        </div>';
             html += '        <div class="news-meta">';
-            html += '            <div class="news-author">';
-            html += '                ' + authorName;
-            html += '                ' + rssBadge;
-            html += '            </div>';
+            html += '            <div class="news-author">' + authorName + '</div>';
             html += '            <div class="news-date">' + newsDate + '</div>';
             html += '        </div>';
             html += '        <div class="news-type-badge" style="background: ' + typeColor + '20; color: ' + typeColor + '">';
@@ -99,7 +95,16 @@
             html += '    <div class="news-card-body">';
             html += '        <h3 class="news-title">' + newsTitle + '</h3>';
             html += '        <div class="news-content">';
-            html += '            <p class="news-preview">' + newsPreview + '</p>';
+
+            if (isLong) {
+                html += '            <p class="news-preview" id="news-text-' + newsId + '">' + shortContent + '</p>';
+                html += '            <button class="news-toggle-btn" data-id="' + newsId + '" data-full="' + escapeHtml(newsContent) + '" data-short="' + shortContent + '">';
+                html += '                <span class="toggle-icon">▼</span> Развернуть';
+                html += '            </button>';
+            } else {
+                html += '            <p class="news-preview">' + newsContent + '</p>';
+            }
+
             html += '        </div>';
             html += '    </div>';
             html += '    <div class="news-card-footer">';
@@ -109,6 +114,35 @@
         }
 
         newsFeed.innerHTML = html;
+
+        // ============================================================
+        // ОБРАБОТЧИКИ ДЛЯ КНОПОК "РАЗВЕРНУТЬ/СВЕРНУТЬ"
+        // ============================================================
+        var toggleBtns = document.querySelectorAll('.news-toggle-btn');
+        for (var j = 0; j < toggleBtns.length; j++) {
+            toggleBtns[j].addEventListener('click', function() {
+                var btn = this;
+                var id = btn.dataset.id;
+                var textEl = document.getElementById('news-text-' + id);
+                var icon = btn.querySelector('.toggle-icon');
+
+                if (!textEl) return;
+
+                if (btn.classList.contains('expanded')) {
+                    // Сворачиваем
+                    textEl.textContent = btn.dataset.short;
+                    btn.classList.remove('expanded');
+                    icon.textContent = '▼';
+                    btn.innerHTML = '<span class="toggle-icon">▼</span> Развернуть';
+                } else {
+                    // Разворачиваем
+                    textEl.textContent = btn.dataset.full;
+                    btn.classList.add('expanded');
+                    icon.textContent = '▲';
+                    btn.innerHTML = '<span class="toggle-icon">▲</span> Свернуть';
+                }
+            });
+        }
     }
 
     function escapeHtml(text) {

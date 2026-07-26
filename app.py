@@ -67,8 +67,9 @@ def fetch_rss_news():
             else:
                 desc_text = title_text
 
+            # Удаляем HTML-теги для чистого текста
             desc_clean = re.sub(r'<[^>]+>', '', desc_text)
-            desc_clean = desc_clean[:500] + '...' if len(desc_clean) > 500 else desc_clean
+            # НЕ обрезаем текст — полная версия
 
             try:
                 date_obj = datetime.strptime(pub_date_element.text, '%a, %d %b %Y %H:%M:%S %Z')
@@ -83,8 +84,8 @@ def fetch_rss_news():
                 'title': title_text,
                 'date': date_formatted,
                 'type': 'update',
-                'preview': desc_clean,
-                'content': desc_clean,
+                'preview': desc_clean[:300] + '...' if len(desc_clean) > 300 else desc_clean,
+                'content': desc_clean,  # ПОЛНЫЙ текст
                 'link': link_text,
                 'author': 'Valve',
                 'timestamp': int(datetime.now().timestamp() * 1000),
@@ -132,15 +133,17 @@ def initialize_news():
         print("✅ Новости уже есть, пропускаем загрузку")
         return
 
-    print("📝 Новостей нет. Пытаемся загрузить из RSS...")
+    print("📝 Новостей нет. Загружаем свежие из RSS...")
     rss_news = fetch_rss_news()
 
     if rss_news and len(rss_news) > 0:
         save_news(rss_news)
-        print(f"✅ Добавлено {len(rss_news)} новостей из RSS")
+        print(f"✅ Добавлено {len(rss_news)} свежих новостей из RSS")
+        for item in rss_news[:3]:
+            print(f"   📌 {item['title']}")
         return
 
-    print("⚠️ RSS не загрузился. Добавляем тестовые новости...")
+    print("⚠️ RSS не загрузился. Добавляем тестовую новость...")
     test_news = [
         {
             'id': 1,
@@ -148,40 +151,16 @@ def initialize_news():
             'date': datetime.now().strftime('%d %B %Y'),
             'type': 'feature',
             'preview': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.',
-            'content': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam. Если вы видите это сообщение, значит сайт работает корректно.',
+            'content': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam. Если вы видите это сообщение, значит сайт работает корректно. Следите за обновлениями!',
             'link': 'https://store.steampowered.com/news/app/570',
             'author': 'Dota 2 Guide',
-            'timestamp': int(datetime.now().timestamp() * 1000),
-            'source': 'manual'
-        },
-        {
-            'id': 2,
-            'title': 'The International 2026 — анонс турнира',
-            'date': datetime.now().strftime('%d %B %Y'),
-            'type': 'tournament',
-            'preview': 'Valve анонсировала The International 2026. Турнир пройдёт в сентябре в Сиэтле.',
-            'content': 'Valve анонсировала The International 2026. Турнир пройдёт в сентябре в Сиэтле. Призовой фонд составит более 3 миллионов долларов.',
-            'link': 'https://www.dota2.com/esports/ti2026',
-            'author': 'Valve',
-            'timestamp': int(datetime.now().timestamp() * 1000),
-            'source': 'manual'
-        },
-        {
-            'id': 3,
-            'title': 'Обновление 7.38 — новые герои и баланс',
-            'date': datetime.now().strftime('%d %B %Y'),
-            'type': 'update',
-            'preview': 'Вышло обновление 7.38 с новым героем Kez и балансными изменениями.',
-            'content': 'Вышло обновление 7.38 с новым героем Kez и балансными изменениями. Изменены предметы, переработаны некоторые способности.',
-            'link': 'https://www.dota2.com/patches/7.38',
-            'author': 'Valve',
             'timestamp': int(datetime.now().timestamp() * 1000),
             'source': 'manual'
         }
     ]
 
     save_news(test_news)
-    print(f"✅ Добавлено {len(test_news)} тестовых новостей")
+    print(f"✅ Добавлена тестовая новость")
     print("=" * 60)
 
 initialize_news()
