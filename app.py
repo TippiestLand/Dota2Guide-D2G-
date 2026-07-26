@@ -73,7 +73,9 @@ def translate_title(title):
         'Nerf': 'Ослабление',
         'Buff': 'Усиление',
         'Rework': 'Переработка',
-        'Redesign': 'Редизайн'
+        'Redesign': 'Редизайн',
+        'All Events': 'Все события',
+        'Dota 2 Events': 'События Dota 2'
     }
     
     for eng, rus in translations.items():
@@ -99,6 +101,10 @@ def format_news_content(text):
                 formatted_lines.append(line)
             elif line.startswith('1.') or line.startswith('2.') or line.startswith('3.'):
                 formatted_lines.append(line)
+            elif line.startswith('Fixed'):
+                formatted_lines.append('• Исправлено: ' + line[6:])
+            elif line.startswith('Fixed '):
+                formatted_lines.append('• Исправлено: ' + line[6:])
             else:
                 formatted_lines.append(line)
     
@@ -155,7 +161,6 @@ def fetch_rss_news():
                 'date': date_formatted,
                 'content': desc_clean,
                 'link': link_text,
-                'author': 'Steam',  # Убираем Valve, ставим Steam
                 'timestamp': int(datetime.now().timestamp() * 1000),
                 'source': 'rss'
             })
@@ -219,7 +224,6 @@ def initialize_news():
             'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
             'content': 'Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.\n• Все новости будут переведены на русский язык\n• Дата и время — по Московскому времени\n• Форматирование — как в официальных новостях Steam',
             'link': 'https://store.steampowered.com/news/app/570',
-            'author': 'Steam',
             'timestamp': int(datetime.now().timestamp() * 1000),
             'source': 'manual'
         }

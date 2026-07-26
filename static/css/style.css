@@ -822,7 +822,7 @@ section {
 }
 
 /* ============================================================
-   НОВОСТИ (СТИЛЬ КАК В STEAM)
+   НОВОСТИ (СТИЛЬ КАК В STEAM, БЕЗ AUTHOR)
    ============================================================ */
 .news-feed {
     display: flex;
@@ -881,24 +881,8 @@ section {
 
 .news-card-header {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
-}
-
-.news-meta {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.news-author {
-    font-weight: 600;
-    font-size: 1rem;
-    color: #f0b90b;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: 0.3px;
+    justify-content: flex-end;
+    margin-bottom: 10px;
 }
 
 .news-date {
@@ -1279,15 +1263,6 @@ h1::before, h2::before {
         padding: 18px 16px;
     }
 
-    .news-card-header {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .news-author {
-        font-size: 0.9rem;
-    }
-
     .news-title {
         font-size: 1.05rem;
     }
@@ -1297,7 +1272,6 @@ h1::before, h2::before {
         line-height: 1.7;
     }
 
-    /* Отключаем кастомный курсор на телефонах */
     .custom-cursor {
         display: none !important;
     }
@@ -1340,10 +1314,5 @@ h1::before, h2::before {
 
     .news-toggle-btn {
         font-size: 0.75rem;
-    }
-
-    .news-card-header {
-        flex-wrap: wrap;
-        gap: 8px;
     }
 }

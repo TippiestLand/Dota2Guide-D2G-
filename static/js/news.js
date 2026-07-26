@@ -60,7 +60,6 @@
         var html = '';
         for (var i = 0; i < sorted.length; i++) {
             var news = sorted[i];
-            var authorName = news.author || 'Steam';
             var newsDate = escapeHtml(news.date);
             var newsTitle = escapeHtml(news.title);
             var newsContent = escapeHtml(news.content || '');
@@ -78,10 +77,7 @@
 
             html += '<div class="news-card-vk" data-id="' + newsId + '">';
             html += '    <div class="news-card-header">';
-            html += '        <div class="news-meta">';
-            html += '            <div class="news-author">' + authorName + '</div>';
-            html += '            <div class="news-date">' + newsDate + '</div>';
-            html += '        </div>';
+            html += '        <div class="news-date">' + newsDate + '</div>';
             html += '    </div>';
             html += '    <div class="news-card-body">';
             html += '        <h3 class="news-title">' + newsTitle + '</h3>';
