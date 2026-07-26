@@ -14,7 +14,12 @@ services:
         value: tippi
       - key: FLASK_ENV
         value: production
-    disk:
-      name: sqlite-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
+
+  - type: cron
+    name: rss-updater
+    repo: https://github.com/TippiestLand/dota2-guide
+    schedule: "*/5 * * * *"
+    command: python rss_updater.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0

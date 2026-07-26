@@ -1,3 +1,4 @@
+// ===== js/admin.js =====
 (function() {
     'use strict';
 
@@ -30,7 +31,7 @@
         try {
             const token = localStorage.getItem('adminToken');
             if (!token) return false;
-            const res = await fetch(API_URL + '/verify', {
+            const res = await fetch(API_URL + '/admin/verify', {
                 headers: { 'X-Admin-Auth': token }
             });
             if (res.ok) {
@@ -56,21 +57,25 @@
 
     async function loadAdminNews() {
         const list = document.getElementById('adminNewsList');
+        const count = document.getElementById('newsCount');
         if (!list) return;
         try {
             const res = await fetch(API_URL + '/news');
             const data = await res.json();
+            if (count) count.textContent = `(${data.length})`;
             if (!data || data.length === 0) {
                 list.innerHTML = '<p style="color:#888; text-align:center; padding:10px;">Новостей нет</p>';
                 return;
             }
             list.innerHTML = data.map(n => `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 14px; margin-bottom:8px; border-left:3px solid #f0b90b;">
-                    <div>
-                        <div style="font-weight:600; font-size:0.9rem;">${escapeHtml(n.title)}</div>
-                        <div style="font-size:0.7rem; color:#888;">${n.date}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 14px; margin-bottom:6px; border-left:3px solid ${n.source === 'rss' ? '#4ecdc4' : '#f0b90b'};">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:500; font-size:0.85rem; color:#e8e6e3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(n.title)}</div>
+                        <div style="font-size:0.65rem; color:#888;">
+                            ${n.date} · ${n.source === 'rss' ? '📡 RSS' : '✏️ Ручная'}
+                        </div>
                     </div>
-                    <button class="delete-news-btn" data-id="${n.id}" style="padding:4px 14px; border-radius:6px; border:1px solid #ff6b6b; background:transparent; color:#ff6b6b; cursor:pointer;">Удалить</button>
+                    <button class="delete-news-btn" data-id="${n.id}" style="padding:4px 14px; border-radius:6px; border:1px solid #ff6b6b; background:transparent; color:#ff6b6b; cursor:pointer; font-size:0.7rem; flex-shrink:0;">Удалить</button>
                 </div>
             `).join('');
             list.querySelectorAll('.delete-news-btn').forEach(btn => {
@@ -125,9 +130,28 @@
         }
     }
 
+    async function updateRSS() {
+        try {
+            const res = await fetch(API_URL + '/admin/update_rss', {
+                method: 'POST',
+                headers: { 'X-Admin-Auth': adminToken }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast(`📡 Добавлено ${data.added || 0} новостей из RSS`);
+                loadAdminNews();
+                if (window.refreshNews) window.refreshNews();
+            } else {
+                showToast('Ошибка обновления RSS', 'error');
+            }
+        } catch (e) {
+            showToast('Ошибка соединения', 'error');
+        }
+    }
+
     async function adminLogin(username, password) {
         try {
-            const res = await fetch(API_URL + '/login', {
+            const res = await fetch(API_URL + '/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -208,6 +232,10 @@
                     document.getElementById('newsLink').value = '';
                 }
             });
+        });
+
+        document.getElementById('updateRssBtn').addEventListener('click', function() {
+            updateRSS();
         });
 
         window.refreshNews = function() {

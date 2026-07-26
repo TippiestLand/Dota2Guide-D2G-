@@ -1,3 +1,4 @@
+// ===== js/news.js =====
 (function() {
     'use strict';
 
@@ -7,7 +8,12 @@
         const newsFeed = document.getElementById('newsFeed');
         if (!newsFeed) return;
 
-        newsFeed.innerHTML = `<div class="news-loading"><div class="loader"></div><p>Загрузка новостей...</p></div>`;
+        newsFeed.innerHTML = `
+            <div class="news-loading">
+                <div class="loader"></div>
+                <p>Загрузка новостей...</p>
+            </div>
+        `;
 
         try {
             const response = await fetch(API_URL + '?t=' + Date.now());
@@ -17,7 +23,12 @@
             if (data && data.length > 0) {
                 renderNews(data);
             } else {
-                newsFeed.innerHTML = `<div class="news-empty"><p>Новостей пока нет</p></div>`;
+                newsFeed.innerHTML = `
+                    <div class="news-empty">
+                        <p>Новостей пока нет</p>
+                        <p style="font-size:0.8rem; color:#666; margin-top:8px;">Новости появятся здесь автоматически</p>
+                    </div>
+                `;
             }
         } catch (error) {
             console.error('Ошибка загрузки новостей:', error);
@@ -37,21 +48,34 @@
         const sorted = [...newsItems].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
         newsFeed.innerHTML = sorted.map(news => `
-            <div class="news-card-vk">
+            <div class="news-card-vk ${news.source === 'rss' ? 'news-rss' : 'news-manual'}">
                 <div class="news-card-header">
-                    <div class="news-avatar" style="background: ${getTypeColor(news.type)}20; color: ${getTypeColor(news.type)}">${getTypeIcon(news.type)}</div>
+                    <div class="news-avatar" style="background: ${getTypeColor(news.type)}20; color: ${getTypeColor(news.type)}">
+                        ${getTypeIcon(news.type)}
+                    </div>
                     <div class="news-meta">
-                        <div class="news-author">${escapeHtml(news.author || 'Valve')}</div>
+                        <div class="news-author">
+                            ${escapeHtml(news.author || 'Valve')}
+                            ${news.source === 'rss' 
+                                ? '<span style="font-size:0.6rem; background:rgba(78,205,196,0.15); color:#4ecdc4; padding:2px 10px; border-radius:12px; margin-left:8px;">📡</span>' 
+                                : '<span style="font-size:0.6rem; background:rgba(240,185,11,0.15); color:#f0b90b; padding:2px 10px; border-radius:12px; margin-left:8px;">✏️</span>'
+                            }
+                        </div>
                         <div class="news-date">${escapeHtml(news.date)}</div>
                     </div>
-                    <div class="news-type-badge" style="background: ${getTypeColor(news.type)}20; color: ${getTypeColor(news.type)}">${getTypeLabel(news.type)}</div>
+                    <div class="news-type-badge" style="background: ${getTypeColor(news.type)}20; color: ${getTypeColor(news.type)}">
+                        ${getTypeLabel(news.type)}
+                    </div>
                 </div>
                 <div class="news-card-body">
                     <h3 class="news-title">${escapeHtml(news.title)}</h3>
-                    <p class="news-preview">${escapeHtml(news.preview || news.content)}</p>
+                    <div class="news-content">
+                        <p class="news-preview">${escapeHtml(news.preview || news.content)}</p>
+                        ${news.content && news.content.length > 500 ? `<button class="news-read-more-btn" onclick="this.parentElement.querySelector('.news-preview').style.webkitLineClamp='unset'; this.style.display='none';">Читать полностью →</button>` : ''}
+                    </div>
                 </div>
                 <div class="news-card-footer">
-                    <a href="${escapeHtml(news.link || '#')}" target="_blank" class="news-read-more">Читать полностью →</a>
+                    ${news.link ? `<a href="${escapeHtml(news.link)}" target="_blank" class="news-read-more">Читать на Steam →</a>` : ''}
                 </div>
             </div>
         `).join('');
@@ -65,15 +89,35 @@
     }
 
     function getTypeIcon(type) {
-        const icons = { 'update': '⚙️', 'event': '🎪', 'tournament': '🏆', 'hero': '🦸', 'feature': '✨' };
+        const icons = {
+            'update': '⚙️',
+            'event': '🎪',
+            'tournament': '🏆',
+            'hero': '🦸',
+            'feature': '✨'
+        };
         return icons[type] || '📰';
     }
+
     function getTypeColor(type) {
-        const colors = { 'update': '#f0b90b', 'event': '#ff6b6b', 'tournament': '#4ecdc4', 'hero': '#a29bfe', 'feature': '#fd79a8' };
+        const colors = {
+            'update': '#f0b90b',
+            'event': '#ff6b6b',
+            'tournament': '#4ecdc4',
+            'hero': '#a29bfe',
+            'feature': '#fd79a8'
+        };
         return colors[type] || '#888';
     }
+
     function getTypeLabel(type) {
-        const labels = { 'update': 'Обновление', 'event': 'Событие', 'tournament': 'Турнир', 'hero': 'Новый герой', 'feature': 'Новинка' };
+        const labels = {
+            'update': 'Обновление',
+            'event': 'Событие',
+            'tournament': 'Турнир',
+            'hero': 'Новый герой',
+            'feature': 'Новинка'
+        };
         return labels[type] || 'Новость';
     }
 

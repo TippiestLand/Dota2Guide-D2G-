@@ -1,14 +1,16 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
+import os
+import json
 import hashlib
 import hmac
 import secrets
 import time
-from functools import wraps
-import os
-import re
-import sqlite3
 from datetime import datetime
+import requests
+import xml.etree.ElementTree as ET
+from functools import wraps
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -16,160 +18,90 @@ CORS(app)
 # ===== КОНФИГ =====
 SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'tippi')
+ADMIN_PASSWORD_HASH = hashlib.sha256('admin123'.encode()).hexdigest()
+NEWS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'news.json')
+RSS_URL = 'https://store.steampowered.com/feeds/news/app/570/?l=russian'
 
-# ===== БАЗА ДАННЫХ =====
-DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'dota2.db')
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+os.makedirs(os.path.dirname(NEWS_FILE), exist_ok=True)
 
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def init_db():
+# ===== РАБОТА С JSON =====
+def load_news():
     try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS news (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                content TEXT NOT NULL,
-                preview TEXT,
-                type TEXT DEFAULT 'update',
-                date TEXT NOT NULL,
-                link TEXT,
-                author TEXT DEFAULT 'Admin',
-                timestamp INTEGER NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                role TEXT DEFAULT 'user',
-                is_active INTEGER DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        c.execute('CREATE INDEX IF NOT EXISTS idx_news_timestamp ON news(timestamp DESC)')
-        c.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)')
-        c.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
-        conn.commit()
-        conn.close()
-        print('✅ DB initialized')
-        return True
-    except Exception as e:
-        print(f"DB init error: {e}")
-        return False
-
-init_db()
-
-# ===== ФУНКЦИИ БД =====
-def get_all_news():
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('SELECT * FROM news ORDER BY timestamp DESC')
-        rows = c.fetchall()
-        conn.close()
-        return [dict(row) for row in rows]
+        with open(NEWS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
     except:
         return []
 
-def add_news(title, content, type='update', link='', author='Admin'):
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        preview = content[:300] + ('...' if len(content) > 300 else '')
-        date = datetime.now().strftime('%d %B %Y')
-        timestamp = int(datetime.now().timestamp() * 1000)
-        c.execute('''
-            INSERT INTO news (title, content, preview, type, date, link, author, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (title, content, preview, type, date, link, author, timestamp))
-        news_id = c.lastrowid
-        conn.commit()
-        conn.close()
-        return {'id': news_id, 'title': title, 'content': content}
-    except:
-        return None
+def save_news(news):
+    with open(NEWS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(news, f, ensure_ascii=False, indent=4)
 
-def delete_news(news_id):
+# ===== RSS =====
+def fetch_rss_news():
     try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('DELETE FROM news WHERE id = ?', (news_id,))
-        deleted = c.rowcount > 0
-        conn.commit()
-        conn.close()
-        return deleted
-    except:
-        return False
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(RSS_URL, headers=headers, timeout=10)
+        
+        if response.status_code != 200:
+            return []
+        
+        root = ET.fromstring(response.content)
+        news_items = []
+        
+        for item in root.findall('.//item')[:15]:
+            title = item.find('title')
+            title_text = title.text if title is not None else 'Без названия'
+            
+            pub_date = item.find('pubDate')
+            date_text = pub_date.text if pub_date is not None else datetime.now().strftime('%d %B %Y')
+            
+            link = item.find('link')
+            link_text = link.text if link is not None else ''
+            
+            description = item.find('description')
+            desc_text = description.text if description is not None else title_text
+            desc_clean = re.sub(r'<[^>]+>', '', desc_text)
+            desc_clean = desc_clean[:500] + '...' if len(desc_clean) > 500 else desc_clean
+            
+            try:
+                date_obj = datetime.strptime(pub_date.text, '%a, %d %b %Y %H:%M:%S %Z')
+                date_formatted = date_obj.strftime('%d %B %Y')
+            except:
+                date_formatted = date_text
+            
+            news_items.append({
+                'id': int(datetime.now().timestamp() * 1000) + len(news_items),
+                'title': title_text,
+                'date': date_formatted,
+                'type': 'update',
+                'preview': desc_clean,
+                'content': desc_clean,
+                'link': link_text,
+                'author': 'Valve',
+                'timestamp': int(datetime.now().timestamp() * 1000),
+                'source': 'rss',
+                'rss_title': title_text
+            })
+        
+        return news_items
+    except Exception as e:
+        print(f"RSS error: {e}")
+        return []
 
-def add_user(username, email, password_hash):
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('''
-            INSERT INTO users (username, email, password_hash)
-            VALUES (?, ?, ?)
-        ''', (username, email, password_hash))
-        user_id = c.lastrowid
-        conn.commit()
-        conn.close()
-        return {'id': user_id, 'username': username, 'email': email, 'role': 'user'}
-    except:
-        return None
-
-def get_user_by_username(username):
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('SELECT * FROM users WHERE username = ?', (username,))
-        row = c.fetchone()
-        conn.close()
-        return dict(row) if row else None
-    except:
-        return None
-
-def get_user_by_email(email):
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('SELECT * FROM users WHERE email = ?', (email,))
-        row = c.fetchone()
-        conn.close()
-        return dict(row) if row else None
-    except:
-        return None
-
-def delete_all_users():
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('DELETE FROM users')
-        deleted = c.rowcount
-        conn.commit()
-        conn.close()
-        return deleted
-    except:
+def update_news_from_rss():
+    existing = load_news()
+    manual_news = [n for n in existing if n.get('source') != 'rss']
+    rss_news = fetch_rss_news()
+    if not rss_news:
         return 0
-
-def promote_to_admin(username):
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute('UPDATE users SET role = ? WHERE username = ?', ('admin', username))
-        updated = c.rowcount > 0
-        conn.commit()
-        conn.close()
-        return updated
-    except:
-        return False
+    rss_titles = {n['rss_title'] for n in rss_news}
+    existing_rss = [n for n in existing if n.get('source') == 'rss' and n.get('rss_title') in rss_titles]
+    existing_rss_titles = {n.get('rss_title') for n in existing_rss}
+    new_items = [n for n in rss_news if n['rss_title'] not in existing_rss_titles]
+    updated_news = new_items + existing_rss + manual_news
+    updated_news.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
+    save_news(updated_news)
+    return len(new_items)
 
 # ===== ПРОВЕРКА АДМИНА =====
 def admin_required(f):
@@ -183,11 +115,8 @@ def admin_required(f):
             if int(timestamp) < time.time() - 3600:
                 return jsonify({'error': 'Сессия истекла'}), 401
             expected = hmac.new(SECRET_KEY.encode(), f"{username}|{timestamp}".encode(), hashlib.sha256).hexdigest()
-            if not hmac.compare_digest(signature, expected):
+            if not hmac.compare_digest(signature, expected) or username != ADMIN_USERNAME:
                 return jsonify({'error': 'Неверная подпись'}), 401
-            user = get_user_by_username(username)
-            if not user or user.get('role') != 'admin':
-                return jsonify({'error': 'Недостаточно прав'}), 403
         except:
             return jsonify({'error': 'Неверный формат'}), 401
         return f(*args, **kwargs)
@@ -202,107 +131,39 @@ def index():
 def serve_static(path):
     return send_from_directory('static', path)
 
-# ===== API =====
-@app.route('/api/register', methods=['POST'])
-def register():
+# ===== API: ВХОД =====
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
     data = request.json
     username = data.get('username', '').strip()
-    email = data.get('email', '').strip()
     password = data.get('password', '').strip()
     
-    if not username or not email or not password:
-        return jsonify({'error': 'Все поля обязательны'}), 400
-    
-    if not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email):
-        return jsonify({'error': 'Некорректный email'}), 400
-    
-    if len(password) < 6:
-        return jsonify({'error': 'Пароль должен быть минимум 6 символов'}), 400
-    
-    if get_user_by_username(username):
-        return jsonify({'error': 'Пользователь с таким логином уже существует'}), 400
-    
-    if get_user_by_email(email):
-        return jsonify({'error': 'Пользователь с таким email уже существует'}), 400
+    if username != ADMIN_USERNAME:
+        return jsonify({'error': 'Неверный логин'}), 401
     
     password_hash = hashlib.sha256(password.encode()).hexdigest()
-    user = add_user(username, email, password_hash)
-    if not user:
-        return jsonify({'error': 'Ошибка регистрации'}), 500
+    if password_hash != ADMIN_PASSWORD_HASH:
+        return jsonify({'error': 'Неверный пароль'}), 401
     
     timestamp = str(int(time.time()))
     signature = hmac.new(SECRET_KEY.encode(), f"{username}|{timestamp}".encode(), hashlib.sha256).hexdigest()
     token = f"{username}|{timestamp}|{signature}"
     
-    return jsonify({
-        'success': True,
-        'token': token,
-        'user': user,
-        'message': 'Регистрация успешна!'
-    })
+    return jsonify({'token': token, 'username': username})
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = request.json
-    email_or_username = data.get('username', '').strip()
-    password = data.get('password', '').strip()
-    
-    if not email_or_username or not password:
-        return jsonify({'error': 'Все поля обязательны'}), 400
-    
-    user = get_user_by_email(email_or_username)
-    if not user:
-        user = get_user_by_username(email_or_username)
-    
-    if not user:
-        return jsonify({'error': 'Неверный логин/email или пароль'}), 401
-    
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    if password_hash != user['password_hash']:
-        return jsonify({'error': 'Неверный логин/email или пароль'}), 401
-    
-    username = user['username']
-    timestamp = str(int(time.time()))
-    signature = hmac.new(SECRET_KEY.encode(), f"{username}|{timestamp}".encode(), hashlib.sha256).hexdigest()
-    token = f"{username}|{timestamp}|{signature}"
-    
-    return jsonify({
-        'success': True,
-        'token': token,
-        'user': user,
-        'message': 'Вход выполнен!'
-    })
+@app.route('/api/admin/verify', methods=['GET'])
+@admin_required
+def admin_verify():
+    return jsonify({'valid': True})
 
-@app.route('/api/verify', methods=['GET'])
-def verify():
-    auth = request.headers.get('X-Admin-Auth')
-    if not auth:
-        return jsonify({'valid': False}), 401
-    try:
-        username, timestamp, signature = auth.split('|')
-        if int(timestamp) < time.time() - 3600:
-            return jsonify({'valid': False}), 401
-        expected = hmac.new(SECRET_KEY.encode(), f"{username}|{timestamp}".encode(), hashlib.sha256).hexdigest()
-        if not hmac.compare_digest(signature, expected):
-            return jsonify({'valid': False}), 401
-        user = get_user_by_username(username)
-        if not user:
-            return jsonify({'valid': False}), 401
-        return jsonify({
-            'valid': True,
-            'username': username,
-            'role': user['role']
-        })
-    except:
-        return jsonify({'valid': False}), 401
-
+# ===== API: НОВОСТИ =====
 @app.route('/api/news', methods=['GET'])
 def get_news():
-    return jsonify(get_all_news())
+    return jsonify(load_news())
 
 @app.route('/api/news', methods=['POST'])
 @admin_required
-def add_news_route():
+def add_news():
     data = request.json
     title = data.get('title', '').strip()
     content = data.get('content', '').strip()
@@ -310,40 +171,41 @@ def add_news_route():
     if not title or not content:
         return jsonify({'error': 'Заголовок и текст обязательны'}), 400
     
-    news = add_news(
-        title=title,
-        content=content,
-        type=data.get('type', 'update'),
-        link=data.get('link', ''),
-        author='Admin'
-    )
-    return jsonify({'success': True, 'news': news})
+    news = load_news()
+    new_item = {
+        'id': int(time.time() * 1000),
+        'title': title,
+        'date': datetime.now().strftime('%d %B %Y'),
+        'type': data.get('type', 'update'),
+        'preview': content[:300] + ('...' if len(content) > 300 else ''),
+        'content': content,
+        'link': data.get('link', ''),
+        'author': 'Admin',
+        'timestamp': int(datetime.now().timestamp() * 1000),
+        'source': 'manual'
+    }
+    news.insert(0, new_item)
+    save_news(news)
+    return jsonify({'success': True, 'news': new_item})
 
 @app.route('/api/news/<int:news_id>', methods=['DELETE'])
 @admin_required
-def delete_news_route(news_id):
-    deleted = delete_news(news_id)
-    if deleted:
-        return jsonify({'success': True})
-    return jsonify({'error': 'Новость не найдена'}), 404
+def delete_news(news_id):
+    news = load_news()
+    news = [n for n in news if n.get('id') != news_id]
+    save_news(news)
+    return jsonify({'success': True})
 
-@app.route('/api/admin/clear_users', methods=['DELETE'])
+@app.route('/api/admin/update_rss', methods=['POST'])
 @admin_required
-def clear_users():
-    deleted = delete_all_users()
-    return jsonify({'success': True, 'deleted': deleted})
-
-@app.route('/api/admin/promote', methods=['POST'])
-@admin_required
-def promote_user():
-    data = request.json
-    username = data.get('username', '').strip()
-    if not username:
-        return jsonify({'error': 'Укажите username'}), 400
-    success = promote_to_admin(username)
-    if success:
-        return jsonify({'success': True, 'message': f'Пользователь {username} стал админом'})
-    return jsonify({'error': 'Пользователь не найден'}), 404
+def update_rss():
+    count = update_news_from_rss()
+    return jsonify({'success': True, 'added': count})
 
 if __name__ == '__main__':
+    try:
+        count = update_news_from_rss()
+        print(f"📰 Загружено {count} новых RSS новостей")
+    except:
+        print("⚠️ RSS не загрузился")
     app.run(host='0.0.0.0', port=8000)
