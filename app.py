@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, send_from_directory
+from flask import Flask, render_template, jsonify, send_from_directory, redirect, url_for
 from flask_cors import CORS
 import os
 import json
@@ -23,10 +23,20 @@ MSK = timezone(timedelta(hours=3))
 
 os.makedirs(os.path.dirname(NEWS_FILE), exist_ok=True)
 
+if not os.path.exists(NEWS_FILE):
+    with open(NEWS_FILE, 'w', encoding='utf-8') as f:
+        json.dump([], f, ensure_ascii=False, indent=4)
+
+# ============================================================
+# РАЗДАЧА СТАТИКИ
+# ============================================================
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
 
+# ============================================================
+# РАБОТА С НОВОСТЯМИ
+# ============================================================
 def load_news():
     try:
         with open(NEWS_FILE, 'r', encoding='utf-8') as f:
@@ -95,7 +105,6 @@ def format_news_content(text):
         line = line.strip()
         
         if not line:
-            # Пустая строка — закрываем список, если он был открыт
             if in_list:
                 html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
                 list_items = []
@@ -103,7 +112,6 @@ def format_news_content(text):
             html_parts.append('<br>')
             continue
         
-        # Проверяем, начинается ли строка с маркера списка
         is_list_item = False
         clean_text = line
         
@@ -132,30 +140,24 @@ def format_news_content(text):
                 list_items = []
             list_items.append('  <li>' + clean_text + '</li>')
         else:
-            # Закрываем список, если он был открыт
             if in_list:
                 html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
                 list_items = []
                 in_list = False
-            # Обычная строка как отдельный абзац
             html_parts.append('<p>' + clean_text + '</p>')
     
-    # Закрываем список, если он остался открытым
     if in_list:
         html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
     
     return '\n'.join(html_parts)
 
 def convert_date_to_msk(date_string):
-    """Конвертирует дату из RSS в МСК и возвращает в формате '27 July 2026, 15:30 МСК'"""
+    """Конвертирует дату из RSS в МСК"""
     try:
-        # Парсим дату из RSS
         date_obj = datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %Z')
-        # Конвертируем в МСК
         date_obj_msk = date_obj.astimezone(MSK)
         return date_obj_msk.strftime('%d %B %Y, %H:%M МСК')
     except:
-        # Если не удалось распарсить, возвращаем текущую дату в МСК
         return datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК')
 
 def fetch_rss_news():
@@ -173,14 +175,10 @@ def fetch_rss_news():
         for item in root.findall('.//item')[:15]:
             title_element = item.find('title')
             title_text = title_element.text if title_element is not None else 'Без названия'
-            
-            # Переводим заголовок
             title_text = translate_title(title_text)
 
             pub_date_element = item.find('pubDate')
             pub_date_text = pub_date_element.text if pub_date_element is not None else ''
-            
-            # Конвертируем дату в МСК
             date_formatted = convert_date_to_msk(pub_date_text)
 
             link_element = item.find('link')
@@ -192,12 +190,9 @@ def fetch_rss_news():
             else:
                 desc_text = title_text
 
-            # Очищаем HTML
             desc_clean = re.sub(r'<[^>]+>', '', desc_text)
-            # Форматируем как в Steam (с точками и списками)
             desc_clean = format_news_content(desc_clean)
 
-            # Генерируем ID на основе заголовка (чтобы не дублировалось)
             hash_id = int(hashlib.md5(title_text.encode('utf-8')).hexdigest()[:8], 16)
 
             news_items.append({
@@ -230,6 +225,67 @@ def update_news_from_rss():
 
     return len(new_items)
 
+# ============================================================
+# ГЕРОИ
+# ============================================================
+HERO_CACHE = {}
+HEROES_LIST_CACHE = None
+
+def get_heroes_list():
+    """Получает список всех героев из OpenDota API"""
+    global HEROES_LIST_CACHE
+    if HEROES_LIST_CACHE:
+        return HEROES_LIST_CACHE
+    
+    try:
+        response = requests.get('https://api.opendota.com/api/heroes', timeout=10)
+        if response.status_code == 200:
+            HEROES_LIST_CACHE = response.json()
+            return HEROES_LIST_CACHE
+    except Exception as e:
+        print(f"Ошибка загрузки списка героев: {e}")
+    
+    return []
+
+def get_hero_data(hero_name):
+    """Получает данные о герое из OpenDota API"""
+    global HERO_CACHE
+    
+    if hero_name in HERO_CACHE:
+        return HERO_CACHE[hero_name]
+    
+    try:
+        heroes = get_heroes_list()
+        hero_id = None
+        for h in heroes:
+            if h['name'] == f'npc_dota_hero_{hero_name}':
+                hero_id = h['id']
+                break
+        
+        if not hero_id:
+            return None
+        
+        response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
+            abilities = abilities_response.json() if abilities_response.status_code == 200 else []
+            
+            HERO_CACHE[hero_name] = {
+                'data': data,
+                'abilities': abilities
+            }
+            return HERO_CACHE[hero_name]
+            
+    except Exception as e:
+        print(f"Ошибка загрузки данных героя {hero_name}: {e}")
+    
+    return None
+
+# ============================================================
+# МАРШРУТЫ
+# ============================================================
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -238,6 +294,21 @@ def index():
 def get_news():
     return jsonify(load_news())
 
+@app.route('/hero/<hero_name>')
+def hero_page(hero_name):
+    """Страница героя"""
+    hero_data = get_hero_data(hero_name)
+    
+    if not hero_data:
+        return redirect(url_for('index') + '#page-heroes')
+    
+    return render_template('hero.html', 
+                          hero=hero_data['data'],
+                          abilities=hero_data['abilities'])
+
+# ============================================================
+# ИНИЦИАЛИЗАЦИЯ НОВОСТЕЙ
+# ============================================================
 def initialize_news():
     print("=" * 60)
     print("🚀 ИНИЦИАЛИЗАЦИЯ НОВОСТЕЙ")
@@ -278,6 +349,9 @@ def initialize_news():
 
 initialize_news()
 
+# ============================================================
+# ЗАПУСК
+# ============================================================
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port)
