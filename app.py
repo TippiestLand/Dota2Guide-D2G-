@@ -23,16 +23,6 @@ MSK = timezone(timedelta(hours=3))
 
 os.makedirs(os.path.dirname(NEWS_FILE), exist_ok=True)
 
-# ===== ВАЖНО: ПРИНУДИТЕЛЬНО УДАЛЯЕМ СТАРЫЙ ФАЙЛ ПРИ ЗАПУСКЕ =====
-# Это гарантирует, что новости пересоберутся с правильным форматированием
-if os.path.exists(NEWS_FILE):
-    print("🗑️ Удаляем старый файл новостей для пересборки...")
-    os.remove(NEWS_FILE)
-
-# Создаём новый пустой файл
-with open(NEWS_FILE, 'w', encoding='utf-8') as f:
-    json.dump([], f, ensure_ascii=False, indent=4)
-
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
@@ -156,6 +146,18 @@ def format_news_content(text):
     
     return '\n'.join(html_parts)
 
+def convert_date_to_msk(date_string):
+    """Конвертирует дату из RSS в МСК и возвращает в формате '27 July 2026, 15:30 МСК'"""
+    try:
+        # Парсим дату из RSS
+        date_obj = datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %Z')
+        # Конвертируем в МСК
+        date_obj_msk = date_obj.astimezone(MSK)
+        return date_obj_msk.strftime('%d %B %Y, %H:%M МСК')
+    except:
+        # Если не удалось распарсить, возвращаем текущую дату в МСК
+        return datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК')
+
 def fetch_rss_news():
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
@@ -176,14 +178,10 @@ def fetch_rss_news():
             title_text = translate_title(title_text)
 
             pub_date_element = item.find('pubDate')
+            pub_date_text = pub_date_element.text if pub_date_element is not None else ''
             
             # Конвертируем дату в МСК
-            try:
-                date_obj = datetime.strptime(pub_date_element.text, '%a, %d %b %Y %H:%M:%S %Z')
-                date_obj_msk = date_obj.astimezone(MSK)
-                date_formatted = date_obj_msk.strftime('%d %B %Y, %H:%M МСК')
-            except:
-                date_formatted = datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК')
+            date_formatted = convert_date_to_msk(pub_date_text)
 
             link_element = item.find('link')
             link_text = link_element.text if link_element is not None else ''
@@ -199,6 +197,7 @@ def fetch_rss_news():
             # Форматируем как в Steam (с точками и списками)
             desc_clean = format_news_content(desc_clean)
 
+            # Генерируем ID на основе заголовка (чтобы не дублировалось)
             hash_id = int(hashlib.md5(title_text.encode('utf-8')).hexdigest()[:8], 16)
 
             news_items.append({
@@ -207,7 +206,6 @@ def fetch_rss_news():
                 'date': date_formatted,
                 'content': desc_clean,
                 'link': link_text,
-                'timestamp': int(datetime.now().timestamp() * 1000),
                 'source': 'rss'
             })
 
@@ -270,7 +268,6 @@ def initialize_news():
             'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
             'content': '<p>Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.</p><ul><li>Все новости будут переведены на русский язык</li><li>Дата и время — по Московскому времени</li><li>Форматирование — как в официальных новостях Steam</li></ul>',
             'link': 'https://store.steampowered.com/news/app/570',
-            'timestamp': int(datetime.now().timestamp() * 1000),
             'source': 'manual'
         }
     ]
