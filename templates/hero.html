@@ -297,9 +297,9 @@
         <nav>
             <a href="/">Главная</a>
             <a href="/" class="active">Герои</a>
-            <a href="/#page-items">Предметы</a>
-            <a href="/#page-news">Новости</a>
-            <a href="/#page-guides">Гайды</a>
+            <a href="/">Предметы</a>
+            <a href="/">Новости</a>
+            <a href="/">Гайды</a>
         </nav>
     </header>
 
@@ -418,17 +418,5 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script>
-        // Подсвечиваем вкладку "Герои" в навигации
-        document.addEventListener('DOMContentLoaded', function() {
-            var navLinks = document.querySelectorAll('nav a');
-            for (var i = 0; i < navLinks.length; i++) {
-                navLinks[i].classList.remove('active');
-                if (navLinks[i].textContent.trim() === 'Герои') {
-                    navLinks[i].classList.add('active');
-                }
-            }
-        });
-    </script>
 </body>
 </html>
