@@ -71,15 +71,12 @@
                 linkHtml = '<a href="' + newsLink + '" target="_blank" class="news-read-more">Steam →</a>';
             }
 
-            // Проверяем длину (без HTML тегов для подсчёта)
             var plainText = newsContent.replace(/<[^>]+>/g, '');
             var isLong = plainText.length > 500;
             
-            // Для короткого текста — обрезаем по словам
             var shortContent = newsContent;
             if (isLong) {
                 var shortPlain = plainText.substring(0, 500) + '...';
-                // Вставляем короткий текст в HTML
                 shortContent = shortPlain.replace(/\n/g, '<br>');
             }
 
@@ -110,7 +107,6 @@
 
         newsFeed.innerHTML = html;
 
-        // Обработчики для кнопок "Развернуть/Свернуть"
         var toggleBtns = document.querySelectorAll('.news-toggle-btn');
         for (var j = 0; j < toggleBtns.length; j++) {
             toggleBtns[j].addEventListener('click', function() {

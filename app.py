@@ -300,7 +300,7 @@ def hero_page(hero_name):
     hero_data = get_hero_data(hero_name)
     
     if not hero_data:
-        return redirect(url_for('index') + '#page-heroes')
+        return redirect(url_for('index'))
     
     return render_template('hero.html', 
                           hero=hero_data['data'],
