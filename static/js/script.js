@@ -180,7 +180,7 @@
             var iconFile = hero.icon + '.png';
             var attrClass = getAttributeClass(hero.attribute);
             
-            html += '<a href="/hero/' + hero.icon + '" class="hero-link" style="text-decoration:none; display:block; cursor:pointer;">';
+            html += '<a href="/hero/' + hero.icon + '" class="hero-link" style="text-decoration:none; display:block; cursor:pointer; position:relative; z-index:10;">';
             html += '    <div class="hero-item ' + attrClass + '" data-hero="' + hero.name + '" data-attribute="' + hero.attribute + '">';
             html += '        <div class="tilt-wrap">';
             html += '            <img src="/static/assets/icons/' + iconFile + '" alt="' + hero.name + '" loading="lazy" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'<span style=\\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\\'>' + hero.name.charAt(0) + '</span>\'">';
@@ -408,6 +408,17 @@
             fadeElements[fe3].classList.add('visible');
         }
     }
+
+    // ============================================================
+    // ПРИНУДИТЕЛЬНОЕ РАЗРЕШЕНИЕ ПЕРЕХОДА ПО ССЫЛКАМ ГЕРОЕВ
+    // ============================================================
+    document.addEventListener('click', function(e) {
+        var target = e.target.closest('.hero-link');
+        if (target) {
+            // Ничего не делаем — пусть ссылка работает как обычно
+            return true;
+        }
+    }, true);
 
     console.log('🚀 Dota 2 Guide loaded');
 })();

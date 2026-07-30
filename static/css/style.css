@@ -229,31 +229,6 @@ nav a.active {
     color: var(--gold);
 }
 
-.header-actions {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-.btn-auth {
-    padding: 8px 24px;
-    border-radius: 50px;
-    border: 1px solid var(--gold);
-    background: transparent;
-    color: var(--gold);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: none;
-    transition: all 0.3s ease;
-    font-family: 'Inter', sans-serif;
-}
-
-.btn-auth:hover {
-    background: var(--gold);
-    color: #0a0a0f;
-    box-shadow: 0 0 30px var(--gold-glow);
-}
-
 /* ============================================================
    ОСНОВНОЙ КОНТЕНТ
    ============================================================ */
@@ -601,7 +576,7 @@ section {
     background: rgba(255, 255, 255, 0.02);
     border-radius: 12px;
     overflow: hidden;
-    cursor: none;
+    cursor: pointer;
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                 box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     perspective: 800px;
@@ -695,6 +670,14 @@ section {
 
 .hero-item.universal:hover {
     box-shadow: 0 0 40px rgba(240, 185, 11, 0.25), inset 0 0 40px rgba(240, 185, 11, 0.05);
+}
+
+.hero-link {
+    display: block;
+    text-decoration: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
 }
 
 .no-heroes {
@@ -925,9 +908,6 @@ section {
     word-break: break-word;
 }
 
-/* ============================================================
-   СТИЛИ ДЛЯ СПИСКОВ В НОВОСТЯХ (КАК В STEAM)
-   ============================================================ */
 .news-content ul {
     list-style: none;
     padding: 0;
@@ -968,9 +948,6 @@ section {
     margin: 4px 0;
 }
 
-/* ============================================================
-   КНОПКА РАЗВЕРНУТЬ/СВЕРНУТЬ
-   ============================================================ */
 .news-toggle-btn {
     background: none;
     border: none;
@@ -996,9 +973,6 @@ section {
     transition: transform 0.3s ease;
 }
 
-/* ============================================================
-   ФУТЕР НОВОСТЕЙ
-   ============================================================ */
 .news-card-footer {
     display: flex;
     justify-content: flex-end;
@@ -1243,15 +1217,6 @@ h1::before, h2::before {
 
     .logo {
         font-size: 1.2rem;
-    }
-
-    .header-actions {
-        margin-left: auto;
-    }
-
-    .btn-auth {
-        padding: 6px 16px;
-        font-size: 0.8rem;
     }
 
     main {
