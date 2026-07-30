@@ -238,12 +238,16 @@ def get_heroes_list():
         return HEROES_LIST_CACHE
     
     try:
+        print("📡 Запрос списка героев из OpenDota API...")
         response = requests.get('https://api.opendota.com/api/heroes', timeout=10)
         if response.status_code == 200:
             HEROES_LIST_CACHE = response.json()
+            print(f"✅ Получено {len(HEROES_LIST_CACHE)} героев")
             return HEROES_LIST_CACHE
+        else:
+            print(f"❌ API вернул код: {response.status_code}")
     except Exception as e:
-        print(f"Ошибка загрузки списка героев: {e}")
+        print(f"❌ Ошибка загрузки списка героев: {e}")
     
     return []
 
@@ -251,11 +255,15 @@ def get_hero_data(hero_name):
     """Получает данные о герое из OpenDota API"""
     global HERO_CACHE
     
+    print(f"📡 Запрос данных для героя: {hero_name}")
+    
     if hero_name in HERO_CACHE:
+        print(f"✅ Данные из кэша для {hero_name}")
         return HERO_CACHE[hero_name]
     
     try:
         heroes = get_heroes_list()
+        
         hero_id = None
         for h in heroes:
             if h['name'] == f'npc_dota_hero_{hero_name}':
@@ -263,23 +271,30 @@ def get_hero_data(hero_name):
                 break
         
         if not hero_id:
+            print(f"❌ Герой {hero_name} не найден в списке")
             return None
+        
+        print(f"🆔 ID героя: {hero_id}")
         
         response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
         if response.status_code == 200:
             data = response.json()
+            print(f"✅ Данные героя получены")
             
             abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
             abilities = abilities_response.json() if abilities_response.status_code == 200 else []
+            print(f"✅ Получено {len(abilities)} способностей")
             
             HERO_CACHE[hero_name] = {
                 'data': data,
                 'abilities': abilities
             }
             return HERO_CACHE[hero_name]
+        else:
+            print(f"❌ API героя вернул код: {response.status_code}")
             
     except Exception as e:
-        print(f"Ошибка загрузки данных героя {hero_name}: {e}")
+        print(f"❌ Ошибка загрузки данных героя {hero_name}: {e}")
     
     return None
 
@@ -294,14 +309,29 @@ def index():
 def get_news():
     return jsonify(load_news())
 
+@app.route('/test-hero/<hero_name>')
+def test_hero(hero_name):
+    """Тестовый маршрут для проверки работы роутинга"""
+    return f"""
+    <h1>Тест маршрута героя</h1>
+    <p>Герой: <strong>{hero_name}</strong></p>
+    <p>Если вы видите это сообщение — маршрут работает!</p>
+    <p><a href="/">На главную</a></p>
+    """
+
 @app.route('/hero/<hero_name>')
 def hero_page(hero_name):
     """Страница героя"""
+    print(f"🔍 Запрос героя: {hero_name}")
+    
     hero_data = get_hero_data(hero_name)
+    print(f"📦 Данные героя: {hero_data is not None}")
     
     if not hero_data:
+        print("❌ Герой не найден, редирект на главную")
         return redirect(url_for('index'))
     
+    print("✅ Рендерим hero.html")
     return render_template('hero.html', 
                           hero=hero_data['data'],
                           abilities=hero_data['abilities'])
