@@ -180,14 +180,16 @@
             var iconFile = hero.icon + '.png';
             var attrClass = getAttributeClass(hero.attribute);
             
-            html += '<div class="hero-item ' + attrClass + '" data-hero="' + hero.name + '" data-attribute="' + hero.attribute + '" onclick="window.location.href=\'/hero/' + hero.icon + '\'" style="cursor:pointer;">';
-            html += '    <div class="tilt-wrap">';
-            html += '        <img src="/static/assets/icons/' + iconFile + '" alt="' + hero.name + '" loading="lazy" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'<span style=\\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\\'>' + hero.name.charAt(0) + '</span>\'">';
+            html += '<a href="/hero/' + hero.icon + '" class="hero-link" style="text-decoration:none; display:block; cursor:pointer;">';
+            html += '    <div class="hero-item ' + attrClass + '" data-hero="' + hero.name + '" data-attribute="' + hero.attribute + '">';
+            html += '        <div class="tilt-wrap">';
+            html += '            <img src="/static/assets/icons/' + iconFile + '" alt="' + hero.name + '" loading="lazy" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'<span style=\\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\\'>' + hero.name.charAt(0) + '</span>\'">';
+            html += '        </div>';
+            html += '        <div class="hero-hover">';
+            html += '            <div class="name">' + hero.name + '</div>';
+            html += '        </div>';
             html += '    </div>';
-            html += '    <div class="hero-hover">';
-            html += '        <div class="name">' + hero.name + '</div>';
-            html += '    </div>';
-            html += '</div>';
+            html += '</a>';
         }
         heroList.innerHTML = html;
 
