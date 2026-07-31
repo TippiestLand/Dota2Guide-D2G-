@@ -132,50 +132,5 @@
 
     <script src="{{ url_for('static', filename='js/news.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script>
-        // Простая навигация без перехвата кликов
-        document.addEventListener('DOMContentLoaded', function() {
-            var links = document.querySelectorAll('nav a');
-            var sections = document.querySelectorAll('.page');
-            
-            // Функция показать/скрыть секции
-            function showPage(pageId) {
-                sections.forEach(function(section) {
-                    section.classList.remove('active');
-                });
-                var target = document.getElementById(pageId);
-                if (target) {
-                    target.classList.add('active');
-                }
-                links.forEach(function(link) {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === '#' + pageId) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-            
-            // Обработка кликов по навигации
-            links.forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    var href = this.getAttribute('href');
-                    if (href && href.startsWith('#page-')) {
-                        e.preventDefault();
-                        var pageId = href.substring(1);
-                        showPage(pageId);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                });
-            });
-            
-            // Показываем страницу по URL при загрузке
-            if (window.location.hash) {
-                var pageId = window.location.hash.substring(1);
-                if (document.getElementById(pageId)) {
-                    showPage(pageId);
-                }
-            }
-        });
-    </script>
 </body>
 </html>
