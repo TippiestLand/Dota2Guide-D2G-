@@ -73,7 +73,7 @@
 
             var plainText = newsContent.replace(/<[^>]+>/g, '');
             var isLong = plainText.length > 500;
-            
+
             var shortContent = newsContent;
             if (isLong) {
                 var shortPlain = plainText.substring(0, 500) + '...';

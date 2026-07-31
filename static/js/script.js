@@ -272,6 +272,45 @@
 
     renderHeroes();
 
+    var navLinks = document.querySelectorAll('nav a');
+    var pages = {
+        home: document.getElementById('page-home'),
+        heroes: document.getElementById('page-heroes'),
+        items: document.getElementById('page-items'),
+        news: document.getElementById('page-news'),
+        guides: document.getElementById('page-guides')
+    };
+
+    function navigateTo(pageId) {
+        var pageKeys = Object.keys(pages);
+        for (var pk = 0; pk < pageKeys.length; pk++) {
+            var key = pageKeys[pk];
+            if (pages[key]) {
+                pages[key].classList.remove('active');
+            }
+        }
+        if (pages[pageId]) {
+            pages[pageId].classList.add('active');
+        }
+        for (var nl = 0; nl < navLinks.length; nl++) {
+            navLinks[nl].classList.remove('active');
+            if (navLinks[nl].dataset.page === pageId) {
+                navLinks[nl].classList.add('active');
+            }
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    for (var nl2 = 0; nl2 < navLinks.length; nl2++) {
+        navLinks[nl2].addEventListener('click', function(e) {
+            e.preventDefault();
+            var pageId = this.dataset.page;
+            if (pageId) {
+                navigateTo(pageId);
+            }
+        });
+    }
+
     // ============================================================
     // КАСТОМНЫЙ КУРСОР
     // ============================================================
