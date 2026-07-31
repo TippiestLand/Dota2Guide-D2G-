@@ -179,7 +179,7 @@
             var hero = filtered[i];
             var iconFile = hero.icon + '.png';
             var attrClass = getAttributeClass(hero.attribute);
-            
+
             html += '<a href="/hero/' + hero.icon + '" class="hero-link" style="text-decoration:none; display:block; cursor:pointer; position:relative; z-index:10;">';
             html += '    <div class="hero-item ' + attrClass + '" data-hero="' + hero.name + '" data-attribute="' + hero.attribute + '">';
             html += '        <div class="tilt-wrap">';
@@ -301,26 +301,16 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    for (var nl2 = 0; nl2 < navLinks.length; nl2++) {
-        navLinks[nl2].addEventListener('click', function(e) {
+    // Обработка кликов по навигации (ТОЛЬКО по nav a)
+    document.querySelectorAll('nav a[data-page]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
             e.preventDefault();
             var pageId = this.dataset.page;
             if (pageId) {
                 navigateTo(pageId);
             }
         });
-    }
-
-    var dataPageEls = document.querySelectorAll('[data-page]');
-    for (var dp = 0; dp < dataPageEls.length; dp++) {
-        dataPageEls[dp].addEventListener('click', function(e) {
-            e.preventDefault();
-            var pageId = this.dataset.page;
-            if (pageId) {
-                navigateTo(pageId);
-            }
-        });
-    }
+    });
 
     // ============================================================
     // КАСТОМНЫЙ КУРСОР
@@ -408,17 +398,6 @@
             fadeElements[fe3].classList.add('visible');
         }
     }
-
-    // ============================================================
-    // ПРИНУДИТЕЛЬНОЕ РАЗРЕШЕНИЕ ПЕРЕХОДА ПО ССЫЛКАМ ГЕРОЕВ
-    // ============================================================
-    document.addEventListener('click', function(e) {
-        var target = e.target.closest('.hero-link');
-        if (target) {
-            // Ничего не делаем — пусть ссылка работает как обычно
-            return true;
-        }
-    }, true);
 
     console.log('🚀 Dota 2 Guide loaded');
 })();
