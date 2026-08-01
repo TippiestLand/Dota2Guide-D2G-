@@ -130,6 +130,16 @@
         <p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p>
     </footer>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО ГЕРОЯ ===== -->
+    <div class="hero-modal" id="heroModal">
+        <div class="hero-modal-content">
+            <button class="hero-modal-close" id="heroModalClose">✕</button>
+            <div class="hero-modal-body" id="heroModalBody">
+                <div class="hero-modal-loading">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/news.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

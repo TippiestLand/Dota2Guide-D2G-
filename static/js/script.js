@@ -147,6 +147,117 @@
     var searchQuery = '';
     var isTransitioning = false;
 
+    // ============================================================
+    // МОДАЛЬНОЕ ОКНО
+    // ============================================================
+    var modal = document.getElementById('heroModal');
+    var modalBody = document.getElementById('heroModalBody');
+    var modalClose = document.getElementById('heroModalClose');
+
+    function openHeroModal(heroIcon) {
+        if (!modal) return;
+        modal.classList.add('active');
+        modalBody.innerHTML = '<div class="hero-modal-loading"><div class="loader"></div><p>Загрузка...</p></div>';
+
+        var hero = uniqueHeroes.find(function(h) { return h.icon === heroIcon; });
+        if (!hero) {
+            modalBody.innerHTML = '<p style="color:#ff6b6b; text-align:center; padding:20px;">Герой не найден</p>';
+            return;
+        }
+
+        fetch('/api/hero/' + heroIcon)
+            .then(function(response) {
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                return response.json();
+            })
+            .then(function(data) {
+                renderHeroModal(data, hero);
+            })
+            .catch(function(error) {
+                console.error('Ошибка:', error);
+                modalBody.innerHTML = '<p style="color:#ff6b6b; text-align:center; padding:20px;">Не удалось загрузить данные героя</p>';
+            });
+    }
+
+    function renderHeroModal(data, hero) {
+        var heroData = data.data;
+        var abilities = data.abilities || [];
+
+        var attrClass = hero.attribute;
+        var attrName = {
+            'strength': 'Сила',
+            'agility': 'Ловкость',
+            'intelligence': 'Интеллект',
+            'universal': 'Универсальный'
+        }[hero.attribute] || 'Универсальный';
+
+        var html = '';
+
+        html += '<div class="hero-modal-header">';
+        html += '    <div class="hero-modal-avatar">';
+        html += '        <img src="/static/assets/icons/' + hero.icon + '.png" alt="' + hero.name + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'%3E%3Crect width=\'80\' height=\'80\' fill=\'%23222\'/%3E%3Ctext x=\'40\' y=\'45\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'14\' font-family=\'sans-serif\'%3E' + hero.name.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
+        html += '    </div>';
+        html += '    <div>';
+        html += '        <div class="hero-modal-name"><span class="highlight">' + hero.name + '</span></div>';
+        html += '        <div class="hero-modal-attribute ' + attrClass + '">' + attrName + '</div>';
+        html += '    </div>';
+        html += '</div>';
+
+        if (heroData.bio) {
+            html += '<p class="hero-modal-description">' + heroData.bio.slice(0, 300) + (heroData.bio.length > 300 ? '...' : '') + '</p>';
+        } else {
+            html += '<p class="hero-modal-description">Описание героя временно недоступно.</p>';
+        }
+
+        html += '<div class="hero-modal-stats">';
+        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_str || '?') + '</div><div class="hero-modal-stat-label">Сила</div></div>';
+        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_agi || '?') + '</div><div class="hero-modal-stat-label">Ловкость</div></div>';
+        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_int || '?') + '</div><div class="hero-modal-stat-label">Интеллект</div></div>';
+        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_health || '?') + '</div><div class="hero-modal-stat-label">Здоровье</div></div>';
+        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_mana || '?') + '</div><div class="hero-modal-stat-label">Мана</div></div>';
+        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.move_speed || '?') + '</div><div class="hero-modal-stat-label">Скорость</div></div>';
+        html += '</div>';
+
+        if (abilities.length > 0) {
+            html += '<div class="hero-modal-abilities-title"><span>Способности</span></div>';
+            for (var i = 0; i < abilities.length; i++) {
+                var ability = abilities[i];
+                html += '<div class="hero-modal-ability">';
+                html += '    <div class="hero-modal-ability-header">';
+                if (ability.img) {
+                    html += '        <div class="hero-modal-ability-icon"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/' + ability.img + '" alt="' + (ability.dname || 'Способность') + '" onerror="this.style.display=\'none\'"></div>';
+                }
+                html += '        <div class="hero-modal-ability-name">' + (ability.dname || 'Способность') + '</div>';
+                html += '    </div>';
+                html += '    <div class="hero-modal-ability-desc">' + (ability.desc || ability.notes || 'Описание отсутствует') + '</div>';
+                html += '</div>';
+            }
+        }
+
+        modalBody.innerHTML = html;
+    }
+
+    function closeHeroModal() {
+        if (modal) modal.classList.remove('active');
+    }
+
+    if (modalClose) {
+        modalClose.addEventListener('click', closeHeroModal);
+    }
+
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeHeroModal();
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeHeroModal();
+    });
+
+    // ============================================================
+    // РЕНДЕР ГЕРОЕВ
+    // ============================================================
     function getAttributeClass(attribute) {
         var classes = {
             'strength': 'strength',
@@ -180,22 +291,26 @@
             var iconFile = hero.icon + '.png';
             var attrClass = getAttributeClass(hero.attribute);
 
-            html += '<a href="/hero/' + hero.icon + '" class="hero-link" style="text-decoration:none; display:block; cursor:pointer; position:relative; z-index:10;">';
-            html += '    <div class="hero-item ' + attrClass + '" data-hero="' + hero.name + '" data-attribute="' + hero.attribute + '">';
-            html += '        <div class="tilt-wrap">';
-            html += '            <img src="/static/assets/icons/' + iconFile + '" alt="' + hero.name + '" loading="lazy" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'<span style=\\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\\'>' + hero.name.charAt(0) + '</span>\'">';
-            html += '        </div>';
-            html += '        <div class="hero-hover">';
-            html += '            <div class="name">' + hero.name + '</div>';
-            html += '        </div>';
+            html += '<div class="hero-item ' + attrClass + '" data-hero="' + hero.name + '" data-attribute="' + hero.attribute + '" data-icon="' + hero.icon + '" style="cursor:pointer;">';
+            html += '    <div class="tilt-wrap">';
+            html += '        <img src="/static/assets/icons/' + iconFile + '" alt="' + hero.name + '" loading="lazy" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'<span style=\\\'font-size:2rem;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;\\\'>' + hero.name.charAt(0) + '</span>\'">';
             html += '    </div>';
-            html += '</a>';
+            html += '    <div class="hero-hover">';
+            html += '        <div class="name">' + hero.name + '</div>';
+            html += '    </div>';
+            html += '</div>';
         }
         heroList.innerHTML = html;
 
         var items = document.querySelectorAll('.hero-item');
         for (var j = 0; j < items.length; j++) {
             var item = items[j];
+            var icon = item.dataset.icon;
+            item.addEventListener('click', function() {
+                var heroIcon = this.dataset.icon;
+                if (heroIcon) openHeroModal(heroIcon);
+            });
+
             var tiltWrap = item.querySelector('.tilt-wrap');
             item.addEventListener('mousemove', function(e) {
                 var rect = this.getBoundingClientRect();
@@ -272,6 +387,9 @@
 
     renderHeroes();
 
+    // ============================================================
+    // НАВИГАЦИЯ
+    // ============================================================
     var navLinks = document.querySelectorAll('nav a');
     var pages = {
         home: document.getElementById('page-home'),
@@ -397,17 +515,6 @@
             fadeElements[fe3].classList.add('visible');
         }
     }
-
-    // ============================================================
-    // РАЗРЕШАЕМ ПЕРЕХОД ПО ССЫЛКАМ ГЕРОЕВ
-    // ============================================================
-    document.addEventListener('click', function(e) {
-        var target = e.target.closest('a[href^="/hero/"]');
-        if (target) {
-            // Ничего не делаем — пусть ссылка работает как обычно
-            return true;
-        }
-    }, true);
 
     console.log('🚀 Dota 2 Guide loaded');
 })();

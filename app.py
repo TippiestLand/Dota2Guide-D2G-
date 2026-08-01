@@ -336,6 +336,14 @@ def hero_page(hero_name):
                           hero=hero_data['data'],
                           abilities=hero_data['abilities'])
 
+@app.route('/api/hero/<hero_name>')
+def api_hero(hero_name):
+    """API для получения данных героя (для модального окна)"""
+    hero_data = get_hero_data(hero_name)
+    if not hero_data:
+        return jsonify({'error': 'Hero not found'}), 404
+    return jsonify(hero_data)
+
 # ============================================================
 # ИНИЦИАЛИЗАЦИЯ НОВОСТЕЙ
 # ============================================================

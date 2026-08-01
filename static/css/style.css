@@ -1346,3 +1346,297 @@ h1::before, h2::before {
         font-size: 0.82rem;
     }
 }
+
+/* ============================================================
+   МОДАЛЬНОЕ ОКНО ГЕРОЯ
+   ============================================================ */
+.hero-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    animation: modalFadeIn 0.3s ease;
+}
+
+.hero-modal.active {
+    display: flex;
+}
+
+@keyframes modalFadeIn {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.hero-modal-content {
+    background: rgba(20, 20, 30, 0.95);
+    border: 1px solid rgba(240, 185, 11, 0.2);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+}
+
+.hero-modal-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.hero-modal-content::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+}
+
+.hero-modal-close {
+    position: sticky;
+    top: 0;
+    float: right;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    padding: 0 8px;
+}
+
+.hero-modal-close:hover {
+    color: var(--gold);
+    transform: rotate(90deg);
+}
+
+.hero-modal-body {
+    padding-top: 10px;
+}
+
+.hero-modal-loading {
+    text-align: center;
+    color: #888;
+    padding: 40px 0;
+}
+
+.hero-modal-loading .loader {
+    margin: 0 auto 20px;
+}
+
+/* ============================================================
+   СОДЕРЖИМОЕ МОДАЛКИ
+   ============================================================ */
+.hero-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.hero-modal-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(240, 185, 11, 0.3);
+    flex-shrink: 0;
+}
+
+.hero-modal-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-modal-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.hero-modal-name .highlight {
+    color: var(--gold);
+}
+
+.hero-modal-attribute {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+.hero-modal-attribute.strength {
+    background: rgba(229, 90, 90, 0.2);
+    color: #e55a5a;
+    border: 1px solid rgba(229, 90, 90, 0.3);
+}
+
+.hero-modal-attribute.agility {
+    background: rgba(90, 229, 90, 0.2);
+    color: #5ae55a;
+    border: 1px solid rgba(90, 229, 90, 0.3);
+}
+
+.hero-modal-attribute.intelligence {
+    background: rgba(90, 90, 229, 0.2);
+    color: #5a5ae5;
+    border: 1px solid rgba(90, 90, 229, 0.3);
+}
+
+.hero-modal-attribute.universal {
+    background: rgba(240, 185, 11, 0.2);
+    color: #f0b90b;
+    border: 1px solid rgba(240, 185, 11, 0.3);
+}
+
+.hero-modal-description {
+    color: #b0b0c0;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+.hero-modal-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.hero-modal-stat {
+    text-align: center;
+}
+
+.hero-modal-stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.hero-modal-stat-label {
+    font-size: 0.6rem;
+    color: #8888a0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hero-modal-abilities-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.hero-modal-abilities-title span {
+    color: var(--gold);
+}
+
+.hero-modal-ability {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.hero-modal-ability:last-child {
+    margin-bottom: 0;
+}
+
+.hero-modal-ability-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.hero-modal-ability-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.hero-modal-ability-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-modal-ability-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+.hero-modal-ability-desc {
+    color: #b0b0c0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   АДАПТИВ ДЛЯ МОДАЛКИ
+   ============================================================ */
+@media (max-width: 768px) {
+    .hero-modal-content {
+        padding: 24px 20px;
+        max-width: 95%;
+    }
+
+    .hero-modal-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    .hero-modal-avatar {
+        width: 64px;
+        height: 64px;
+    }
+
+    .hero-modal-name {
+        font-size: 1.5rem;
+    }
+
+    .hero-modal-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-modal-content {
+        padding: 16px 14px;
+    }
+
+    .hero-modal-name {
+        font-size: 1.2rem;
+    }
+
+    .hero-modal-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .hero-modal-ability {
+        padding: 12px;
+    }
+}
