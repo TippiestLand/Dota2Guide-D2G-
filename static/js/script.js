@@ -191,35 +191,70 @@
             'universal': 'Универсальный'
         }[hero.attribute] || 'Универсальный';
 
+        var attrEmoji = {
+            'strength': '💪',
+            'agility': '⚡',
+            'intelligence': '🧠',
+            'universal': '✨'
+        }[hero.attribute] || '✨';
+
         var html = '';
 
+        // ===== ШАПКА =====
         html += '<div class="hero-modal-header">';
         html += '    <div class="hero-modal-avatar">';
-        html += '        <img src="/static/assets/icons/' + hero.icon + '.png" alt="' + hero.name + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'%3E%3Crect width=\'80\' height=\'80\' fill=\'%23222\'/%3E%3Ctext x=\'40\' y=\'45\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'14\' font-family=\'sans-serif\'%3E' + hero.name.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
+        html += '        <img src="/static/assets/icons/' + hero.icon + '.png" alt="' + hero.name + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'18\' font-family=\'sans-serif\'%3E' + hero.name.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
         html += '    </div>';
-        html += '    <div>';
+        html += '    <div class="hero-modal-title">';
         html += '        <div class="hero-modal-name"><span class="highlight">' + hero.name + '</span></div>';
-        html += '        <div class="hero-modal-attribute ' + attrClass + '">' + attrName + '</div>';
+        html += '        <div class="hero-modal-attribute ' + attrClass + '">' + attrEmoji + ' ' + attrName + '</div>';
         html += '    </div>';
         html += '</div>';
 
-        if (heroData.bio) {
-            html += '<p class="hero-modal-description">' + heroData.bio.slice(0, 300) + (heroData.bio.length > 300 ? '...' : '') + '</p>';
-        } else {
-            html += '<p class="hero-modal-description">Описание героя временно недоступно.</p>';
-        }
+        // ===== ОПИСАНИЕ =====
+        var bioText = heroData.bio || 'Описание героя временно недоступно.';
+        html += '<div class="hero-modal-description">' + bioText + '</div>';
 
+        // ===== СТАТИСТИКА =====
         html += '<div class="hero-modal-stats">';
-        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_str || '?') + '</div><div class="hero-modal-stat-label">Сила</div></div>';
-        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_agi || '?') + '</div><div class="hero-modal-stat-label">Ловкость</div></div>';
-        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_int || '?') + '</div><div class="hero-modal-stat-label">Интеллект</div></div>';
-        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_health || '?') + '</div><div class="hero-modal-stat-label">Здоровье</div></div>';
-        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.base_mana || '?') + '</div><div class="hero-modal-stat-label">Мана</div></div>';
-        html += '    <div class="hero-modal-stat"><div class="hero-modal-stat-value">' + (heroData.move_speed || '?') + '</div><div class="hero-modal-stat-label">Скорость</div></div>';
+
+        // Атака
+        html += '    <div class="hero-modal-stat-block">';
+        html += '        <div class="hero-modal-stat-block-title">⚔️ Атака</div>';
+        html += '        <div class="hero-modal-stat-block-values">';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_attack_min || '?') + '-' + (heroData.base_attack_max || '?') + '</div><div class="hero-modal-stat-item-label">Урон</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.attack_rate || '?') + '</div><div class="hero-modal-stat-item-label">Скорость</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.attack_range || '?') + '</div><div class="hero-modal-stat-item-label">Дальность</div></div>';
+        html += '        </div>';
+        html += '    </div>';
+
+        // Защита
+        html += '    <div class="hero-modal-stat-block">';
+        html += '        <div class="hero-modal-stat-block-title">🛡️ Защита</div>';
+        html += '        <div class="hero-modal-stat-block-values">';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_health || '?') + '</div><div class="hero-modal-stat-item-label">Здоровье</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_mana || '?') + '</div><div class="hero-modal-stat-item-label">Мана</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_armor || '?') + '</div><div class="hero-modal-stat-item-label">Броня</div></div>';
+        html += '        </div>';
+        html += '    </div>';
+
+        // Основные атрибуты
+        html += '    <div class="hero-modal-stat-block">';
+        html += '        <div class="hero-modal-stat-block-title">📊 Основное</div>';
+        html += '        <div class="hero-modal-stat-block-values">';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_str || '?') + '</div><div class="hero-modal-stat-item-label">Сила</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_agi || '?') + '</div><div class="hero-modal-stat-item-label">Ловкость</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_int || '?') + '</div><div class="hero-modal-stat-item-label">Интеллект</div></div>';
+        html += '        </div>';
+        html += '    </div>';
+
         html += '</div>';
 
+        // ===== СПОСОБНОСТИ =====
         if (abilities.length > 0) {
             html += '<div class="hero-modal-abilities-title"><span>Способности</span></div>';
+            html += '<div class="hero-modal-abilities-grid">';
+
             for (var i = 0; i < abilities.length; i++) {
                 var ability = abilities[i];
                 html += '<div class="hero-modal-ability">';
@@ -230,8 +265,25 @@
                 html += '        <div class="hero-modal-ability-name">' + (ability.dname || 'Способность') + '</div>';
                 html += '    </div>';
                 html += '    <div class="hero-modal-ability-desc">' + (ability.desc || ability.notes || 'Описание отсутствует') + '</div>';
+
+                if (ability.dmg || ability.mana_cost || ability.cooldown) {
+                    html += '    <div class="hero-modal-ability-details">';
+                    if (ability.dmg) {
+                        html += '        <div class="hero-modal-ability-detail">Урон: <span>' + ability.dmg + '</span></div>';
+                    }
+                    if (ability.mana_cost) {
+                        html += '        <div class="hero-modal-ability-detail">Мана: <span>' + ability.mana_cost + '</span></div>';
+                    }
+                    if (ability.cooldown) {
+                        html += '        <div class="hero-modal-ability-detail">Перезарядка: <span>' + ability.cooldown + 'с</span></div>';
+                    }
+                    html += '    </div>';
+                }
+
                 html += '</div>';
             }
+
+            html += '</div>';
         }
 
         modalBody.innerHTML = html;

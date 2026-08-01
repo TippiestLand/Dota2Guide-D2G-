@@ -1192,162 +1192,6 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   АДАПТИВ (ТЕЛЕФОНЫ)
-   ============================================================ */
-@media (max-width: 768px) {
-    header {
-        flex-wrap: wrap;
-        padding: 10px 4%;
-        gap: 10px;
-    }
-
-    nav {
-        order: 3;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-
-    nav a {
-        margin: 0 8px;
-        font-size: 0.8rem;
-    }
-
-    .logo {
-        font-size: 1.2rem;
-    }
-
-    main {
-        margin-top: 120px;
-    }
-
-    .hero {
-        min-height: 60vh;
-    }
-
-    .hero-content h1 {
-        font-size: 2.2rem;
-    }
-
-    .btn {
-        padding: 12px 24px;
-        font-size: 0.8rem;
-    }
-
-    section {
-        padding: 40px 4%;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
-    }
-
-    .hero-controls {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .hero-search {
-        max-width: 100%;
-        width: 100%;
-    }
-
-    .hero-filters {
-        justify-content: center;
-    }
-
-    .hero-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 10px;
-    }
-
-    .hero-item .hero-hover .name {
-        font-size: 0.8rem;
-    }
-
-    .filter-icon {
-        width: 24px;
-        height: 24px;
-    }
-
-    .news-card-vk {
-        padding: 18px 16px;
-    }
-
-    .news-title {
-        font-size: 1.05rem;
-    }
-
-    .news-preview {
-        font-size: 0.88rem;
-        line-height: 1.7;
-    }
-
-    .news-content ul li {
-        font-size: 0.88rem;
-    }
-
-    .news-content p {
-        font-size: 0.88rem;
-    }
-
-    .custom-cursor {
-        display: none !important;
-    }
-    body {
-        cursor: default !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-        gap: 8px;
-    }
-
-    .hero-item .hero-hover {
-        padding: 15px 8px 10px;
-    }
-
-    .hero-item .hero-hover .name {
-        font-size: 0.7rem;
-    }
-
-    .filter-icon {
-        width: 20px;
-        height: 20px;
-    }
-
-    .news-card-vk {
-        padding: 14px 12px;
-        border-radius: 12px;
-    }
-
-    .news-title {
-        font-size: 0.95rem;
-    }
-
-    .news-preview {
-        font-size: 0.82rem;
-    }
-
-    .news-toggle-btn {
-        font-size: 0.75rem;
-    }
-
-    .news-content ul li {
-        font-size: 0.82rem;
-        padding-left: 18px;
-    }
-
-    .news-content p {
-        font-size: 0.82rem;
-    }
-}
-
-/* ============================================================
    МОДАЛЬНОЕ ОКНО ГЕРОЯ
    ============================================================ */
 .hero-modal {
@@ -1357,13 +1201,14 @@ h1::before, h2::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 10000;
     justify-content: center;
     align-items: center;
     animation: modalFadeIn 0.3s ease;
+    padding: 20px;
 }
 
 .hero-modal.active {
@@ -1376,20 +1221,25 @@ h1::before, h2::before {
 }
 
 .hero-modal-content {
-    background: rgba(20, 20, 30, 0.95);
-    border: 1px solid rgba(240, 185, 11, 0.2);
+    background: rgba(15, 15, 25, 0.95);
+    border: 1px solid rgba(240, 185, 11, 0.15);
     border-radius: 24px;
     padding: 40px;
-    max-width: 700px;
-    width: 90%;
-    max-height: 85vh;
+    max-width: 1100px;
+    width: 100%;
+    max-height: 90vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
 }
 
 .hero-modal-content::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
+}
+
+.hero-modal-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
 }
 
 .hero-modal-content::-webkit-scrollbar-thumb {
@@ -1403,12 +1253,13 @@ h1::before, h2::before {
     float: right;
     background: none;
     border: none;
-    color: #888;
-    font-size: 2rem;
+    color: #666;
+    font-size: 2.2rem;
     cursor: pointer;
     transition: all 0.3s ease;
     z-index: 10;
     padding: 0 8px;
+    line-height: 1;
 }
 
 .hero-modal-close:hover {
@@ -1423,7 +1274,7 @@ h1::before, h2::before {
 .hero-modal-loading {
     text-align: center;
     color: #888;
-    padding: 40px 0;
+    padding: 60px 0;
 }
 
 .hero-modal-loading .loader {
@@ -1431,22 +1282,25 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   СОДЕРЖИМОЕ МОДАЛКИ
+   ВЕРХНЯЯ ЧАСТЬ — ИМЯ + АТРИБУТ + АВАТАР
    ============================================================ */
 .hero-modal-header {
     display: flex;
     align-items: center;
-    gap: 24px;
-    margin-bottom: 24px;
+    gap: 30px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .hero-modal-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
+    width: 100px;
+    height: 100px;
+    border-radius: 16px;
     overflow: hidden;
-    border: 2px solid rgba(240, 185, 11, 0.3);
+    border: 2px solid rgba(240, 185, 11, 0.25);
     flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .hero-modal-avatar img {
@@ -1455,26 +1309,32 @@ h1::before, h2::before {
     object-fit: cover;
 }
 
+.hero-modal-title {
+    flex: 1;
+}
+
 .hero-modal-name {
     font-family: 'Orbitron', sans-serif;
-    font-size: 2rem;
+    font-size: 3rem;
     font-weight: 900;
     color: #fff;
+    line-height: 1.1;
 }
 
 .hero-modal-name .highlight {
     color: var(--gold);
+    text-shadow: 0 0 40px rgba(240, 185, 11, 0.2);
 }
 
 .hero-modal-attribute {
     display: inline-block;
-    padding: 4px 16px;
+    padding: 6px 24px;
     border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 4px;
+    letter-spacing: 1.5px;
+    margin-top: 8px;
 }
 
 .hero-modal-attribute.strength {
@@ -1501,77 +1361,116 @@ h1::before, h2::before {
     border: 1px solid rgba(240, 185, 11, 0.3);
 }
 
+/* ============================================================
+   ОПИСАНИЕ ГЕРОЯ
+   ============================================================ */
 .hero-modal-description {
     color: #b0b0c0;
-    font-size: 0.95rem;
-    line-height: 1.8;
-    margin-bottom: 20px;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border-left: 3px solid rgba(240, 185, 11, 0.2);
 }
 
+/* ============================================================
+   СТАТИСТИКА (КАК НА ОФИЦИАЛЬНОМ САЙТЕ)
+   ============================================================ */
 .hero-modal-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    padding: 16px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
 }
 
-.hero-modal-stat {
+.hero-modal-stat-block {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 16px;
     text-align: center;
 }
 
-.hero-modal-stat-value {
+.hero-modal-stat-block-title {
+    font-size: 0.65rem;
+    color: #8888a0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.hero-modal-stat-block-values {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.hero-modal-stat-item {
+    text-align: center;
+}
+
+.hero-modal-stat-item-value {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #fff;
 }
 
-.hero-modal-stat-label {
+.hero-modal-stat-item-label {
     font-size: 0.6rem;
     color: #8888a0;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
+/* ============================================================
+   СПОСОБНОСТИ
+   ============================================================ */
 .hero-modal-abilities-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     color: #fff;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .hero-modal-abilities-title span {
     color: var(--gold);
 }
 
-.hero-modal-ability {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+.hero-modal-abilities-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
 }
 
-.hero-modal-ability:last-child {
-    margin-bottom: 0;
+.hero-modal-ability {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: all 0.3s ease;
+}
+
+.hero-modal-ability:hover {
+    border-color: rgba(240, 185, 11, 0.15);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .hero-modal-ability-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
+    gap: 14px;
+    margin-bottom: 8px;
 }
 
 .hero-modal-ability-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .hero-modal-ability-icon img {
@@ -1581,24 +1480,43 @@ h1::before, h2::before {
 }
 
 .hero-modal-ability-name {
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-weight: 700;
+    font-size: 1rem;
     color: #fff;
 }
 
 .hero-modal-ability-desc {
     color: #b0b0c0;
-    font-size: 0.85rem;
-    line-height: 1.6;
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+
+.hero-modal-ability-details {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.hero-modal-ability-detail {
+    font-size: 0.7rem;
+    color: #8888a0;
+}
+
+.hero-modal-ability-detail span {
+    color: #fff;
+    font-weight: 600;
 }
 
 /* ============================================================
-   АДАПТИВ ДЛЯ МОДАЛКИ
+   АДАПТИВ
    ============================================================ */
 @media (max-width: 768px) {
     .hero-modal-content {
-        padding: 24px 20px;
-        max-width: 95%;
+        padding: 24px 18px;
+        max-height: 92vh;
     }
 
     .hero-modal-header {
@@ -1608,35 +1526,71 @@ h1::before, h2::before {
     }
 
     .hero-modal-avatar {
-        width: 64px;
-        height: 64px;
+        width: 80px;
+        height: 80px;
+    }
+
+    .hero-modal-name {
+        font-size: 2rem;
+    }
+
+    .hero-modal-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .hero-modal-abilities-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-modal-description {
+        font-size: 0.95rem;
+        padding: 12px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-modal-content {
+        padding: 16px 12px;
+        border-radius: 16px;
     }
 
     .hero-modal-name {
         font-size: 1.5rem;
     }
 
-    .hero-modal-stats {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-modal-content {
-        padding: 16px 14px;
-    }
-
-    .hero-modal-name {
-        font-size: 1.2rem;
+    .hero-modal-avatar {
+        width: 64px;
+        height: 64px;
     }
 
     .hero-modal-stats {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr 1fr;
         gap: 8px;
+    }
+
+    .hero-modal-stat-block {
         padding: 12px;
     }
 
     .hero-modal-ability {
-        padding: 12px;
+        padding: 12px 14px;
+    }
+
+    .hero-modal-ability-header {
+        gap: 10px;
+    }
+
+    .hero-modal-ability-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .hero-modal-ability-name {
+        font-size: 0.9rem;
+    }
+
+    .hero-modal-ability-desc {
+        font-size: 0.8rem;
     }
 }
