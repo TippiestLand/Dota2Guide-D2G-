@@ -299,6 +299,90 @@ def get_hero_data(hero_name):
     return None
 
 # ============================================================
+# ЛОКАЛЬНЫЕ ДАННЫЕ ГЕРОЕВ (FALLBACK)
+# ============================================================
+LOCAL_HEROES_DATA = {
+    'abaddon': {
+        'data': {
+            'localized_name': 'Abaddon',
+            'bio': 'Абаддон — универсальный герой, способный защищать союзников и наносить урон врагам. Его способности позволяют лечить, создавать щиты и даже возвращать полученный урон. Абаддон отлично подходит для поддержки и танкования.',
+            'base_str': 22,
+            'base_agi': 15,
+            'base_int': 18,
+            'base_health': 620,
+            'base_mana': 290,
+            'base_armor': 2.5,
+            'attack_rate': 1.7,
+            'move_speed': 310,
+            'base_attack_min': 48,
+            'base_attack_max': 58,
+            'attack_range': 150,
+            'primary_attr': 'universal'
+        },
+        'abilities': [
+            {'dname': 'Мистический туман', 'desc': 'Абаддон выпускает туман, который лечит союзников или наносит урон врагам.', 'img': 'abaddon_mist_coil.png'},
+            {'dname': 'Щит без света', 'desc': 'Создает щит, который поглощает урон и взрывается при разрушении.', 'img': 'abaddon_aphotic_shield.png'},
+            {'dname': 'Ледяная скорбь', 'desc': 'Атаки замедляют врагов и наносят дополнительный урон.', 'img': 'abaddon_frostmourne.png'},
+            {'dname': 'Возврат времени', 'desc': 'При активации превращает получаемый урон в исцеление.', 'img': 'abaddon_borrowed_time.png'}
+        ]
+    },
+    'pudge': {
+        'data': {
+            'localized_name': 'Pudge',
+            'bio': 'Пудж — герой силы, известный своим мясным крюком и способностью пожирать врагов. Он может вытягивать противников, наносить чистый урон и восстанавливать здоровье. Пудж — один из самых популярных героев в Dota 2.',
+            'base_str': 25,
+            'base_agi': 14,
+            'base_int': 16,
+            'base_health': 650,
+            'base_mana': 280,
+            'base_armor': 1.5,
+            'attack_rate': 1.8,
+            'move_speed': 285,
+            'base_attack_min': 52,
+            'base_attack_max': 62,
+            'attack_range': 150,
+            'primary_attr': 'str'
+        },
+        'abilities': [
+            {'dname': 'Мясной крюк', 'desc': 'Пудж бросает крюк, который вытягивает врага к нему.', 'img': 'pudge_meat_hook.png'},
+            {'dname': 'Гниение', 'desc': 'Пудж выпускает ядовитый газ, наносящий урон врагам.', 'img': 'pudge_rot.png'},
+            {'dname': 'Мясной крюк (пассивный)', 'desc': 'Увеличивает урон и здоровье Пуджа.', 'img': 'pudge_flesh_heap.png'},
+            {'dname': 'Расчленение', 'desc': 'Пудж расчленяет врага, нанося огромный урон и восстанавливая здоровье.', 'img': 'pudge_dismember.png'}
+        ]
+    },
+    'axe': {
+        'data': {
+            'localized_name': 'Axe',
+            'bio': 'Акс — герой силы, который заставляет врагов атаковать его. Он может наносить чистый урон, замедлять и уничтожать слабых врагов. Акс — отличный инициатор и танк.',
+            'base_str': 25,
+            'base_agi': 20,
+            'base_int': 18,
+            'base_health': 660,
+            'base_mana': 300,
+            'base_armor': 2.5,
+            'attack_rate': 1.8,
+            'move_speed': 300,
+            'base_attack_min': 50,
+            'base_attack_max': 60,
+            'attack_range': 150,
+            'primary_attr': 'str'
+        },
+        'abilities': [
+            {'dname': 'Жажда битвы', 'desc': 'Пассивная способность, увеличивающая скорость атаки Акса.', 'img': 'axe_berserkers_call.png'},
+            {'dname': 'Боевой клич', 'desc': 'Акс провоцирует врагов атаковать его.', 'img': 'axe_battle_hunger.png'},
+            {'dname': 'Голод битвы', 'desc': 'Наносит урон врагам и замедляет их.', 'img': 'axe_counter_helix.png'},
+            {'dname': 'Уничтожение', 'desc': 'Акс мгновенно уничтожает врага с низким здоровьем.', 'img': 'axe_culling_blade.png'}
+        ]
+    }
+}
+
+def get_local_hero_data(hero_name):
+    """Возвращает локальные данные героя если они есть"""
+    if hero_name in LOCAL_HEROES_DATA:
+        return LOCAL_HEROES_DATA[hero_name]
+    return None
+
+# ============================================================
 # МАРШРУТЫ
 # ============================================================
 @app.route('/')
@@ -338,10 +422,49 @@ def hero_page(hero_name):
 
 @app.route('/api/hero/<hero_name>')
 def api_hero(hero_name):
-    """API для получения данных героя (для модального окна)"""
+    """API для получения данных героя (с fallback)"""
+    print(f"🔍 API запрос героя: {hero_name}")
+    
+    # Пытаемся получить данные из OpenDota
     hero_data = get_hero_data(hero_name)
+    
+    # Если OpenDota не ответил — используем локальные данные
     if not hero_data:
-        return jsonify({'error': 'Hero not found'}), 404
+        print(f"⚠️ OpenDota не ответил, ищем локальные данные для {hero_name}")
+        
+        # Проверяем локальные данные
+        local_data = get_local_hero_data(hero_name)
+        if local_data:
+            print(f"✅ Использованы локальные данные для {hero_name}")
+            return jsonify(local_data)
+        
+        # Если героя нет в локальных данных — возвращаем общий fallback
+        print(f"❌ Герой {hero_name} не найден в локальных данных, используем общий fallback")
+        return jsonify({
+            'data': {
+                'localized_name': hero_name.capitalize(),
+                'bio': 'Это тестовое описание героя ' + hero_name.capitalize() + '. Здесь будет полная информация о герое, его способностях и статистике.',
+                'base_str': 22,
+                'base_agi': 18,
+                'base_int': 20,
+                'base_health': 600,
+                'base_mana': 300,
+                'base_armor': 2,
+                'attack_rate': 1.7,
+                'move_speed': 300,
+                'base_attack_min': 45,
+                'base_attack_max': 55,
+                'attack_range': 150,
+                'primary_attr': 'universal'
+            },
+            'abilities': [
+                {'dname': 'Способность 1', 'desc': 'Описание способности 1', 'img': 'default_ability.png'},
+                {'dname': 'Способность 2', 'desc': 'Описание способности 2', 'img': 'default_ability.png'},
+                {'dname': 'Способность 3', 'desc': 'Описание способности 3', 'img': 'default_ability.png'},
+                {'dname': 'Способность 4', 'desc': 'Описание способности 4', 'img': 'default_ability.png'}
+            ]
+        })
+    
     return jsonify(hero_data)
 
 # ============================================================

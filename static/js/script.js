@@ -251,7 +251,7 @@
         html += '</div>';
 
         // ===== СПОСОБНОСТИ =====
-        if (abilities.length > 0) {
+        if (abilities && abilities.length > 0) {
             html += '<div class="hero-modal-abilities-title"><span>Способности</span></div>';
             html += '<div class="hero-modal-abilities-grid">';
 
