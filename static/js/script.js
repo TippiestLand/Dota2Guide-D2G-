@@ -184,6 +184,7 @@
         var heroData = data.data;
         var abilities = data.abilities || [];
 
+        // Определяем атрибут
         var primaryAttr = heroData.primary_attr || hero.attribute;
         var attrClass = {
             'str': 'strength',
@@ -263,10 +264,10 @@
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">ИНТЕЛЛЕКТ</span><span class="attr-value">' + (heroData.base_int || '?') + ' +' + (heroData.int_gain || '?') + '</span></div>';
         html += '</div>';
 
-        // ===== СПОСОБНОСТИ =====
+        // ===== СПОСОБНОСТИ (В ЦЕНТРЕ) =====
         if (abilities && abilities.length > 0) {
             html += '<div class="hero-modal-abilities-title"><span>Способности</span></div>';
-            html += '<div class="hero-modal-abilities-grid">';
+            html += '<div class="hero-modal-abilities-grid" style="justify-content: center;">';
 
             for (var i = 0; i < abilities.length; i++) {
                 var ability = abilities[i];
