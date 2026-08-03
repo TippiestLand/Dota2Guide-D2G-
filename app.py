@@ -18,7 +18,6 @@ CORS(app)
 NEWS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'news.json')
 RSS_URL = 'https://store.steampowered.com/feeds/news/app/570/?l=russian'
 
-# Московское время (UTC+3)
 MSK = timezone(timedelta(hours=3))
 
 os.makedirs(os.path.dirname(NEWS_FILE), exist_ok=True)
@@ -27,9 +26,6 @@ if not os.path.exists(NEWS_FILE):
     with open(NEWS_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f, ensure_ascii=False, indent=4)
 
-# ============================================================
-# РАЗДАЧА СТАТИКИ
-# ============================================================
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
@@ -50,7 +46,6 @@ def save_news(news):
         json.dump(news, f, ensure_ascii=False, indent=4)
 
 def translate_title(title):
-    """Переводит заголовки новостей на русский"""
     translations = {
         'Gameplay Update': 'Игровое обновление',
         'Gameplay Patch': 'Игровой патч',
@@ -83,27 +78,18 @@ def translate_title(title):
         'All Events': 'Все события',
         'Dota 2 Events': 'События Dota 2'
     }
-    
     for eng, rus in translations.items():
         if eng in title:
             return title.replace(eng, rus)
     return title
 
 def format_news_content(text):
-    """
-    Преобразует текст новости в HTML с правильными списками.
-    - Строки с точками в начале → <ul><li>...</li></ul>
-    - Обычные строки → <p>...</p>
-    - Пустые строки → <br>
-    """
     lines = text.split('\n')
     html_parts = []
     in_list = False
     list_items = []
-    
     for line in lines:
         line = line.strip()
-        
         if not line:
             if in_list:
                 html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
@@ -111,29 +97,14 @@ def format_news_content(text):
                 in_list = False
             html_parts.append('<br>')
             continue
-        
         is_list_item = False
         clean_text = line
-        
-        if line.startswith('• '):
-            is_list_item = True
-            clean_text = line[2:]
-        elif line.startswith('- '):
-            is_list_item = True
-            clean_text = line[2:]
-        elif line.startswith('* '):
-            is_list_item = True
-            clean_text = line[2:]
-        elif line.startswith('— '):
+        if line.startswith('• ') or line.startswith('- ') or line.startswith('* ') or line.startswith('— '):
             is_list_item = True
             clean_text = line[2:]
         elif line.startswith('Fixed'):
             is_list_item = True
             clean_text = 'Исправлено: ' + line[6:]
-        elif line.startswith('Fixed '):
-            is_list_item = True
-            clean_text = 'Исправлено: ' + line[6:]
-        
         if is_list_item:
             if not in_list:
                 in_list = True
@@ -145,14 +116,11 @@ def format_news_content(text):
                 list_items = []
                 in_list = False
             html_parts.append('<p>' + clean_text + '</p>')
-    
     if in_list:
         html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
-    
     return '\n'.join(html_parts)
 
 def convert_date_to_msk(date_string):
-    """Конвертирует дату из RSS в МСК"""
     try:
         date_obj = datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %Z')
         date_obj_msk = date_obj.astimezone(MSK)
@@ -164,37 +132,27 @@ def fetch_rss_news():
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         response = requests.get(RSS_URL, headers=headers, timeout=10)
-
         if response.status_code != 200:
-            print(f"RSS ответил с кодом {response.status_code}")
             return []
-
         root = ET.fromstring(response.content)
         news_items = []
-
         for item in root.findall('.//item')[:15]:
             title_element = item.find('title')
             title_text = title_element.text if title_element is not None else 'Без названия'
             title_text = translate_title(title_text)
-
             pub_date_element = item.find('pubDate')
             pub_date_text = pub_date_element.text if pub_date_element is not None else ''
             date_formatted = convert_date_to_msk(pub_date_text)
-
             link_element = item.find('link')
             link_text = link_element.text if link_element is not None else ''
-
             description_element = item.find('description')
             if description_element is not None and description_element.text:
                 desc_text = description_element.text
             else:
                 desc_text = title_text
-
             desc_clean = re.sub(r'<[^>]+>', '', desc_text)
             desc_clean = format_news_content(desc_clean)
-
             hash_id = int(hashlib.md5(title_text.encode('utf-8')).hexdigest()[:8], 16)
-
             news_items.append({
                 'id': hash_id,
                 'title': title_text,
@@ -203,7 +161,6 @@ def fetch_rss_news():
                 'link': link_text,
                 'source': 'rss'
             })
-
         return news_items
     except Exception as e:
         print(f"Ошибка при получении RSS: {e}")
@@ -212,17 +169,13 @@ def fetch_rss_news():
 def update_news_from_rss():
     existing = load_news()
     rss_news = fetch_rss_news()
-
     if not rss_news:
         return 0
-
     existing_titles = {n.get('title') for n in existing if n.get('source') == 'rss'}
     new_items = [n for n in rss_news if n['title'] not in existing_titles]
-
     if new_items:
         updated_news = new_items + existing
         save_news(updated_news)
-
     return len(new_items)
 
 # ============================================================
@@ -232,11 +185,9 @@ HERO_CACHE = {}
 HEROES_LIST_CACHE = None
 
 def get_heroes_list():
-    """Получает список всех героев из OpenDota API"""
     global HEROES_LIST_CACHE
     if HEROES_LIST_CACHE:
         return HEROES_LIST_CACHE
-    
     try:
         print("📡 Запрос списка героев из OpenDota API...")
         response = requests.get('https://api.opendota.com/api/heroes', timeout=10)
@@ -248,82 +199,44 @@ def get_heroes_list():
             print(f"❌ API вернул код: {response.status_code}")
     except Exception as e:
         print(f"❌ Ошибка загрузки списка героев: {e}")
-    
     return []
 
 def get_hero_data(hero_name):
-    """Получает данные о герое из OpenDota API"""
     global HERO_CACHE
-    
-    print(f"📡 Запрос данных для героя: {hero_name}")
-    
     if hero_name in HERO_CACHE:
-        print(f"✅ Данные из кэша для {hero_name}")
         return HERO_CACHE[hero_name]
-    
     try:
         heroes = get_heroes_list()
-        
         hero_id = None
         for h in heroes:
             if h['name'] == f'npc_dota_hero_{hero_name}':
                 hero_id = h['id']
                 break
-        
         if not hero_id:
-            print(f"❌ Герой {hero_name} не найден в списке")
             return None
-        
-        print(f"🆔 ID героя: {hero_id}")
-        
         response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Данные героя получены")
-            
             abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
             abilities = abilities_response.json() if abilities_response.status_code == 200 else []
-            print(f"✅ Получено {len(abilities)} способностей")
-            
             HERO_CACHE[hero_name] = {
                 'data': data,
                 'abilities': abilities
             }
             return HERO_CACHE[hero_name]
-        else:
-            print(f"❌ API героя вернул код: {response.status_code}")
-            
     except Exception as e:
         print(f"❌ Ошибка загрузки данных героя {hero_name}: {e}")
-    
     return None
 
 # ============================================================
-# ЛОКАЛЬНЫЕ ДАННЫЕ ГЕРОЕВ (FALLBACK) — ВСЕ ГЕРОИ
+# ЛОКАЛЬНЫЕ ДАННЫЕ ГЕРОЕВ (С ПРАВИЛЬНЫМИ АТРИБУТАМИ)
 # ============================================================
 LOCAL_HEROES_DATA = {
-    'abaddon': {
-        'data': {
-            'localized_name': 'Abaddon',
-            'bio': 'Абаддон — универсальный герой, способный защищать союзников и наносить урон врагам.',
-            'base_str': 22, 'base_agi': 15, 'base_int': 18,
-            'base_health': 620, 'base_mana': 290, 'base_armor': 2.5,
-            'attack_rate': 1.7, 'move_speed': 310,
-            'base_attack_min': 48, 'base_attack_max': 58, 'attack_range': 150,
-            'primary_attr': 'universal',
-            'str_gain': 2.6, 'agi_gain': 1.5, 'int_gain': 2.0
-        },
-        'abilities': [
-            {'dname': 'Мистический туман', 'desc': 'Лечит союзников или наносит урон врагам.', 'img': 'abaddon_mist_coil.png'},
-            {'dname': 'Щит без света', 'desc': 'Создает щит, поглощающий урон.', 'img': 'abaddon_aphotic_shield.png'},
-            {'dname': 'Ледяная скорбь', 'desc': 'Атаки замедляют врагов.', 'img': 'abaddon_frostmourne.png'},
-            {'dname': 'Возврат времени', 'desc': 'Превращает урон в исцеление.', 'img': 'abaddon_borrowed_time.png'}
-        ]
-    },
+    # ===== СИЛА =====
     'axe': {
         'data': {
             'localized_name': 'Axe',
-            'bio': 'Акс — герой силы, заставляющий врагов атаковать его.',
+            'bio': 'Акс — герой силы, который заставляет врагов атаковать его. Наносит чистый урон, замедляет и уничтожает слабых врагов.',
             'base_str': 25, 'base_agi': 20, 'base_int': 18,
             'base_health': 660, 'base_mana': 300, 'base_armor': 2.5,
             'attack_rate': 1.8, 'move_speed': 300,
@@ -332,16 +245,16 @@ LOCAL_HEROES_DATA = {
             'str_gain': 2.8, 'agi_gain': 2.0, 'int_gain': 1.6
         },
         'abilities': [
-            {'dname': 'Боевой клич', 'desc': 'Провоцирует врагов.', 'img': 'axe_berserkers_call.png'},
-            {'dname': 'Голод битвы', 'desc': 'Наносит урон и замедляет.', 'img': 'axe_battle_hunger.png'},
-            {'dname': 'Жажда битвы', 'desc': 'Увеличивает скорость атаки.', 'img': 'axe_counter_helix.png'},
-            {'dname': 'Уничтожение', 'desc': 'Уничтожает врага с низким здоровьем.', 'img': 'axe_culling_blade.png'}
+            {'dname': 'Боевой клич', 'desc': 'Провоцирует врагов атаковать Акса.', 'img': 'axe_berserkers_call.png'},
+            {'dname': 'Голод битвы', 'desc': 'Наносит урон и замедляет врага.', 'img': 'axe_battle_hunger.png'},
+            {'dname': 'Контр-удар', 'desc': 'Пассивная способность, наносящая урон при атаке.', 'img': 'axe_counter_helix.png'},
+            {'dname': 'Уничтожение', 'desc': 'Мгновенно уничтожает врага с низким здоровьем.', 'img': 'axe_culling_blade.png'}
         ]
     },
     'pudge': {
         'data': {
             'localized_name': 'Pudge',
-            'bio': 'Пудж — герой силы, известный своим мясным крюком.',
+            'bio': 'Пудж — герой силы, известный своим мясным крюком. Вытягивает врагов, наносит чистый урон и восстанавливает здоровье.',
             'base_str': 25, 'base_agi': 14, 'base_int': 16,
             'base_health': 650, 'base_mana': 280, 'base_armor': 1.5,
             'attack_rate': 1.8, 'move_speed': 285,
@@ -350,16 +263,16 @@ LOCAL_HEROES_DATA = {
             'str_gain': 3.2, 'agi_gain': 1.5, 'int_gain': 1.8
         },
         'abilities': [
-            {'dname': 'Мясной крюк', 'desc': 'Вытягивает врага.', 'img': 'pudge_meat_hook.png'},
-            {'dname': 'Гниение', 'desc': 'Наносит урон врагам.', 'img': 'pudge_rot.png'},
-            {'dname': 'Плоть', 'desc': 'Увеличивает урон и здоровье.', 'img': 'pudge_flesh_heap.png'},
-            {'dname': 'Расчленение', 'desc': 'Наносит огромный урон.', 'img': 'pudge_dismember.png'}
+            {'dname': 'Мясной крюк', 'desc': 'Бросает крюк, вытягивая врага к Пуджу.', 'img': 'pudge_meat_hook.png'},
+            {'dname': 'Гниение', 'desc': 'Выпускает ядовитый газ, наносящий урон врагам.', 'img': 'pudge_rot.png'},
+            {'dname': 'Плоть', 'desc': 'Пассивно увеличивает урон и здоровье.', 'img': 'pudge_flesh_heap.png'},
+            {'dname': 'Расчленение', 'desc': 'Наносит огромный урон и восстанавливает здоровье.', 'img': 'pudge_dismember.png'}
         ]
     },
     'beastmaster': {
         'data': {
             'localized_name': 'Beastmaster',
-            'bio': 'Beastmaster призывает зверей на помощь.',
+            'bio': 'Beastmaster призывает зверей на помощь. Прорубается топорами через лес, а его оглушительный рёв позволяет напасть на врагов.',
             'base_str': 24, 'base_agi': 19, 'base_int': 16,
             'base_health': 640, 'base_mana': 310, 'base_armor': 2.0,
             'attack_rate': 2.2, 'move_speed': 310,
@@ -368,30 +281,517 @@ LOCAL_HEROES_DATA = {
             'str_gain': 2.9, 'agi_gain': 2.0, 'int_gain': 1.9
         },
         'abilities': [
-            {'dname': 'Призыв кабана', 'desc': 'Призывает кабана.', 'img': 'beastmaster_boar.png'},
-            {'dname': 'Призыв ястреба', 'desc': 'Призывает ястреба.', 'img': 'beastmaster_hawk.png'},
-            {'dname': 'Топоры дикой охоты', 'desc': 'Бросает два топора.', 'img': 'beastmaster_axes.png'},
-            {'dname': 'Оглушительный рёв', 'desc': 'Оглушает врагов.', 'img': 'beastmaster_roar.png'}
+            {'dname': 'Призыв кабана', 'desc': 'Призывает кабана, который замедляет врагов.', 'img': 'beastmaster_boar.png'},
+            {'dname': 'Призыв ястреба', 'desc': 'Призывает ястреба, дающего обзор.', 'img': 'beastmaster_hawk.png'},
+            {'dname': 'Топоры дикой охоты', 'desc': 'Бросает два топора, проходящих сквозь врагов.', 'img': 'beastmaster_axes.png'},
+            {'dname': 'Оглушительный рёв', 'desc': 'Оглушает врагов и ускоряет союзников.', 'img': 'beastmaster_roar.png'}
         ]
     },
-    'alchemist': {
+    'bristleback': {
         'data': {
-            'localized_name': 'Alchemist',
-            'bio': 'Алхимик — герой силы, который зарабатывает золото быстрее всех.',
-            'base_str': 23, 'base_agi': 18, 'base_int': 19,
-            'base_health': 630, 'base_mana': 300, 'base_armor': 2.0,
+            'localized_name': 'Bristleback',
+            'bio': 'Bristleback — герой силы, который получает меньше урона со спины.',
+            'base_str': 23, 'base_agi': 17, 'base_int': 15,
+            'base_health': 630, 'base_mana': 280, 'base_armor': 2.0,
             'attack_rate': 1.8, 'move_speed': 305,
-            'base_attack_min': 48, 'base_attack_max': 58, 'attack_range': 150,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
             'primary_attr': 'str',
-            'str_gain': 2.7, 'agi_gain': 1.6, 'int_gain': 1.9
+            'str_gain': 2.8, 'agi_gain': 1.8, 'int_gain': 1.6
         },
         'abilities': [
-            {'dname': 'Нестабильная смесь', 'desc': 'Бросает кислоту, наносящую урон.', 'img': 'alchemist_acid_spray.png'},
-            {'dname': 'Нестабильная смесь', 'desc': 'Взрывает врагов.', 'img': 'alchemist_unstable_concoction.png'},
-            {'dname': 'Огненный щит', 'desc': 'Сжигает врагов вокруг.', 'img': 'alchemist_fire_shield.png'},
-            {'dname': 'Алхимия', 'desc': 'Пассивно увеличивает золото.', 'img': 'alchemist_greevils_greed.png'}
+            {'dname': 'Иглы', 'desc': 'Наносит урон врагам вокруг.', 'img': 'bristleback_quill_spray.png'},
+            {'dname': 'Бронированная спина', 'desc': 'Уменьшает урон со спины.', 'img': 'bristleback_bristleback.png'},
+            {'dname': 'Сопли', 'desc': 'Замедляет врага и снижает его броню.', 'img': 'bristleback_viscous_nasal_goo.png'},
+            {'dname': 'Варварство', 'desc': 'Увеличивает урон и скорость атаки.', 'img': 'bristleback_warpath.png'}
         ]
     },
+    'centaur': {
+        'data': {
+            'localized_name': 'Centaur Warrunner',
+            'bio': 'Centaur Warrunner — герой силы, который наносит урон при получении атак.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 305,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Топот', 'desc': 'Оглушает врагов вокруг.', 'img': 'centaur_hoof_stomp.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'centaur_double_edge.png'},
+            {'dname': 'Возврат урона', 'desc': 'Возвращает урон врагам.', 'img': 'centaur_return.png'},
+            {'dname': 'Стойкость', 'desc': 'Увеличивает здоровье и урон.', 'img': 'centaur_stampede.png'}
+        ]
+    },
+    'chaos_knight': {
+        'data': {
+            'localized_name': 'Chaos Knight',
+            'bio': 'Chaos Knight — герой силы, который создаёт иллюзии и наносит огромный урон.',
+            'base_str': 24, 'base_agi': 18, 'base_int': 16,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 310,
+            'base_attack_min': 52, 'base_attack_max': 62, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.9, 'agi_gain': 1.8, 'int_gain': 1.6
+        },
+        'abilities': [
+            {'dname': 'Оглушение', 'desc': 'Оглушает врага.', 'img': 'chaos_knight_chaos_bolt.png'},
+            {'dname': 'Создание иллюзий', 'desc': 'Создаёт иллюзии героя.', 'img': 'chaos_knight_phantasm.png'},
+            {'dname': 'Реализм', 'desc': 'Увеличивает урон иллюзий.', 'img': 'chaos_knight_reality_rift.png'},
+            {'dname': 'Критический удар', 'desc': 'Наносит критический урон.', 'img': 'chaos_knight_chaos_strike.png'}
+        ]
+    },
+    'doom_bringer': {
+        'data': {
+            'localized_name': 'Doom',
+            'bio': 'Doom — герой силы, который накладывает проклятие на врагов.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Дьявольский огонь', 'desc': 'Наносит урон врагам.', 'img': 'doom_bringer_devour.png'},
+            {'dname': 'Проклятие', 'desc': 'Накладывает проклятие на врага.', 'img': 'doom_bringer_scorched_earth.png'},
+            {'dname': 'Смертельный удар', 'desc': 'Наносит дополнительный урон.', 'img': 'doom_bringer_lvl_death.png'},
+            {'dname': 'Судьба', 'desc': 'Останавливает врага.', 'img': 'doom_bringer_doom.png'}
+        ]
+    },
+    'dragon_knight': {
+        'data': {
+            'localized_name': 'Dragon Knight',
+            'bio': 'Dragon Knight — герой силы, который превращается в дракона.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Дыхание дракона', 'desc': 'Наносит урон врагам.', 'img': 'dragon_knight_breathe_fire.png'},
+            {'dname': 'Стойкость', 'desc': 'Увеличивает броню.', 'img': 'dragon_knight_dragon_blood.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'dragon_knight_dragon_tail.png'},
+            {'dname': 'Превращение', 'desc': 'Превращается в дракона.', 'img': 'dragon_knight_elder_dragon_form.png'}
+        ]
+    },
+    'earthshaker': {
+        'data': {
+            'localized_name': 'Earthshaker',
+            'bio': 'Earthshaker — герой силы, который создаёт трещины в земле.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Трещина', 'desc': 'Создаёт трещину в земле.', 'img': 'earthshaker_fissure.png'},
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'earthshaker_enchant_totem.png'},
+            {'dname': 'Пассивный удар', 'desc': 'Наносит дополнительный урон.', 'img': 'earthshaker_aftershock.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит урон по площади.', 'img': 'earthshaker_echo_slam.png'}
+        ]
+    },
+    'huskar': {
+        'data': {
+            'localized_name': 'Huskar',
+            'bio': 'Huskar — герой силы, который жертвует здоровьем для урона.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Копьё', 'desc': 'Бросает копьё, наносящее урон.', 'img': 'huskar_spear.png'},
+            {'dname': 'Жертва', 'desc': 'Жертвует здоровьем.', 'img': 'huskar_burning_spear.png'},
+            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'huskar_inner_vitality.png'},
+            {'dname': 'Божественный удар', 'desc': 'Наносит урон врагам.', 'img': 'huskar_life_break.png'}
+        ]
+    },
+    'kunkka': {
+        'data': {
+            'localized_name': 'Kunkka',
+            'bio': 'Kunkka — герой силы, который управляет водой.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Волна', 'desc': 'Создаёт волну.', 'img': 'kunkka_torrent.png'},
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'kunkka_tidebringer.png'},
+            {'dname': 'Корабль', 'desc': 'Призывает корабль.', 'img': 'kunkka_ghost_ship.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит урон по площади.', 'img': 'kunkka_x_marks_the_spot.png'}
+        ]
+    },
+    'legion_commander': {
+        'data': {
+            'localized_name': 'Legion Commander',
+            'bio': 'Legion Commander — герой силы, которая вызывает врагов на дуэль.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'legion_commander_overwhelming_odds.png'},
+            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'legion_commander_press_the_attack.png'},
+            {'dname': 'Дуэль', 'desc': 'Вызывает врага на дуэль.', 'img': 'legion_commander_duel.png'},
+            {'dname': 'Пассивный урон', 'desc': 'Наносит дополнительный урон.', 'img': 'legion_commander_moment_of_courage.png'}
+        ]
+    },
+    'life_stealer': {
+        'data': {
+            'localized_name': 'Lifestealer',
+            'bio': 'Lifestealer — герой силы, который восстанавливает здоровье от атак.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Вампиризм', 'desc': 'Восстанавливает здоровье от атак.', 'img': 'life_stealer_rage.png'},
+            {'dname': 'Ярость', 'desc': 'Увеличивает скорость атаки.', 'img': 'life_stealer_feast.png'},
+            {'dname': 'Заражение', 'desc': 'Заражает врага.', 'img': 'life_stealer_open_wounds.png'},
+            {'dname': 'Вселение', 'desc': 'Вселяется в врага.', 'img': 'life_stealer_infest.png'}
+        ]
+    },
+    'lycan': {
+        'data': {
+            'localized_name': 'Lycan',
+            'bio': 'Lycan — герой силы, который превращается в волка.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Призыв волков', 'desc': 'Призывает волков.', 'img': 'lycan_summon_wolves.png'},
+            {'dname': 'Скорость', 'desc': 'Увеличивает скорость.', 'img': 'lycan_howl.png'},
+            {'dname': 'Укус', 'desc': 'Наносит дополнительный урон.', 'img': 'lycan_feral_impulse.png'},
+            {'dname': 'Превращение', 'desc': 'Превращается в волка.', 'img': 'lycan_shapeshift.png'}
+        ]
+    },
+    'mars': {
+        'data': {
+            'localized_name': 'Mars',
+            'bio': 'Mars — герой силы, который создаёт барьер из щитов.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 305,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Копьё', 'desc': 'Бросает копьё, наносящее урон.', 'img': 'mars_spear.png'},
+            {'dname': 'Щит', 'desc': 'Создаёт барьер из щитов.', 'img': 'mars_gods_rebuke.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'mars_bulwark.png'},
+            {'dname': 'Стена', 'desc': 'Создаёт стену копий.', 'img': 'mars_arena_of_blood.png'}
+        ]
+    },
+    'night_stalker': {
+        'data': {
+            'localized_name': 'Night Stalker',
+            'bio': 'Night Stalker — герой силы, который сильнее ночью.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 305,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Безмолвие', 'desc': 'Заставляет врага замолчать.', 'img': 'night_stalker_void.png'},
+            {'dname': 'Когти', 'desc': 'Наносит дополнительный урон.', 'img': 'night_stalker_crippling_fear.png'},
+            {'dname': 'Ночной охотник', 'desc': 'Увеличивает скорость ночью.', 'img': 'night_stalker_hunter_in_the_night.png'},
+            {'dname': 'Тьма', 'desc': 'Погружает в темноту.', 'img': 'night_stalker_darkness.png'}
+        ]
+    },
+    'ogre_magi': {
+        'data': {
+            'localized_name': 'Ogre Magi',
+            'bio': 'Ogre Magi — герой силы, который бросает огненные шары.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Огненный шар', 'desc': 'Бросает огненный шар.', 'img': 'ogre_magi_fireblast.png'},
+            {'dname': 'Замедление', 'desc': 'Замедляет врага.', 'img': 'ogre_magi_ignite.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'ogre_magi_bloodlust.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'ogre_magi_multicast.png'}
+        ]
+    },
+    'omniknight': {
+        'data': {
+            'localized_name': 'Omniknight',
+            'bio': 'Omniknight — герой силы, который лечит и защищает союзников.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'omniknight_purification.png'},
+            {'dname': 'Защита', 'desc': 'Защищает от магии.', 'img': 'omniknight_repel.png'},
+            {'dname': 'Божественная защита', 'desc': 'Защищает от физического урона.', 'img': 'omniknight_guardian_angel.png'},
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'omniknight_degen_aura.png'}
+        ]
+    },
+    'phoenix': {
+        'data': {
+            'localized_name': 'Phoenix',
+            'bio': 'Phoenix — герой силы, который возрождается из пепла.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Огонь', 'desc': 'Наносит урон врагам.', 'img': 'phoenix_fire_spirits.png'},
+            {'dname': 'Луч', 'desc': 'Наносит урон по площади.', 'img': 'phoenix_sun_ray.png'},
+            {'dname': 'Яйцо', 'desc': 'Возрождается из яйца.', 'img': 'phoenix_supernova.png'},
+            {'dname': 'Птица', 'desc': 'Превращается в птицу.', 'img': 'phoenix_icarus_dive.png'}
+        ]
+    },
+    'primal_beast': {
+        'data': {
+            'localized_name': 'Primal Beast',
+            'bio': 'Primal Beast — герой силы, который наносит урон своими ударами.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'primal_beast_onslaught.png'},
+            {'dname': 'Ярость', 'desc': 'Увеличивает урон.', 'img': 'primal_beast_trample.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'primal_beast_uproar.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит огромный урон.', 'img': 'primal_beast_pulverize.png'}
+        ]
+    },
+    'slardar': {
+        'data': {
+            'localized_name': 'Slardar',
+            'bio': 'Slardar — герой силы, который оглушает врагов.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Оглушение', 'desc': 'Оглушает врага.', 'img': 'slardar_slithereen_crush.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'slardar_bash.png'},
+            {'dname': 'Снижение брони', 'desc': 'Снижает броню врага.', 'img': 'slardar_amplify_damage.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'slardar_guardian_sprint.png'}
+        ]
+    },
+    'spirit_breaker': {
+        'data': {
+            'localized_name': 'Spirit Breaker',
+            'bio': 'Spirit Breaker — герой силы, который таранит врагов.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 305,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Таран', 'desc': 'Таранит врага.', 'img': 'spirit_breaker_charge_of_darkness.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'spirit_breaker_greater_bash.png'},
+            {'dname': 'Ускорение', 'desc': 'Увеличивает скорость.', 'img': 'spirit_breaker_empowering_haste.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит урон по площади.', 'img': 'spirit_breaker_nether_strike.png'}
+        ]
+    },
+    'sven': {
+        'data': {
+            'localized_name': 'Sven',
+            'bio': 'Sven — герой силы, который наносит огромный урон.',
+            'base_str': 25, 'base_agi': 18, 'base_int': 16,
+            'base_health': 650, 'base_mana': 280, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 310,
+            'base_attack_min': 50, 'base_attack_max': 60, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 2.0, 'int_gain': 1.6
+        },
+        'abilities': [
+            {'dname': 'Молот', 'desc': 'Бросает молот, оглушающий врагов.', 'img': 'sven_storm_hammer.png'},
+            {'dname': 'Божественная сила', 'desc': 'Увеличивает урон на время.', 'img': 'sven_gods_strength.png'},
+            {'dname': 'Боевой клич', 'desc': 'Увеличивает броню союзников.', 'img': 'sven_warcry.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит урон по площади.', 'img': 'sven_great_cleave.png'}
+        ]
+    },
+    'tidehunter': {
+        'data': {
+            'localized_name': 'Tidehunter',
+            'bio': 'Tidehunter — герой силы, который наносит урон по площади.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Волна', 'desc': 'Создаёт волну, наносящую урон.', 'img': 'tidehunter_gush.png'},
+            {'dname': 'Кожа', 'desc': 'Уменьшает получаемый урон.', 'img': 'tidehunter_kraken_shell.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'tidehunter_anchor_smash.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит урон по площади.', 'img': 'tidehunter_ravage.png'}
+        ]
+    },
+    'timbersaw': {
+        'data': {
+            'localized_name': 'Timbersaw',
+            'bio': 'Timbersaw — герой силы, который рубит деревья.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Пила', 'desc': 'Рубит деревья.', 'img': 'shredder_whirling_death.png'},
+            {'dname': 'Цепь', 'desc': 'Цепляется за дерево.', 'img': 'shredder_timber_chain.png'},
+            {'dname': 'Реактивная броня', 'desc': 'Увеличивает броню.', 'img': 'shredder_reactive_armor.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'shredder_chakram.png'}
+        ]
+    },
+    'tiny': {
+        'data': {
+            'localized_name': 'Tiny',
+            'bio': 'Tiny — герой силы, который бросает врагов.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 62, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 3.0, 'agi_gain': 1.8, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Бросок', 'desc': 'Бросает врага.', 'img': 'tiny_toss.png'},
+            {'dname': 'Каменная глыба', 'desc': 'Наносит урон по площади.', 'img': 'tiny_avalanche.png'},
+            {'dname': 'Удар дерева', 'desc': 'Увеличивает урон.', 'img': 'tiny_tree_grab.png'},
+            {'dname': 'Бросок дерева', 'desc': 'Бросает дерево.', 'img': 'tiny_tree_throw.png'}
+        ]
+    },
+    'treant': {
+        'data': {
+            'localized_name': 'Treant Protector',
+            'bio': 'Treant Protector — герой силы, который защищает деревья.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Укоренение', 'desc': 'Укореняет врага.', 'img': 'treant_leech_seed.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню союзника.', 'img': 'treant_living_armor.png'},
+            {'dname': 'Природный дар', 'desc': 'Лечит союзников.', 'img': 'treant_natures_guise.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'treant_overgrowth.png'}
+        ]
+    },
+    'tusk': {
+        'data': {
+            'localized_name': 'Tusk',
+            'bio': 'Tusk — герой силы, который использует лёд.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Ледяной шар', 'desc': 'Создаёт ледяной шар.', 'img': 'tusk_ice_shards.png'},
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'tusk_snowball.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'tusk_frozen_sigil.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит урон по площади.', 'img': 'tusk_walrus_punch.png'}
+        ]
+    },
+    'underlord': {
+        'data': {
+            'localized_name': 'Underlord',
+            'bio': 'Underlord — герой силы, который создаёт порталы.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Тьма', 'desc': 'Наносит урон врагам.', 'img': 'abyssal_underlord_firestorm.png'},
+            {'dname': 'Портал', 'desc': 'Создаёт портал.', 'img': 'abyssal_underlord_dark_rift.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'abyssal_underlord_atrophy_aura.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'abyssal_underlord_pit_of_malice.png'}
+        ]
+    },
+    'undying': {
+        'data': {
+            'localized_name': 'Undying',
+            'bio': 'Undying — герой силы, который создаёт зомби.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.8, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Зомби', 'desc': 'Призывает зомби.', 'img': 'undying_tombstone.png'},
+            {'dname': 'Укус', 'desc': 'Наносит урон врагам.', 'img': 'undying_decay.png'},
+            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'undying_soul_rip.png'},
+            {'dname': 'Жертва', 'desc': 'Жертвует здоровьем.', 'img': 'undying_flesh_golem.png'}
+        ]
+    },
+    'wraith_king': {
+        'data': {
+            'localized_name': 'Wraith King',
+            'bio': 'Wraith King — герой силы, который возрождается после смерти.',
+            'base_str': 24, 'base_agi': 16, 'base_int': 18,
+            'base_health': 640, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.8, 'move_speed': 300,
+            'base_attack_min': 50, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'str',
+            'str_gain': 2.8, 'agi_gain': 1.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'skeleton_king_hellfire_blast.png'},
+            {'dname': 'Вампиризм', 'desc': 'Восстанавливает здоровье.', 'img': 'skeleton_king_vampiric_aura.png'},
+            {'dname': 'Возрождение', 'desc': 'Возрождается после смерти.', 'img': 'skeleton_king_reincarnation.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит урон по площади.', 'img': 'skeleton_king_mortal_strike.png'}
+        ]
+    },
+    # ===== ЛОВКОСТЬ =====
     'antimage': {
         'data': {
             'localized_name': 'Anti-Mage',
@@ -406,8 +806,603 @@ LOCAL_HEROES_DATA = {
         'abilities': [
             {'dname': 'Удар маны', 'desc': 'Сжигает ману врага.', 'img': 'antimage_mana_break.png'},
             {'dname': 'Телепорт', 'desc': 'Телепортируется на короткое расстояние.', 'img': 'antimage_blink.png'},
-            {'dname': 'Защита от магии', 'desc': 'Пассивная защита.', 'img': 'antimage_spell_shield.png'},
+            {'dname': 'Защита от магии', 'desc': 'Пассивная защита от магии.', 'img': 'antimage_spell_shield.png'},
             {'dname': 'Уничтожение маны', 'desc': 'Наносит урон за сожжённую ману.', 'img': 'antimage_mana_void.png'}
+        ]
+    },
+    'bloodseeker': {
+        'data': {
+            'localized_name': 'Bloodseeker',
+            'bio': 'Bloodseeker — герой ловкости, который преследует раненых врагов.',
+            'base_str': 22, 'base_agi': 24, 'base_int': 16,
+            'base_health': 600, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 310,
+            'base_attack_min': 50, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Кровавая воля', 'desc': 'Увеличивает скорость при низком здоровье.', 'img': 'bloodseeker_strygwyr_thirst.png'},
+            {'dname': 'Кровавый ритуал', 'desc': 'Наносит урон врагам.', 'img': 'bloodseeker_blood_rage.png'},
+            {'dname': 'Кровавый удар', 'desc': 'Наносит дополнительный урон.', 'img': 'bloodseeker_blood_bath.png'},
+            {'dname': 'Кровавый след', 'desc': 'Находит раненых врагов.', 'img': 'bloodseeker_rupture.png'}
+        ]
+    },
+    'bounty_hunter': {
+        'data': {
+            'localized_name': 'Bounty Hunter',
+            'bio': 'Bounty Hunter — герой ловкости, который охотится на врагов.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 300, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 315,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Скрытность', 'desc': 'Становится невидимым.', 'img': 'bounty_hunter_shuriken_toss.png'},
+            {'dname': 'Кинжал', 'desc': 'Бросает кинжал.', 'img': 'bounty_hunter_jinada.png'},
+            {'dname': 'Награда', 'desc': 'Находит врага.', 'img': 'bounty_hunter_track.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'bounty_hunter_wind_walk.png'}
+        ]
+    },
+    'broodmother': {
+        'data': {
+            'localized_name': 'Broodmother',
+            'bio': 'Broodmother — герой ловкости, который создаёт паутину.',
+            'base_str': 20, 'base_agi': 22, 'base_int': 18,
+            'base_health': 580, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 300,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Паутина', 'desc': 'Создаёт паутину.', 'img': 'broodmother_spawn_spiderlings.png'},
+            {'dname': 'Укус', 'desc': 'Наносит дополнительный урон.', 'img': 'broodmother_spin_web.png'},
+            {'dname': 'Яд', 'desc': 'Наносит урон врагам.', 'img': 'broodmother_incapacitating_bite.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'broodmother_insatiable_hunger.png'}
+        ]
+    },
+    'clinkz': {
+        'data': {
+            'localized_name': 'Clinkz',
+            'bio': 'Clinkz — герой ловкости, который стреляет огненными стрелами.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 310,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 600,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Огненная стрела', 'desc': 'Наносит дополнительный урон.', 'img': 'clinkz_searing_arrows.png'},
+            {'dname': 'Скрытность', 'desc': 'Становится невидимым.', 'img': 'clinkz_skeleton_walk.png'},
+            {'dname': 'Огненный удар', 'desc': 'Наносит урон врагам.', 'img': 'clinkz_burning_army.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит огромный урон.', 'img': 'clinkz_death_pact.png'}
+        ]
+    },
+    'drow_ranger': {
+        'data': {
+            'localized_name': 'Drow Ranger',
+            'bio': 'Drow Ranger — герой ловкости, которая стреляет с большой дальности.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 600,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Ледяная стрела', 'desc': 'Замедляет врага.', 'img': 'drow_ranger_frost_arrows.png'},
+            {'dname': 'Безмолвие', 'desc': 'Заставляет врага замолчать.', 'img': 'drow_ranger_silence.png'},
+            {'dname': 'Точность', 'desc': 'Увеличивает урон.', 'img': 'drow_ranger_trueshot_aura.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'drow_ranger_marksmanship.png'}
+        ]
+    },
+    'ember_spirit': {
+        'data': {
+            'localized_name': 'Ember Spirit',
+            'bio': 'Ember Spirit — герой ловкости, который управляет огнём.',
+            'base_str': 20, 'base_agi': 22, 'base_int': 18,
+            'base_health': 580, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 310,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Огненный удар', 'desc': 'Наносит урон врагам.', 'img': 'ember_spirit_flame_guard.png'},
+            {'dname': 'Телепорт', 'desc': 'Телепортируется.', 'img': 'ember_spirit_fire_remnant.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'ember_spirit_sleight_of_fist.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'ember_spirit_activate_fire_remnant.png'}
+        ]
+    },
+    'faceless_void': {
+        'data': {
+            'localized_name': 'Faceless Void',
+            'bio': 'Faceless Void — герой ловкости, который управляет временем.',
+            'base_str': 22, 'base_agi': 24, 'base_int': 16,
+            'base_health': 600, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 50, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Удар времени', 'desc': 'Наносит дополнительный урон.', 'img': 'faceless_void_time_lock.png'},
+            {'dname': 'Телепорт', 'desc': 'Телепортируется.', 'img': 'faceless_void_time_walk.png'},
+            {'dname': 'Замедление', 'desc': 'Замедляет врагов.', 'img': 'faceless_void_time_dilation.png'},
+            {'dname': 'Ультимейт', 'desc': 'Останавливает время.', 'img': 'faceless_void_chronosphere.png'}
+        ]
+    },
+    'gyrocopter': {
+        'data': {
+            'localized_name': 'Gyrocopter',
+            'bio': 'Gyrocopter — герой ловкости, который стреляет ракетами.',
+            'base_str': 20, 'base_agi': 22, 'base_int': 18,
+            'base_health': 580, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Ракета', 'desc': 'Запускает ракету.', 'img': 'gyrocopter_rocket_barrage.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'gyrocopter_homing_missile.png'},
+            {'dname': 'Ускорение', 'desc': 'Увеличивает скорость.', 'img': 'gyrocopter_flak_cannon.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'gyrocopter_call_down.png'}
+        ]
+    },
+    'juggernaut': {
+        'data': {
+            'localized_name': 'Juggernaut',
+            'bio': 'Juggernaut — герой ловкости, который убивает врагов ультимейтом.',
+            'base_str': 20, 'base_agi': 22, 'base_int': 16,
+            'base_health': 580, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 300,
+            'base_attack_min': 50, 'base_attack_max': 56, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 2.0, 'agi_gain': 2.6, 'int_gain': 1.6
+        },
+        'abilities': [
+            {'dname': 'Вихрь клинков', 'desc': 'Наносит урон вокруг.', 'img': 'juggernaut_blade_fury.png'},
+            {'dname': 'Тотем лечения', 'desc': 'Лечит союзников.', 'img': 'juggernaut_healing_ward.png'},
+            {'dname': 'Удар по площади', 'desc': 'Наносит дополнительный урон.', 'img': 'juggernaut_blade_dance.png'},
+            {'dname': 'Омнислэш', 'desc': 'Наносит удары по всем врагам.', 'img': 'juggernaut_omni_slash.png'}
+        ]
+    },
+    'lone_druid': {
+        'data': {
+            'localized_name': 'Lone Druid',
+            'bio': 'Lone Druid — герой ловкости, который призывает медведя.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Призыв медведя', 'desc': 'Призывает медведя.', 'img': 'lone_druid_spirit_bear.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'lone_druid_rabid.png'},
+            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'lone_druid_true_form.png'},
+            {'dname': 'Ультимейт', 'desc': 'Превращается в медведя.', 'img': 'lone_druid_savage_roar.png'}
+        ]
+    },
+    'luna': {
+        'data': {
+            'localized_name': 'Luna',
+            'bio': 'Luna — герой ловкости, которая стреляет лунными лучами.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Лунный луч', 'desc': 'Наносит урон.', 'img': 'luna_lucent_beam.png'},
+            {'dname': 'Лунная аура', 'desc': 'Увеличивает урон союзников.', 'img': 'luna_moon_glaive.png'},
+            {'dname': 'Благословение', 'desc': 'Увеличивает здоровье.', 'img': 'luna_lunar_blessing.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'luna_eclipse.png'}
+        ]
+    },
+    'medusa': {
+        'data': {
+            'localized_name': 'Medusa',
+            'bio': 'Medusa — герой ловкости, которая превращает врагов в камень.',
+            'base_str': 20, 'base_agi': 22, 'base_int': 18,
+            'base_health': 580, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 290,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 600,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Окаменение', 'desc': 'Замедляет врагов.', 'img': 'medusa_stone_gaze.png'},
+            {'dname': 'Змеи', 'desc': 'Наносит урон врагам.', 'img': 'medusa_mystic_snake.png'},
+            {'dname': 'Щит', 'desc': 'Защищает от урона.', 'img': 'medusa_mana_shield.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'medusa_split_shot.png'}
+        ]
+    },
+    'meepo': {
+        'data': {
+            'localized_name': 'Meepo',
+            'bio': 'Meepo — герой ловкости, который создаёт клонов.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Клон', 'desc': 'Создаёт клона.', 'img': 'meepo_poof.png'},
+            {'dname': 'Сеть', 'desc': 'Ловит врага.', 'img': 'meepo_net.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'meepo_geostrike.png'},
+            {'dname': 'Ультимейт', 'desc': 'Телепортирует клонов.', 'img': 'meepo_earthbind.png'}
+        ]
+    },
+    'mirana': {
+        'data': {
+            'localized_name': 'Mirana',
+            'bio': 'Mirana — герой ловкости, которая стреляет стрелами.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 600,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Стрела', 'desc': 'Оглушает врага.', 'img': 'mirana_arrow.png'},
+            {'dname': 'Звёздный удар', 'desc': 'Наносит урон.', 'img': 'mirana_starfall.png'},
+            {'dname': 'Прыжок', 'desc': 'Прыгает на врага.', 'img': 'mirana_leap.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'mirana_moonlight_shadow.png'}
+        ]
+    },
+    'monkey_king': {
+        'data': {
+            'localized_name': 'Monkey King',
+            'bio': 'Monkey King — герой ловкости, который использует посох.',
+            'base_str': 20, 'base_agi': 22, 'base_int': 18,
+            'base_health': 580, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 300,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Удар посохом', 'desc': 'Наносит дополнительный урон.', 'img': 'monkey_king_boundless_strike.png'},
+            {'dname': 'Дерево', 'desc': 'Забирается на дерево.', 'img': 'monkey_king_tree_dance.png'},
+            {'dname': 'Иллюзии', 'desc': 'Создаёт иллюзии.', 'img': 'monkey_king_mischief.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'monkey_king_wukongs_command.png'}
+        ]
+    },
+    'morphling': {
+        'data': {
+            'localized_name': 'Morphling',
+            'bio': 'Morphling — герой ловкости, который меняет форму.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 300,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Волна', 'desc': 'Наносит урон врагам.', 'img': 'morphling_waveform.png'},
+            {'dname': 'Адаптация', 'desc': 'Меняет атрибуты.', 'img': 'morphling_morph.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'morphling_adaptive_strike.png'},
+            {'dname': 'Ультимейт', 'desc': 'Превращается в другого героя.', 'img': 'morphling_replicate.png'}
+        ]
+    },
+    'naga_siren': {
+        'data': {
+            'localized_name': 'Naga Siren',
+            'bio': 'Naga Siren — герой ловкости, которая усыпляет врагов.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Песня сирены', 'desc': 'Усыпляет врагов.', 'img': 'naga_siren_song_of_the_siren.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'naga_siren_rip_tide.png'},
+            {'dname': 'Сеть', 'desc': 'Ловит врага.', 'img': 'naga_siren_ensnare.png'},
+            {'dname': 'Иллюзии', 'desc': 'Создаёт иллюзии.', 'img': 'naga_siren_mirror_image.png'}
+        ]
+    },
+    'phantom_assassin': {
+        'data': {
+            'localized_name': 'Phantom Assassin',
+            'bio': 'Phantom Assassin — герой ловкости, которая убивает с критическим ударом.',
+            'base_str': 19, 'base_agi': 23, 'base_int': 15,
+            'base_health': 560, 'base_mana': 280, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 310,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.8, 'int_gain': 1.6
+        },
+        'abilities': [
+            {'dname': 'Кинжал', 'desc': 'Бросает кинжал.', 'img': 'phantom_assassin_stifling_dagger.png'},
+            {'dname': 'Размытость', 'desc': 'Уклоняется от атак.', 'img': 'phantom_assassin_blur.png'},
+            {'dname': 'Удар удачи', 'desc': 'Наносит критический урон.', 'img': 'phantom_assassin_coup_de_grace.png'},
+            {'dname': 'Удар призрака', 'desc': 'Телепортируется и наносит урон.', 'img': 'phantom_assassin_phantom_strike.png'}
+        ]
+    },
+    'phantom_lancer': {
+        'data': {
+            'localized_name': 'Phantom Lancer',
+            'bio': 'Phantom Lancer — герой ловкости, который создаёт множество иллюзий.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Копьё', 'desc': 'Бросает копьё.', 'img': 'phantom_lancer_spirit_lance.png'},
+            {'dname': 'Иллюзии', 'desc': 'Создаёт иллюзии.', 'img': 'phantom_lancer_doppelwalk.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'phantom_lancer_phantom_rush.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'phantom_lancer_juxtapose.png'}
+        ]
+    },
+    'razor': {
+        'data': {
+            'localized_name': 'Razor',
+            'bio': 'Razor — герой ловкости, который крадёт урон.',
+            'base_str': 20, 'base_agi': 22, 'base_int': 18,
+            'base_health': 580, 'base_mana': 300, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 295,
+            'base_attack_min': 50, 'base_attack_max': 56, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 2.0, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Плазменное поле', 'desc': 'Наносит урон врагам.', 'img': 'razor_plasma_field.png'},
+            {'dname': 'Статическая связь', 'desc': 'Крадёт урон.', 'img': 'razor_static_link.png'},
+            {'dname': 'Нестабильный ток', 'desc': 'Наносит урон вокруг.', 'img': 'razor_unstable_current.png'},
+            {'dname': 'Глаз бури', 'desc': 'Наносит урон по области.', 'img': 'razor_eye_of_the_storm.png'}
+        ]
+    },
+    'riki': {
+        'data': {
+            'localized_name': 'Riki',
+            'bio': 'Riki — герой ловкости, который остаётся невидимым.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 310,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Скрытность', 'desc': 'Становится невидимым.', 'img': 'riki_permanent_invisibility.png'},
+            {'dname': 'Удар в спину', 'desc': 'Наносит дополнительный урон.', 'img': 'riki_backstab.png'},
+            {'dname': 'Дымовая завеса', 'desc': 'Создаёт дымовую завесу.', 'img': 'riki_smoke_screen.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'riki_tricks_of_the_trade.png'}
+        ]
+    },
+    'shadow_fiend': {
+        'data': {
+            'localized_name': 'Shadow Fiend',
+            'bio': 'Shadow Fiend — герой ловкости, который собирает души.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Тень', 'desc': 'Наносит урон врагам.', 'img': 'nevermore_shadowraze.png'},
+            {'dname': 'Некромастерство', 'desc': 'Собирает души.', 'img': 'nevermore_necromastery.png'},
+            {'dname': 'Присутствие', 'desc': 'Снижает броню врагов.', 'img': 'nevermore_presence_of_the_dark_lord.png'},
+            {'dname': 'Требование души', 'desc': 'Наносит урон по площади.', 'img': 'nevermore_requiem.png'}
+        ]
+    },
+    'slark': {
+        'data': {
+            'localized_name': 'Slark',
+            'bio': 'Slark — герой ловкости, который восстанавливает здоровье.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Тёмный договор', 'desc': 'Наносит урон врагам.', 'img': 'slark_dark_pact.png'},
+            {'dname': 'Прыжок', 'desc': 'Прыгает на врага.', 'img': 'slark_pounce.png'},
+            {'dname': 'Эссенция', 'desc': 'Восстанавливает здоровье.', 'img': 'slark_essence_shift.png'},
+            {'dname': 'Ультимейт', 'desc': 'Становится невидимым.', 'img': 'slark_shadow_dance.png'}
+        ]
+    },
+    'sniper': {
+        'data': {
+            'localized_name': 'Sniper',
+            'bio': 'Sniper — герой ловкости, который стреляет издалека.',
+            'base_str': 18, 'base_agi': 20, 'base_int': 18,
+            'base_health': 560, 'base_mana': 300, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 290,
+            'base_attack_min': 45, 'base_attack_max': 55, 'attack_range': 600,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Осколки', 'desc': 'Наносит урон по площади.', 'img': 'sniper_shrapnel.png'},
+            {'dname': 'Выстрел в голову', 'desc': 'Наносит дополнительный урон.', 'img': 'sniper_headshot.png'},
+            {'dname': 'Прицеливание', 'desc': 'Увеличивает дальность.', 'img': 'sniper_take_aim.png'},
+            {'dname': 'Снайперский выстрел', 'desc': 'Наносит огромный урон.', 'img': 'sniper_assassinate.png'}
+        ]
+    },
+    'spectre': {
+        'data': {
+            'localized_name': 'Spectre',
+            'bio': 'Spectre — герой ловкости, которая создаёт иллюзии.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Кинжал', 'desc': 'Бросает кинжал.', 'img': 'spectre_spectral_dagger.png'},
+            {'dname': 'Рассеивание', 'desc': 'Создаёт иллюзии.', 'img': 'spectre_desolate.png'},
+            {'dname': 'Отражение', 'desc': 'Наносит урон врагам.', 'img': 'spectre_dispersion.png'},
+            {'dname': 'Призрак', 'desc': 'Телепортируется к врагу.', 'img': 'spectre_haunt.png'}
+        ]
+    },
+    'templar_assassin': {
+        'data': {
+            'localized_name': 'Templar Assassin',
+            'bio': 'Templar Assassin — герой ловкости, которая скрывается от врагов.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Скрытность', 'desc': 'Становится невидимым.', 'img': 'templar_assassin_meld.png'},
+            {'dname': 'Псионический удар', 'desc': 'Наносит дополнительный урон.', 'img': 'templar_assassin_psi_blades.png'},
+            {'dname': 'Щит', 'desc': 'Защищает от урона.', 'img': 'templar_assassin_refraction.png'},
+            {'dname': 'Ловушка', 'desc': 'Создаёт ловушку.', 'img': 'templar_assassin_trap.png'}
+        ]
+    },
+    'terrorblade': {
+        'data': {
+            'localized_name': 'Terrorblade',
+            'bio': 'Terrorblade — герой ловкости, который создаёт иллюзии.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Иллюзии', 'desc': 'Создаёт иллюзии.', 'img': 'terrorblade_conjure_image.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'terrorblade_metamorphosis.png'},
+            {'dname': 'Скорость', 'desc': 'Увеличивает скорость.', 'img': 'terrorblade_reflection.png'},
+            {'dname': 'Ультимейт', 'desc': 'Меняется местами с врагом.', 'img': 'terrorblade_sunder.png'}
+        ]
+    },
+    'troll_warlord': {
+        'data': {
+            'localized_name': 'Troll Warlord',
+            'bio': 'Troll Warlord — герой ловкости, который быстро атакует.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 310,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Оглушение', 'desc': 'Оглушает врага.', 'img': 'troll_warlord_whirling_axes.png'},
+            {'dname': 'Ускорение', 'desc': 'Увеличивает скорость.', 'img': 'troll_warlord_battle_trance.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'troll_warlord_fervor.png'},
+            {'dname': 'Ультимейт', 'desc': 'Увеличивает скорость атаки.', 'img': 'troll_warlord_berserkers_rage.png'}
+        ]
+    },
+    'ursa': {
+        'data': {
+            'localized_name': 'Ursa',
+            'bio': 'Ursa — герой ловкости, который наносит огромный урон.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 310,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Когти', 'desc': 'Наносит дополнительный урон.', 'img': 'ursa_earthshock.png'},
+            {'dname': 'Ярость', 'desc': 'Увеличивает урон.', 'img': 'ursa_overpower.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'ursa_fury_swipes.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон врагам.', 'img': 'ursa_enrage.png'}
+        ]
+    },
+    'venomancer': {
+        'data': {
+            'localized_name': 'Venomancer',
+            'bio': 'Venomancer — герой ловкости, который отравляет врагов.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Яд', 'desc': 'Наносит урон врагам.', 'img': 'venomancer_venomous_gale.png'},
+            {'dname': 'Тотем', 'desc': 'Создаёт тотем.', 'img': 'venomancer_plague_ward.png'},
+            {'dname': 'Ядовитая кожа', 'desc': 'Наносит урон врагам.', 'img': 'venomancer_poison_sting.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'venomancer_poison_nova.png'}
+        ]
+    },
+    'viper': {
+        'data': {
+            'localized_name': 'Viper',
+            'bio': 'Viper — герой ловкости, который отравляет врагов.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 295,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Яд', 'desc': 'Наносит урон врагам.', 'img': 'viper_poison_attack.png'},
+            {'dname': 'Кислота', 'desc': 'Наносит урон по площади.', 'img': 'viper_nethertoxin.png'},
+            {'dname': 'Броня', 'desc': 'Увеличивает броню.', 'img': 'viper_corrosive_skin.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон врагам.', 'img': 'viper_viper_strike.png'}
+        ]
+    },
+    'weaver': {
+        'data': {
+            'localized_name': 'Weaver',
+            'bio': 'Weaver — герой ловкости, который управляет временем.',
+            'base_str': 18, 'base_agi': 22, 'base_int': 18,
+            'base_health': 560, 'base_mana': 290, 'base_armor': 2.0,
+            'attack_rate': 1.6, 'move_speed': 305,
+            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 500,
+            'primary_attr': 'agi',
+            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+        },
+        'abilities': [
+            {'dname': 'Плетение', 'desc': 'Наносит урон врагам.', 'img': 'weaver_the_swarm.png'},
+            {'dname': 'Прыжок', 'desc': 'Прыгает на врага.', 'img': 'weaver_shukuchi.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'weaver_geminate_attack.png'},
+            {'dname': 'Ультимейт', 'desc': 'Откатывает время.', 'img': 'weaver_time_lapse.png'}
+        ]
+    },
+    # ===== ИНТЕЛЛЕКТ =====
+    'ancient_apparition': {
+        'data': {
+            'localized_name': 'Ancient Apparition',
+            'bio': 'Ancient Apparition — герой интеллекта, который замораживает врагов.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 285,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
+        },
+        'abilities': [
+            {'dname': 'Холодный удар', 'desc': 'Наносит урон и замедляет.', 'img': 'ancient_apparition_cold_feet.png'},
+            {'dname': 'Ледяной взрыв', 'desc': 'Наносит урон по площади.', 'img': 'ancient_apparition_ice_blast.png'},
+            {'dname': 'Призрак', 'desc': 'Создаёт призрака.', 'img': 'ancient_apparition_chilling_touch.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон врагам.', 'img': 'ancient_apparition_ice_vortex.png'}
         ]
     },
     'crystal_maiden': {
@@ -423,7 +1418,7 @@ LOCAL_HEROES_DATA = {
         },
         'abilities': [
             {'dname': 'Ледяная глыба', 'desc': 'Замораживает врага.', 'img': 'crystal_maiden_crystal_nova.png'},
-            {'dname': 'Ледяная глыба', 'desc': 'Наносит урон и замедляет.', 'img': 'crystal_maiden_frostbite.png'},
+            {'dname': 'Укус холода', 'desc': 'Наносит урон и замедляет.', 'img': 'crystal_maiden_frostbite.png'},
             {'dname': 'Ледяная аура', 'desc': 'Пассивное замедление.', 'img': 'crystal_maiden_crystal_aura.png'},
             {'dname': 'Ледяной шторм', 'desc': 'Наносит огромный урон по области.', 'img': 'crystal_maiden_freezing_field.png'}
         ]
@@ -440,28 +1435,46 @@ LOCAL_HEROES_DATA = {
             'str_gain': 2.0, 'agi_gain': 1.8, 'int_gain': 3.5
         },
         'abilities': [
-            {'dname': 'Экзорцизм', 'desc': 'Комбинация стихий.', 'img': 'invoker_invoke.png'},
+            {'dname': 'Призыв', 'desc': 'Комбинация стихий.', 'img': 'invoker_invoke.png'},
             {'dname': 'Солнечный удар', 'desc': 'Наносит урон.', 'img': 'invoker_sun_strike.png'},
-            {'dname': 'Ледяная стена', 'desc': 'Создаёт стену.', 'img': 'invoker_ice_wall.png'},
+            {'dname': 'Ледяная стена', 'desc': 'Создаёт ледяную стену.', 'img': 'invoker_ice_wall.png'},
             {'dname': 'Метеорит', 'desc': 'Призывает метеорит.', 'img': 'invoker_meteor.png'}
         ]
     },
-    'juggernaut': {
+    'lich': {
         'data': {
-            'localized_name': 'Juggernaut',
-            'bio': 'Juggernaut — герой ловкости, который убивает врагов ультимейтом.',
-            'base_str': 20, 'base_agi': 22, 'base_int': 16,
-            'base_health': 580, 'base_mana': 290, 'base_armor': 2.0,
-            'attack_rate': 1.6, 'move_speed': 300,
-            'base_attack_min': 50, 'base_attack_max': 56, 'attack_range': 150,
-            'primary_attr': 'agi',
-            'str_gain': 2.0, 'agi_gain': 2.6, 'int_gain': 1.6
+            'localized_name': 'Lich',
+            'bio': 'Lich — герой интеллекта, который жертвует союзниками.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
         },
         'abilities': [
-            {'dname': 'Вихрь клинков', 'desc': 'Наносит урон вокруг.', 'img': 'juggernaut_blade_fury.png'},
-            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'juggernaut_healing_ward.png'},
-            {'dname': 'Удар по площади', 'desc': 'Наносит дополнительный урон.', 'img': 'juggernaut_blade_dance.png'},
-            {'dname': 'Омнислэш', 'desc': 'Наносит удары по всем врагам.', 'img': 'juggernaut_omni_slash.png'}
+            {'dname': 'Ледяная бомба', 'desc': 'Наносит урон врагам.', 'img': 'lich_frost_blast.png'},
+            {'dname': 'Жертва', 'desc': 'Жертвует союзником.', 'img': 'lich_sacrifice.png'},
+            {'dname': 'Ледяная броня', 'desc': 'Увеличивает броню.', 'img': 'lich_ice_armor.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'lich_chain_frost.png'}
+        ]
+    },
+    'lina': {
+        'data': {
+            'localized_name': 'Lina',
+            'bio': 'Lina — герой интеллекта, которая сжигает врагов.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
+        },
+        'abilities': [
+            {'dname': 'Огненный шар', 'desc': 'Наносит урон врагам.', 'img': 'lina_dragon_slave.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'lina_fiery_soul.png'},
+            {'dname': 'Замедление', 'desc': 'Замедляет врага.', 'img': 'lina_light_strike_array.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит огромный урон.', 'img': 'lina_laguna_blade.png'}
         ]
     },
     'lion': {
@@ -482,24 +1495,6 @@ LOCAL_HEROES_DATA = {
             {'dname': 'Пронзающий взгляд', 'desc': 'Наносит огромный урон.', 'img': 'lion_finger_of_death.png'}
         ]
     },
-    'phantom_assassin': {
-        'data': {
-            'localized_name': 'Phantom Assassin',
-            'bio': 'Phantom Assassin — герой ловкости, которая убивает с критическим ударом.',
-            'base_str': 19, 'base_agi': 23, 'base_int': 15,
-            'base_health': 560, 'base_mana': 280, 'base_armor': 2.0,
-            'attack_rate': 1.6, 'move_speed': 310,
-            'base_attack_min': 48, 'base_attack_max': 54, 'attack_range': 150,
-            'primary_attr': 'agi',
-            'str_gain': 1.8, 'agi_gain': 2.8, 'int_gain': 1.6
-        },
-        'abilities': [
-            {'dname': 'Кинжал', 'desc': 'Бросает кинжал.', 'img': 'phantom_assassin_stifling_dagger.png'},
-            {'dname': 'Уклонение', 'desc': 'Уклоняется от атак.', 'img': 'phantom_assassin_blur.png'},
-            {'dname': 'Критический удар', 'desc': 'Наносит критический урон.', 'img': 'phantom_assassin_coup_de_grace.png'},
-            {'dname': 'Смертельный удар', 'desc': 'Телепортируется и наносит урон.', 'img': 'phantom_assassin_phantom_strike.png'}
-        ]
-    },
     'puck': {
         'data': {
             'localized_name': 'Puck',
@@ -518,40 +1513,94 @@ LOCAL_HEROES_DATA = {
             {'dname': 'Сон', 'desc': 'Усыпляет врагов.', 'img': 'puck_dream_coil.png'}
         ]
     },
-    'razor': {
+    'pugna': {
         'data': {
-            'localized_name': 'Razor',
-            'bio': 'Razor — герой ловкости, который крадёт урон.',
-            'base_str': 20, 'base_agi': 22, 'base_int': 18,
-            'base_health': 580, 'base_mana': 300, 'base_armor': 2.0,
-            'attack_rate': 1.6, 'move_speed': 295,
-            'base_attack_min': 50, 'base_attack_max': 56, 'attack_range': 500,
-            'primary_attr': 'agi',
-            'str_gain': 2.0, 'agi_gain': 2.6, 'int_gain': 1.8
+            'localized_name': 'Pugna',
+            'bio': 'Pugna — герой интеллекта, который разрушает здания.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
         },
         'abilities': [
-            {'dname': 'Плазменная дуга', 'desc': 'Крадёт урон.', 'img': 'razor_plasma_field.png'},
-            {'dname': 'Статическая связь', 'desc': 'Крадёт урон.', 'img': 'razor_static_link.png'},
-            {'dname': 'Шторм', 'desc': 'Наносит урон вокруг.', 'img': 'razor_unstable_current.png'},
-            {'dname': 'Глаз бури', 'desc': 'Наносит урон по области.', 'img': 'razor_eye_of_the_storm.png'}
+            {'dname': 'Разрушение', 'desc': 'Наносит урон зданиям.', 'img': 'pugna_nether_blast.png'},
+            {'dname': 'Снижение урона', 'desc': 'Снижает урон врага.', 'img': 'pugna_decrepify.png'},
+            {'dname': 'Восстановление', 'desc': 'Восстанавливает здоровье.', 'img': 'pugna_life_drain.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'pugna_nether_ward.png'}
         ]
     },
-    'sniper': {
+    'queen_of_pain': {
         'data': {
-            'localized_name': 'Sniper',
-            'bio': 'Sniper — герой ловкости, который стреляет издалека.',
-            'base_str': 18, 'base_agi': 20, 'base_int': 18,
-            'base_health': 560, 'base_mana': 300, 'base_armor': 2.0,
-            'attack_rate': 1.6, 'move_speed': 290,
-            'base_attack_min': 45, 'base_attack_max': 55, 'attack_range': 600,
-            'primary_attr': 'agi',
-            'str_gain': 1.8, 'agi_gain': 2.6, 'int_gain': 1.8
+            'localized_name': 'Queen of Pain',
+            'bio': 'Queen of Pain — герой интеллекта, который наносит боль.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
         },
         'abilities': [
-            {'dname': 'Прицельный выстрел', 'desc': 'Наносит урон и замедляет.', 'img': 'sniper_shrapnel.png'},
-            {'dname': 'Головной выстрел', 'desc': 'Наносит дополнительный урон.', 'img': 'sniper_headshot.png'},
-            {'dname': 'Снайперская стойка', 'desc': 'Увеличивает дальность.', 'img': 'sniper_take_aim.png'},
-            {'dname': 'Выстрел в голову', 'desc': 'Наносит огромный урон.', 'img': 'sniper_assassinate.png'}
+            {'dname': 'Крик боли', 'desc': 'Наносит урон врагам.', 'img': 'queenofpain_scream_of_pain.png'},
+            {'dname': 'Телепорт', 'desc': 'Телепортируется.', 'img': 'queenofpain_blink.png'},
+            {'dname': 'Яд', 'desc': 'Наносит урон врагам.', 'img': 'queenofpain_shadow_strike.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'queenofpain_sonic_wave.png'}
+        ]
+    },
+    'shadow_shaman': {
+        'data': {
+            'localized_name': 'Shadow Shaman',
+            'bio': 'Shadow Shaman — герой интеллекта, который создаёт тотемы.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
+        },
+        'abilities': [
+            {'dname': 'Тотем', 'desc': 'Создаёт тотем.', 'img': 'shadow_shaman_mass_serpent_ward.png'},
+            {'dname': 'Оглушение', 'desc': 'Оглушает врага.', 'img': 'shadow_shaman_shackles.png'},
+            {'dname': 'Яд', 'desc': 'Наносит урон врагам.', 'img': 'shadow_shaman_ether_shock.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'shadow_shaman_hex.png'}
+        ]
+    },
+    'silencer': {
+        'data': {
+            'localized_name': 'Silencer',
+            'bio': 'Silencer — герой интеллекта, который заставляет молчать.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
+        },
+        'abilities': [
+            {'dname': 'Безмолвие', 'desc': 'Заставляет врага молчать.', 'img': 'silencer_curse_of_the_silent.png'},
+            {'dname': 'Удар', 'desc': 'Наносит дополнительный урон.', 'img': 'silencer_glaives_of_wisdom.png'},
+            {'dname': 'Украденная интеллект', 'desc': 'Крадёт интеллект.', 'img': 'silencer_arcane_curse.png'},
+            {'dname': 'Ультимейт', 'desc': 'Заставляет всех молчать.', 'img': 'silencer_global_silence.png'}
+        ]
+    },
+    'skywrath_mage': {
+        'data': {
+            'localized_name': 'Skywrath Mage',
+            'bio': 'Skywrath Mage — герой интеллекта, который стреляет магией.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
+        },
+        'abilities': [
+            {'dname': 'Удар', 'desc': 'Наносит урон врагам.', 'img': 'skywrath_mage_arcane_bolt.png'},
+            {'dname': 'Замедление', 'desc': 'Замедляет врага.', 'img': 'skywrath_mage_concussive_shot.png'},
+            {'dname': 'Щит', 'desc': 'Защищает от магии.', 'img': 'skywrath_mage_ancient_seal.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит огромный урон.', 'img': 'skywrath_mage_mystic_flare.png'}
         ]
     },
     'storm_spirit': {
@@ -567,45 +1616,81 @@ LOCAL_HEROES_DATA = {
         },
         'abilities': [
             {'dname': 'Молния', 'desc': 'Наносит урон.', 'img': 'storm_spirit_static_remnant.png'},
-            {'dname': 'Электрический рывок', 'desc': 'Телепортируется.', 'img': 'storm_spirit_electric_vortex.png'},
+            {'dname': 'Вихрь', 'desc': 'Захватывает врага.', 'img': 'storm_spirit_electric_vortex.png'},
             {'dname': 'Шаровая молния', 'desc': 'Перемещается через врагов.', 'img': 'storm_spirit_ball_lightning.png'},
-            {'dname': 'Разряд', 'desc': 'Наносит урон по области.', 'img': 'storm_spirit_overload.png'}
+            {'dname': 'Перегрузка', 'desc': 'Наносит дополнительный урон.', 'img': 'storm_spirit_overload.png'}
         ]
     },
-    'sven': {
+    'tinker': {
         'data': {
-            'localized_name': 'Sven',
-            'bio': 'Sven — герой силы, который наносит огромный урон.',
-            'base_str': 25, 'base_agi': 18, 'base_int': 16,
-            'base_health': 650, 'base_mana': 280, 'base_armor': 2.5,
-            'attack_rate': 1.8, 'move_speed': 310,
-            'base_attack_min': 50, 'base_attack_max': 60, 'attack_range': 150,
-            'primary_attr': 'str',
-            'str_gain': 2.8, 'agi_gain': 2.0, 'int_gain': 1.6
+            'localized_name': 'Tinker',
+            'bio': 'Tinker — герой интеллекта, который создаёт машины.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 285,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
         },
         'abilities': [
-            {'dname': 'Божественный молот', 'desc': 'Наносит урон по области.', 'img': 'sven_storm_hammer.png'},
-            {'dname': 'Божественный меч', 'desc': 'Увеличивает урон.', 'img': 'sven_gods_strength.png'},
-            {'dname': 'Божественная броня', 'desc': 'Увеличивает броню.', 'img': 'sven_warcry.png'},
-            {'dname': 'Удар молнии', 'desc': 'Наносит урон.', 'img': 'sven_cleave.png'}
+            {'dname': 'Ракета', 'desc': 'Запускает ракету.', 'img': 'tinker_rocket_flare.png'},
+            {'dname': 'Лазер', 'desc': 'Наносит урон врагам.', 'img': 'tinker_laser.png'},
+            {'dname': 'Телепорт', 'desc': 'Телепортируется.', 'img': 'tinker_rearm.png'},
+            {'dname': 'Ультимейт', 'desc': 'Перезаряжает способности.', 'img': 'tinker_march_of_the_machines.png'}
         ]
     },
-    'tiny': {
+    'warlock': {
         'data': {
-            'localized_name': 'Tiny',
-            'bio': 'Tiny — герой силы, который бросает врагов.',
-            'base_str': 24, 'base_agi': 16, 'base_int': 18,
-            'base_health': 640, 'base_mana': 290, 'base_armor': 2.0,
-            'attack_rate': 1.8, 'move_speed': 295,
-            'base_attack_min': 48, 'base_attack_max': 62, 'attack_range': 150,
-            'primary_attr': 'str',
-            'str_gain': 3.0, 'agi_gain': 1.8, 'int_gain': 1.8
+            'localized_name': 'Warlock',
+            'bio': 'Warlock — герой интеллекта, который призывает голема.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 285,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
         },
         'abilities': [
-            {'dname': 'Бросок', 'desc': 'Бросает врага.', 'img': 'tiny_toss.png'},
-            {'dname': 'Камень', 'desc': 'Наносит урон.', 'img': 'tiny_avalanche.png'},
-            {'dname': 'Удар', 'desc': 'Наносит урон.', 'img': 'tiny_tree_grab.png'},
-            {'dname': 'Удар', 'desc': 'Наносит урон.', 'img': 'tiny_tree_throw.png'}
+            {'dname': 'Связь', 'desc': 'Связывает союзников.', 'img': 'warlock_fatal_bonds.png'},
+            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'warlock_shadow_word.png'},
+            {'dname': 'Призыв голема', 'desc': 'Призывает голема.', 'img': 'warlock_chaotic_offering.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'warlock_upheaval.png'}
+        ]
+    },
+    'winter_wyvern': {
+        'data': {
+            'localized_name': 'Winter Wyvern',
+            'bio': 'Winter Wyvern — герой интеллекта, который замораживает врагов.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 285,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
+        },
+        'abilities': [
+            {'dname': 'Дыхание', 'desc': 'Замораживает врагов.', 'img': 'winter_wyvern_arctic_burn.png'},
+            {'dname': 'Кокон', 'desc': 'Заключает врага в кокон.', 'img': 'winter_wyvern_cold_embrace.png'},
+            {'dname': 'Сплинтер', 'desc': 'Наносит урон врагам.', 'img': 'winter_wyvern_splinter_blast.png'},
+            {'dname': 'Ультимейт', 'desc': 'Замораживает врагов.', 'img': 'winter_wyvern_winters_curse.png'}
+        ]
+    },
+    'witch_doctor': {
+        'data': {
+            'localized_name': 'Witch Doctor',
+            'bio': 'Witch Doctor — герой интеллекта, который лечит и наносит урон.',
+            'base_str': 18, 'base_agi': 16, 'base_int': 22,
+            'base_health': 540, 'base_mana': 320, 'base_armor': 1.5,
+            'attack_rate': 1.8, 'move_speed': 290,
+            'base_attack_min': 40, 'base_attack_max': 50, 'attack_range': 600,
+            'primary_attr': 'int',
+            'str_gain': 1.8, 'agi_gain': 1.6, 'int_gain': 3.2
+        },
+        'abilities': [
+            {'dname': 'Тотем смерти', 'desc': 'Создаёт тотем смерти.', 'img': 'witch_doctor_death_ward.png'},
+            {'dname': 'Лечение', 'desc': 'Лечит союзников.', 'img': 'witch_doctor_heal.png'},
+            {'dname': 'Яд', 'desc': 'Наносит урон врагам.', 'img': 'witch_doctor_paralyzing_cask.png'},
+            {'dname': 'Ультимейт', 'desc': 'Наносит урон по площади.', 'img': 'witch_doctor_maledict.png'}
         ]
     },
     'zeus': {
@@ -621,15 +1706,33 @@ LOCAL_HEROES_DATA = {
         },
         'abilities': [
             {'dname': 'Молния', 'desc': 'Наносит урон.', 'img': 'zeus_arc_lightning.png'},
-            {'dname': 'Священный удар', 'desc': 'Наносит урон.', 'img': 'zeus_lightning_bolt.png'},
-            {'dname': 'Божественный удар', 'desc': 'Наносит урон по всем врагам.', 'img': 'zeus_thundergods_wrath.png'},
+            {'dname': 'Божественный удар', 'desc': 'Наносит урон.', 'img': 'zeus_lightning_bolt.png'},
+            {'dname': 'Гнев богов', 'desc': 'Наносит урон по всем врагам.', 'img': 'zeus_thundergods_wrath.png'},
             {'dname': 'Статический разряд', 'desc': 'Наносит урон.', 'img': 'zeus_static_field.png'}
+        ]
+    },
+    # ===== УНИВЕРСАЛЬНЫЕ =====
+    'abaddon': {
+        'data': {
+            'localized_name': 'Abaddon',
+            'bio': 'Абаддон — универсальный герой, который защищает союзников.',
+            'base_str': 22, 'base_agi': 15, 'base_int': 18,
+            'base_health': 620, 'base_mana': 290, 'base_armor': 2.5,
+            'attack_rate': 1.7, 'move_speed': 310,
+            'base_attack_min': 48, 'base_attack_max': 58, 'attack_range': 150,
+            'primary_attr': 'universal',
+            'str_gain': 2.6, 'agi_gain': 1.5, 'int_gain': 2.0
+        },
+        'abilities': [
+            {'dname': 'Мистический туман', 'desc': 'Лечит союзников или наносит урон врагам.', 'img': 'abaddon_mist_coil.png'},
+            {'dname': 'Щит без света', 'desc': 'Создает щит, поглощающий урон.', 'img': 'abaddon_aphotic_shield.png'},
+            {'dname': 'Ледяная скорбь', 'desc': 'Атаки замедляют врагов.', 'img': 'abaddon_frostmourne.png'},
+            {'dname': 'Возврат времени', 'desc': 'Превращает получаемый урон в исцеление.', 'img': 'abaddon_borrowed_time.png'}
         ]
     }
 }
 
 def get_local_hero_data(hero_name):
-    """Возвращает локальные данные героя если они есть"""
     if hero_name in LOCAL_HEROES_DATA:
         return LOCAL_HEROES_DATA[hero_name]
     return None
@@ -647,7 +1750,6 @@ def get_news():
 
 @app.route('/test-hero/<hero_name>')
 def test_hero(hero_name):
-    """Тестовый маршрут для проверки работы роутинга"""
     return f"""
     <h1>Тест маршрута героя</h1>
     <p>Герой: <strong>{hero_name}</strong></p>
@@ -657,16 +1759,12 @@ def test_hero(hero_name):
 
 @app.route('/hero/<hero_name>')
 def hero_page(hero_name):
-    """Страница героя"""
     print(f"🔍 Запрос героя: {hero_name}")
-    
     hero_data = get_hero_data(hero_name)
     print(f"📦 Данные героя: {hero_data is not None}")
-    
     if not hero_data:
         print("❌ Герой не найден, редирект на главную")
         return redirect(url_for('index'))
-    
     print("✅ Рендерим hero.html")
     return render_template('hero.html', 
                           hero=hero_data['data'],
@@ -674,23 +1772,14 @@ def hero_page(hero_name):
 
 @app.route('/api/hero/<hero_name>')
 def api_hero(hero_name):
-    """API для получения данных героя (с fallback)"""
     print(f"🔍 API запрос героя: {hero_name}")
-    
-    # Пытаемся получить данные из OpenDota
     hero_data = get_hero_data(hero_name)
-    
-    # Если OpenDota не ответил — используем локальные данные
     if not hero_data:
         print(f"⚠️ OpenDota не ответил, ищем локальные данные для {hero_name}")
-        
-        # Проверяем локальные данные
         local_data = get_local_hero_data(hero_name)
         if local_data:
             print(f"✅ Использованы локальные данные для {hero_name}")
             return jsonify(local_data)
-        
-        # Если героя нет в локальных данных — возвращаем общий fallback
         print(f"❌ Герой {hero_name} не найден в локальных данных, используем общий fallback")
         return jsonify({
             'data': {
@@ -719,7 +1808,6 @@ def api_hero(hero_name):
                 {'dname': 'Способность 4', 'desc': 'Описание способности 4', 'img': 'default_ability.png'}
             ]
         })
-    
     return jsonify(hero_data)
 
 # ============================================================
@@ -729,24 +1817,19 @@ def initialize_news():
     print("=" * 60)
     print("🚀 ИНИЦИАЛИЗАЦИЯ НОВОСТЕЙ")
     print("=" * 60)
-
     existing = load_news()
     print(f"📰 Существующих новостей: {len(existing)}")
-
     if len(existing) > 0:
         print("✅ Новости уже есть, пропускаем загрузку")
         return
-
     print("📝 Новостей нет. Загружаем свежие из RSS...")
     rss_news = fetch_rss_news()
-
     if rss_news and len(rss_news) > 0:
         save_news(rss_news)
         print(f"✅ Добавлено {len(rss_news)} свежих новостей из RSS")
         for item in rss_news[:3]:
             print(f"   📌 {item['title']}")
         return
-
     print("⚠️ RSS не загрузился. Добавляем тестовую новость...")
     test_news = [
         {
@@ -758,16 +1841,12 @@ def initialize_news():
             'source': 'manual'
         }
     ]
-
     save_news(test_news)
-    print(f"✅ Добавлена тестовая новость")
+    print("✅ Добавлена тестовая новость")
     print("=" * 60)
 
 initialize_news()
 
-# ============================================================
-# ЗАПУСК
-# ============================================================
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port)
