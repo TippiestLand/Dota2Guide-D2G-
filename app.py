@@ -226,7 +226,7 @@ def update_news_from_rss():
     return len(new_items)
 
 # ============================================================
-# ГЕРОИ
+# ГЕРОИ (OpenDota API + FALLBACK)
 # ============================================================
 HERO_CACHE = {}
 HEROES_LIST_CACHE = None
@@ -317,7 +317,10 @@ LOCAL_HEROES_DATA = {
             'base_attack_min': 48,
             'base_attack_max': 58,
             'attack_range': 150,
-            'primary_attr': 'universal'
+            'primary_attr': 'universal',
+            'str_gain': 2.6,
+            'agi_gain': 1.5,
+            'int_gain': 2.0
         },
         'abilities': [
             {'dname': 'Мистический туман', 'desc': 'Абаддон выпускает туман, который лечит союзников или наносит урон врагам.', 'img': 'abaddon_mist_coil.png'},
@@ -341,7 +344,10 @@ LOCAL_HEROES_DATA = {
             'base_attack_min': 52,
             'base_attack_max': 62,
             'attack_range': 150,
-            'primary_attr': 'str'
+            'primary_attr': 'str',
+            'str_gain': 3.2,
+            'agi_gain': 1.5,
+            'int_gain': 1.8
         },
         'abilities': [
             {'dname': 'Мясной крюк', 'desc': 'Пудж бросает крюк, который вытягивает врага к нему.', 'img': 'pudge_meat_hook.png'},
@@ -365,7 +371,10 @@ LOCAL_HEROES_DATA = {
             'base_attack_min': 50,
             'base_attack_max': 60,
             'attack_range': 150,
-            'primary_attr': 'str'
+            'primary_attr': 'str',
+            'str_gain': 2.8,
+            'agi_gain': 2.0,
+            'int_gain': 1.6
         },
         'abilities': [
             {'dname': 'Жажда битвы', 'desc': 'Пассивная способность, увеличивающая скорость атаки Акса.', 'img': 'axe_berserkers_call.png'},
@@ -455,7 +464,10 @@ def api_hero(hero_name):
                 'base_attack_min': 45,
                 'base_attack_max': 55,
                 'attack_range': 150,
-                'primary_attr': 'universal'
+                'primary_attr': 'universal',
+                'str_gain': 2.6,
+                'agi_gain': 1.8,
+                'int_gain': 2.0
             },
             'abilities': [
                 {'dname': 'Способность 1', 'desc': 'Описание способности 1', 'img': 'default_ability.png'},
