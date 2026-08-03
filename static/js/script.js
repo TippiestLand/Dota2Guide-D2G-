@@ -157,6 +157,8 @@
     function openHeroModal(heroIcon) {
         if (!modal) return;
         modal.classList.add('active');
+        // Блокируем скролл основного окна
+        document.body.style.overflow = 'hidden';
         modalBody.innerHTML = '<div class="hero-modal-loading"><div class="loader"></div><p>Загрузка...</p></div>';
 
         var hero = uniqueHeroes.find(function(h) { return h.icon === heroIcon; });
@@ -308,7 +310,11 @@
     }
 
     function closeHeroModal() {
-        if (modal) modal.classList.remove('active');
+        if (modal) {
+            modal.classList.remove('active');
+            // Разблокируем скролл
+            document.body.style.overflow = '';
+        }
     }
 
     if (modalClose) {
