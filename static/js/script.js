@@ -157,7 +157,6 @@
     function openHeroModal(heroIcon) {
         if (!modal) return;
         modal.classList.add('active');
-        // Блокируем скролл основного окна
         document.body.style.overflow = 'hidden';
         modalBody.innerHTML = '<div class="hero-modal-loading"><div class="loader"></div><p>Загрузка...</p></div>';
 
@@ -185,7 +184,6 @@
         var heroData = data.data;
         var abilities = data.abilities || [];
 
-        // Определяем атрибут
         var primaryAttr = heroData.primary_attr || hero.attribute;
         var attrClass = {
             'str': 'strength',
@@ -208,13 +206,14 @@
         }[primaryAttr] || 'Универсальный';
 
         var heroName = heroData.localized_name || hero.name;
+        var heroIcon = hero.icon;
 
         var html = '';
 
         // ===== ШАПКА =====
         html += '<div class="hero-modal-header">';
         html += '    <div class="hero-modal-avatar">';
-        html += '        <img src="/static/assets/icons/' + hero.icon + '.png" alt="' + heroName + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'18\' font-family=\'sans-serif\'%3E' + heroName.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
+        html += '        <img src="/static/assets/icons/' + heroIcon + '.png" alt="' + heroName + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'18\' font-family=\'sans-serif\'%3E' + heroName.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
         html += '    </div>';
         html += '    <div class="hero-modal-title">';
         html += '        <div class="hero-modal-attribute ' + attrClass + '">' + attrName.toUpperCase() + '</div>';
@@ -229,7 +228,6 @@
         // ===== СТАТИСТИКА =====
         html += '<div class="hero-modal-stats">';
 
-        // Атака
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">АТАКА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -239,7 +237,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // Защита
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">ЗАЩИТА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -249,7 +246,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // Мобильность
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">МОБИЛЬНОСТЬ</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -277,29 +273,33 @@
                 var abilityName = ability.dname || 'Способность';
                 var abilityDesc = ability.desc || ability.notes || 'Описание отсутствует';
 
-                html += '<div class="hero-modal-ability">';
-                html += '    <div class="hero-modal-ability-header">';
-                if (ability.img) {
-                    html += '        <div class="hero-modal-ability-icon"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/' + ability.img + '" alt="' + abilityName + '" onerror="this.style.display=\'none\'"></div>';
-                }
-                html += '        <div class="hero-modal-ability-name">' + abilityName + '</div>';
-                html += '    </div>';
-                html += '    <div class="hero-modal-ability-desc">' + abilityDesc + '</div>';
-
+                var details = '';
                 if (ability.dmg || ability.mana_cost || ability.cooldown) {
-                    html += '    <div class="hero-modal-ability-details">';
+                    details += '<div class="ability-tooltip-details">';
                     if (ability.dmg) {
-                        html += '        <div class="hero-modal-ability-detail">Урон: <span>' + ability.dmg + '</span></div>';
+                        details += '    <div class="ability-tooltip-detail">Урон: <span>' + ability.dmg + '</span></div>';
                     }
                     if (ability.mana_cost) {
-                        html += '        <div class="hero-modal-ability-detail">Мана: <span>' + ability.mana_cost + '</span></div>';
+                        details += '    <div class="ability-tooltip-detail">Мана: <span>' + ability.mana_cost + '</span></div>';
                     }
                     if (ability.cooldown) {
-                        html += '        <div class="hero-modal-ability-detail">Перезарядка: <span>' + ability.cooldown + 'с</span></div>';
+                        details += '    <div class="ability-tooltip-detail">Перезарядка: <span>' + ability.cooldown + 'с</span></div>';
                     }
-                    html += '    </div>';
+                    details += '</div>';
                 }
 
+                html += '<div class="hero-modal-ability">';
+                html += '    <div class="hero-modal-ability-icon">';
+                if (ability.img) {
+                    html += '        <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/' + ability.img + '" alt="' + abilityName + '" onerror="this.style.display=\'none\'">';
+                }
+                html += '    </div>';
+                html += '    <div class="hero-modal-ability-name">' + abilityName + '</div>';
+                html += '    <div class="hero-modal-ability-tooltip">';
+                html += '        <div class="ability-tooltip-name">' + abilityName + '</div>';
+                html += '        <div class="ability-tooltip-desc">' + abilityDesc + '</div>';
+                html += '        ' + details;
+                html += '    </div>';
                 html += '</div>';
             }
 
@@ -312,7 +312,6 @@
     function closeHeroModal() {
         if (modal) {
             modal.classList.remove('active');
-            // Разблокируем скролл
             document.body.style.overflow = '';
         }
     }

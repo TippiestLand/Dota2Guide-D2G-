@@ -1458,48 +1458,40 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   СПОСОБНОСТИ
+   СПОСОБНОСТИ В РЯД С ВСПЛЫВАЮЩИМИ ПОДСКАЗКАМИ
    ============================================================ */
-.hero-modal-abilities-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.4rem;
-    color: #fff;
-    margin-bottom: 20px;
-}
-
-.hero-modal-abilities-title span {
-    color: var(--gold);
-}
-
 .hero-modal-abilities-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-start;
 }
 
 .hero-modal-ability {
-    background: rgba(255, 255, 255, 0.02);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px 12px;
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 12px;
-    padding: 16px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 70px;
+    flex: 0 0 auto;
 }
 
 .hero-modal-ability:hover {
-    border-color: rgba(240, 185, 11, 0.15);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.hero-modal-ability-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 8px;
+    border-color: rgba(240, 185, 11, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-2px);
 }
 
 .hero-modal-ability-icon {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
@@ -1514,34 +1506,97 @@ h1::before, h2::before {
 }
 
 .hero-modal-ability-name {
+    font-size: 0.7rem;
+    color: #b0b0c0;
+    text-align: center;
+    font-weight: 500;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== ВСПЛЫВАЮЩАЯ ПОДСКАЗКА ===== */
+.hero-modal-ability-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 280px;
+    max-width: 320px;
+    padding: 16px 18px;
+    background: rgba(10, 10, 15, 0.95);
+    border: 1px solid rgba(240, 185, 11, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    pointer-events: none;
+}
+
+.hero-modal-ability:hover .hero-modal-ability-tooltip {
+    display: block;
+    animation: tooltipFadeIn 0.25s ease;
+}
+
+@keyframes tooltipFadeIn {
+    0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.ability-tooltip-name {
     font-weight: 700;
     font-size: 1rem;
     color: #fff;
+    margin-bottom: 6px;
 }
 
-.hero-modal-ability-desc {
+.ability-tooltip-desc {
+    font-size: 0.85rem;
     color: #b0b0c0;
-    font-size: 0.88rem;
-    line-height: 1.7;
+    line-height: 1.6;
 }
 
-.hero-modal-ability-details {
+.ability-tooltip-details {
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px 16px;
 }
 
-.hero-modal-ability-detail {
+.ability-tooltip-detail {
     font-size: 0.7rem;
     color: #8888a0;
 }
 
-.hero-modal-ability-detail span {
+.ability-tooltip-detail span {
     color: #fff;
     font-weight: 600;
+}
+
+/* ===== СТРЕЛКА ПОДСКАЗКИ ===== */
+.hero-modal-ability-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: rgba(240, 185, 11, 0.2);
+}
+
+.hero-modal-ability-tooltip::before {
+    content: '';
+    position: absolute;
+    top: calc(100% - 1px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 7px solid transparent;
+    border-top-color: rgba(10, 10, 15, 0.95);
+    z-index: 1;
 }
 
 /* ============================================================
@@ -1672,7 +1727,38 @@ h1::before, h2::before {
     }
 
     .hero-modal-abilities-grid {
-        grid-template-columns: 1fr;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .hero-modal-ability {
+        min-width: 60px;
+        padding: 8px 10px 10px;
+    }
+
+    .hero-modal-ability-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .hero-modal-ability-name {
+        font-size: 0.6rem;
+        max-width: 60px;
+    }
+
+    .hero-modal-ability-tooltip {
+        min-width: 220px;
+        max-width: 260px;
+        padding: 12px 14px;
+        bottom: calc(100% + 10px);
+    }
+
+    .ability-tooltip-name {
+        font-size: 0.9rem;
+    }
+
+    .ability-tooltip-desc {
+        font-size: 0.8rem;
     }
 
     .hero-modal-description {
@@ -1756,12 +1842,13 @@ h1::before, h2::before {
         padding: 12px;
     }
 
-    .hero-modal-ability {
-        padding: 12px 14px;
+    .hero-modal-abilities-grid {
+        gap: 6px;
     }
 
-    .hero-modal-ability-header {
-        gap: 10px;
+    .hero-modal-ability {
+        min-width: 50px;
+        padding: 6px 8px 8px;
     }
 
     .hero-modal-ability-icon {
@@ -1770,10 +1857,30 @@ h1::before, h2::before {
     }
 
     .hero-modal-ability-name {
-        font-size: 0.9rem;
+        font-size: 0.55rem;
+        max-width: 50px;
     }
 
-    .hero-modal-ability-desc {
+    .hero-modal-ability-tooltip {
+        min-width: 180px;
+        max-width: 220px;
+        padding: 10px 12px;
+        bottom: calc(100% + 8px);
+        left: 0;
+        transform: translateX(0);
+    }
+
+    .hero-modal-ability-tooltip::after,
+    .hero-modal-ability-tooltip::before {
+        left: 20px;
+        transform: translateX(0);
+    }
+
+    .ability-tooltip-name {
         font-size: 0.8rem;
+    }
+
+    .ability-tooltip-desc {
+        font-size: 0.75rem;
     }
 }
