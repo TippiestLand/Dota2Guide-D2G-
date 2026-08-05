@@ -229,6 +229,7 @@
         // ===== СТАТИСТИКА =====
         html += '<div class="hero-modal-stats">';
 
+        // Атака
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">АТАКА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -238,6 +239,7 @@
         html += '        </div>';
         html += '    </div>';
 
+        // Защита
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">ЗАЩИТА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -247,6 +249,7 @@
         html += '        </div>';
         html += '    </div>';
 
+        // Мобильность
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">МОБИЛЬНОСТЬ</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -264,7 +267,7 @@
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">ИНТЕЛЛЕКТ</span><span class="attr-value">' + (heroData.base_int || '?') + ' +' + (heroData.int_gain || '?') + '</span></div>';
         html += '</div>';
 
-        // ===== СПОСОБНОСТИ (В ЦЕНТРЕ) =====
+        // ===== ВСЕ СПОСОБНОСТИ (ВКЛЮЧАЯ ВРОЖДЁННЫЕ, АГАНИМ, ШАРД) =====
         if (abilities && abilities.length > 0) {
             html += '<div class="hero-modal-abilities-title"><span>Способности</span></div>';
             html += '<div class="hero-modal-abilities-grid" style="justify-content: center;">';
@@ -273,6 +276,14 @@
                 var ability = abilities[i];
                 var abilityName = ability.dname || 'Способность';
                 var abilityDesc = ability.desc || ability.notes || 'Описание отсутствует';
+                var isInnate = ability.dname && ability.dname.includes('Врождённая');
+                var isScepter = ability.dname && ability.dname.includes('Аганим');
+                var isShard = ability.dname && ability.dname.includes('Шард');
+
+                var badge = '';
+                if (isInnate) badge = ' <span style="font-size:0.5rem; background:rgba(78,205,196,0.2); color:#4ecdc4; padding:2px 8px; border-radius:10px;">Врождённая</span>';
+                else if (isScepter) badge = ' <span style="font-size:0.5rem; background:rgba(240,185,11,0.2); color:#f0b90b; padding:2px 8px; border-radius:10px;">Аганим</span>';
+                else if (isShard) badge = ' <span style="font-size:0.5rem; background:rgba(255,107,107,0.2); color:#ff6b6b; padding:2px 8px; border-radius:10px;">Шард</span>';
 
                 var details = '';
                 if (ability.dmg || ability.mana_cost || ability.cooldown) {
@@ -295,7 +306,7 @@
                     html += '        <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/' + ability.img + '" alt="' + abilityName + '" onerror="this.style.display=\'none\'">';
                 }
                 html += '    </div>';
-                html += '    <div class="hero-modal-ability-name">' + abilityName + '</div>';
+                html += '    <div class="hero-modal-ability-name">' + abilityName + badge + '</div>';
                 html += '    <div class="hero-modal-ability-tooltip">';
                 html += '        <div class="ability-tooltip-name">' + abilityName + '</div>';
                 html += '        <div class="ability-tooltip-desc">' + abilityDesc + '</div>';
