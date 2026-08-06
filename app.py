@@ -185,6 +185,7 @@ HERO_CACHE = {}
 HEROES_LIST_CACHE = None
 
 def get_heroes_list():
+    """Получает список всех героев из OpenDota API"""
     global HEROES_LIST_CACHE
     if HEROES_LIST_CACHE:
         return HEROES_LIST_CACHE
@@ -201,23 +202,65 @@ def get_heroes_list():
         print(f"❌ Ошибка загрузки списка героев: {e}")
     return []
 
+def find_hero_id(hero_name):
+    """Находит ID героя по имени (с поддержкой разных форматов)"""
+    heroes = get_heroes_list()
+    if not heroes:
+        return None
+    
+    # Пробуем разные форматы имени
+    possible_names = [
+        hero_name,                          # "abaddon"
+        f'npc_dota_hero_{hero_name}',       # "npc_dota_hero_abaddon"
+        hero_name.replace('_', ''),         # "abaddon" (без подчёркиваний)
+        hero_name.lower(),                  # "abaddon" (нижний регистр)
+        hero_name.capitalize(),             # "Abaddon"
+    ]
+    
+    # Ищем точное совпадение
+    for h in heroes:
+        hero_api_name = h.get('name', '')
+        hero_localized_name = h.get('localized_name', '').lower()
+        hero_id = h.get('id')
+        
+        # Проверяем по имени в API
+        for name_variant in possible_names:
+            if hero_api_name == name_variant:
+                print(f"✅ Найден ID для {hero_name}: {hero_id} (по имени {name_variant})")
+                return hero_id
+        
+        # Проверяем по локализованному имени (без учёта регистра)
+        if hero_localized_name == hero_name.lower():
+            print(f"✅ Найден ID для {hero_name}: {hero_id} (по локализованному имени)")
+            return hero_id
+    
+    # Если не нашли — пробуем поиск по части имени
+    for h in heroes:
+        hero_api_name = h.get('name', '')
+        hero_localized_name = h.get('localized_name', '').lower()
+        hero_id = h.get('id')
+        
+        # Проверяем, содержится ли имя в API имени или локализованном имени
+        if hero_name.lower() in hero_api_name.lower() or hero_name.lower() in hero_localized_name:
+            print(f"✅ Найден ID для {hero_name}: {hero_id} (по частичному совпадению)")
+            return hero_id
+    
+    print(f"❌ Герой {hero_name} не найден в списке")
+    return None
+
 def get_hero_data(hero_name):
+    """Получает данные о герое из OpenDota API"""
     global HERO_CACHE
+    
     if hero_name in HERO_CACHE:
+        print(f"📦 Данные {hero_name} из кэша")
         return HERO_CACHE[hero_name]
+    
+    hero_id = find_hero_id(hero_name)
+    if not hero_id:
+        return None
+    
     try:
-        heroes = get_heroes_list()
-        hero_id = None
-        for h in heroes:
-            # Ищем героя по имени
-            if h['name'] == f'npc_dota_hero_{hero_name}':
-                hero_id = h['id']
-                break
-        
-        if not hero_id:
-            print(f"❌ Герой {hero_name} не найден в списке")
-            return None
-        
         print(f"🆔 ID героя {hero_name}: {hero_id}")
         
         # Получаем данные героя
@@ -232,27 +275,17 @@ def get_hero_data(hero_name):
         abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
         abilities = abilities_response.json() if abilities_response.status_code == 200 else []
         
-        # Получаем статистику героя
-        stats_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/stats', timeout=10)
-        stats = stats_response.json() if stats_response.status_code == 200 else {}
-        
-        # Добавляем недостающие поля из stats
-        if stats:
-            data['base_health'] = stats.get('base_health', data.get('base_health', 0))
-            data['base_mana'] = stats.get('base_mana', data.get('base_mana', 0))
-            data['base_armor'] = stats.get('base_armor', data.get('base_armor', 0))
-            data['base_attack_min'] = stats.get('base_attack_min', data.get('base_attack_min', 0))
-            data['base_attack_max'] = stats.get('base_attack_max', data.get('base_attack_max', 0))
-        
         # Добавляем иконку героя
         data['icon'] = hero_name
         
-        HERO_CACHE[hero_name] = {
+        result = {
             'data': data,
-            'abilities': abilities,
-            'stats': stats
+            'abilities': abilities
         }
-        return HERO_CACHE[hero_name]
+        
+        HERO_CACHE[hero_name] = result
+        print(f"✅ Данные героя {hero_name} загружены")
+        return result
         
     except Exception as e:
         print(f"❌ Ошибка загрузки данных героя {hero_name}: {e}")
