@@ -8,7 +8,6 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 import html
-from bs4 import BeautifulSoup
 
 app = Flask(__name__,
             template_folder='templates',
@@ -180,141 +179,7 @@ def update_news_from_rss():
     return len(new_items)
 
 # ============================================================
-# ПАРСИНГ С ОФИЦИАЛЬНОГО САЙТА (без lxml)
-# ============================================================
-def parse_hero_from_official(hero_name):
-    """
-    Парсит данные героя с официального сайта dota2.com/hero/hero_name
-    Использует html5lib вместо lxml
-    """
-    try:
-        url = f'https://www.dota2.com/hero/{hero_name}'
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
-        response = requests.get(url, headers=headers, timeout=10)
-        
-        if response.status_code != 200:
-            print(f"❌ Не удалось загрузить страницу {hero_name}: {response.status_code}")
-            return None
-        
-        # Используем html5lib вместо lxml
-        soup = BeautifulSoup(response.content, 'html5lib')
-        
-        # Ищем все скрипты с данными
-        scripts = soup.find_all('script')
-        hero_data = None
-        
-        for script in scripts:
-            if script.string:
-                # Ищем heroData в скрипте
-                match = re.search(r'heroData\s*=\s*({.*?});', script.string, re.DOTALL)
-                if match:
-                    try:
-                        hero_data = json.loads(match.group(1))
-                        break
-                    except:
-                        pass
-                
-                # Ищем window.__INITIAL_STATE__
-                match2 = re.search(r'window\.__INITIAL_STATE__\s*=\s*({.*?});', script.string, re.DOTALL)
-                if match2:
-                    try:
-                        data = json.loads(match2.group(1))
-                        if 'hero' in data:
-                            hero_data = data['hero']
-                            break
-                    except:
-                        pass
-        
-        if not hero_data:
-            print(f"❌ Не найдены данные для {hero_name}")
-            return None
-        
-        # Извлекаем нужные поля
-        result = {
-            'localized_name': hero_data.get('localized_name', hero_name.capitalize()),
-            'bio': hero_data.get('bio', ''),
-            'primary_attr': hero_data.get('primary_attr', 'universal'),
-            'attack_type': hero_data.get('attack_type', 'melee'),
-            'complexity': hero_data.get('complexity', 2),
-            'roles': hero_data.get('roles', []),
-            
-            # Характеристики
-            'base_str': hero_data.get('base_str', 0),
-            'base_agi': hero_data.get('base_agi', 0),
-            'base_int': hero_data.get('base_int', 0),
-            'str_gain': hero_data.get('str_gain', 0),
-            'agi_gain': hero_data.get('agi_gain', 0),
-            'int_gain': hero_data.get('int_gain', 0),
-            
-            'base_health': hero_data.get('base_health', 0),
-            'base_mana': hero_data.get('base_mana', 0),
-            'base_armor': hero_data.get('base_armor', 0),
-            'base_health_regen': hero_data.get('base_health_regen', 0),
-            'base_mana_regen': hero_data.get('base_mana_regen', 0),
-            
-            'attack_min': hero_data.get('attack_min', 0),
-            'attack_max': hero_data.get('attack_max', 0),
-            'attack_rate': hero_data.get('attack_rate', 1.7),
-            'attack_range': hero_data.get('attack_range', 150),
-            
-            'move_speed': hero_data.get('move_speed', 300),
-            'day_vision': hero_data.get('day_vision', 1800),
-            'night_vision': hero_data.get('night_vision', 800),
-            
-            # Способности
-            'abilities': hero_data.get('abilities', []),
-            
-            # Таланты (дерево)
-            'talents': hero_data.get('talents', []),
-            
-            # Аганим и Шард
-            'aghanim': hero_data.get('aghanim', None),
-            'shard': hero_data.get('shard', None),
-            
-            # Иконка героя
-            'icon': hero_name
-        }
-        
-        print(f"✅ Парсинг {hero_name} завершён")
-        return result
-        
-    except Exception as e:
-        print(f"❌ Ошибка парсинга {hero_name}: {e}")
-        return None
-
-def get_hero_data_from_official(hero_name):
-    """
-    Пытается получить данные с официального сайта.
-    Если есть кэш — использует его, иначе парсит.
-    """
-    cache_file = os.path.join(os.path.dirname(__file__), 'data', 'heroes_cache.json')
-    
-    # Загружаем кэш
-    cache = {}
-    if os.path.exists(cache_file):
-        try:
-            with open(cache_file, 'r', encoding='utf-8') as f:
-                cache = json.load(f)
-        except:
-            pass
-    
-    # Если герой есть в кэше — возвращаем
-    if hero_name in cache:
-        print(f"📦 Данные {hero_name} из кэша")
-        return cache[hero_name]
-    
-    # Иначе парсим
-    data = parse_hero_from_official(hero_name)
-    if data:
-        cache[hero_name] = data
-        with open(cache_file, 'w', encoding='utf-8') as f:
-            json.dump(cache, f, ensure_ascii=False, indent=4)
-        print(f"💾 Данные {hero_name} сохранены в кэш")
-    
-    return data
-
-# ============================================================
-# ГЕРОИ (OpenDota API + FALLBACK)
+# ГЕРОИ (OpenDota API)
 # ============================================================
 HERO_CACHE = {}
 HEROES_LIST_CACHE = None
@@ -344,24 +209,54 @@ def get_hero_data(hero_name):
         heroes = get_heroes_list()
         hero_id = None
         for h in heroes:
+            # Ищем героя по имени
             if h['name'] == f'npc_dota_hero_{hero_name}':
                 hero_id = h['id']
                 break
+        
         if not hero_id:
+            print(f"❌ Герой {hero_name} не найден в списке")
             return None
+        
+        print(f"🆔 ID героя {hero_name}: {hero_id}")
+        
+        # Получаем данные героя
         response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
-            abilities = abilities_response.json() if abilities_response.status_code == 200 else []
-            HERO_CACHE[hero_name] = {
-                'data': data,
-                'abilities': abilities
-            }
-            return HERO_CACHE[hero_name]
+        if response.status_code != 200:
+            print(f"❌ API героя вернул код: {response.status_code}")
+            return None
+        
+        data = response.json()
+        
+        # Получаем способности
+        abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
+        abilities = abilities_response.json() if abilities_response.status_code == 200 else []
+        
+        # Получаем статистику героя
+        stats_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/stats', timeout=10)
+        stats = stats_response.json() if stats_response.status_code == 200 else {}
+        
+        # Добавляем недостающие поля из stats
+        if stats:
+            data['base_health'] = stats.get('base_health', data.get('base_health', 0))
+            data['base_mana'] = stats.get('base_mana', data.get('base_mana', 0))
+            data['base_armor'] = stats.get('base_armor', data.get('base_armor', 0))
+            data['base_attack_min'] = stats.get('base_attack_min', data.get('base_attack_min', 0))
+            data['base_attack_max'] = stats.get('base_attack_max', data.get('base_attack_max', 0))
+        
+        # Добавляем иконку героя
+        data['icon'] = hero_name
+        
+        HERO_CACHE[hero_name] = {
+            'data': data,
+            'abilities': abilities,
+            'stats': stats
+        }
+        return HERO_CACHE[hero_name]
+        
     except Exception as e:
         print(f"❌ Ошибка загрузки данных героя {hero_name}: {e}")
-    return None
+        return None
 
 # ============================================================
 # МАРШРУТЫ
@@ -374,60 +269,18 @@ def index():
 def get_news():
     return jsonify(load_news())
 
-@app.route('/test-hero/<hero_name>')
-def test_hero(hero_name):
-    return f"""
-    <h1>Тест маршрута героя</h1>
-    <p>Герой: <strong>{hero_name}</strong></p>
-    <p>Если вы видите это сообщение — маршрут работает!</p>
-    <p><a href="/">На главную</a></p>
-    """
-
-@app.route('/hero/<hero_name>')
-def hero_page(hero_name):
-    print(f"🔍 Запрос героя: {hero_name}")
-    
-    # Пытаемся получить с официального сайта
-    hero_data = get_hero_data_from_official(hero_name)
-    
-    if hero_data:
-        print(f"✅ Рендерим hero.html для {hero_name}")
-        return render_template('hero.html', 
-                              hero=hero_data)
-    
-    # Fallback — OpenDota API
-    hero_data_api = get_hero_data(hero_name)
-    if hero_data_api:
-        print(f"✅ Рендерим hero.html из OpenDota для {hero_name}")
-        return render_template('hero.html', 
-                              hero=hero_data_api['data'],
-                              abilities=hero_data_api['abilities'])
-    
-    print("❌ Герой не найден, редирект на главную")
-    return redirect(url_for('index'))
-
 @app.route('/api/hero/<hero_name>')
 def api_hero(hero_name):
-    """API для получения данных героя (с официального сайта)"""
+    """API для получения данных героя из OpenDota"""
     print(f"🔍 API запрос героя: {hero_name}")
     
-    # Пытаемся получить с официального сайта
-    hero_data = get_hero_data_from_official(hero_name)
+    hero_data = get_hero_data(hero_name)
+    if not hero_data:
+        print(f"❌ Герой {hero_name} не найден")
+        return jsonify({'error': 'Hero not found'}), 404
     
-    if hero_data:
-        return jsonify(hero_data)
-    
-    # Fallback — OpenDota API
-    hero_data_api = get_hero_data(hero_name)
-    if hero_data_api:
-        return jsonify({
-            'data': hero_data_api['data'],
-            'abilities': hero_data_api['abilities']
-        })
-    
-    # Общий fallback
-    print(f"❌ Герой {hero_name} не найден")
-    return jsonify({'error': 'Hero not found'}), 404
+    print(f"✅ Данные героя {hero_name} отправлены")
+    return jsonify(hero_data)
 
 # ============================================================
 # ИНИЦИАЛИЗАЦИЯ НОВОСТЕЙ

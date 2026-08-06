@@ -181,17 +181,12 @@
     }
 
     function renderHeroModal(data, hero) {
-        // Если data уже содержит все поля (с официального сайта)
-        var heroData = data;
-        
-        // Если data в формате {data: {...}, abilities: [...]} (из OpenDota)
-        if (data.data) {
-            heroData = data.data;
-        }
+        var heroData = data.data;
+        var abilities = data.abilities || [];
+        var stats = data.stats || {};
 
-        var heroName = heroData.localized_name || hero.name;
+        // Определяем атрибут
         var primaryAttr = heroData.primary_attr || hero.attribute;
-        
         var attrClass = {
             'str': 'strength',
             'agi': 'agility',
@@ -212,14 +207,15 @@
             'intelligence': 'Интеллект'
         }[primaryAttr] || 'Универсальный';
 
-        var abilities = data.abilities || heroData.abilities || [];
+        var heroName = heroData.localized_name || hero.name;
+        var heroIcon = hero.icon;
 
         var html = '';
 
         // ===== ШАПКА =====
         html += '<div class="hero-modal-header">';
         html += '    <div class="hero-modal-avatar">';
-        html += '        <img src="/static/assets/icons/' + hero.icon + '.png" alt="' + heroName + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'18\' font-family=\'sans-serif\'%3E' + heroName.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
+        html += '        <img src="/static/assets/icons/' + heroIcon + '.png" alt="' + heroName + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'18\' font-family=\'sans-serif\'%3E' + heroName.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
         html += '    </div>';
         html += '    <div class="hero-modal-title">';
         html += '        <div class="hero-modal-attribute ' + attrClass + '">' + attrName.toUpperCase() + '</div>';
@@ -238,7 +234,7 @@
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">АТАКА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
-        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.attack_min || heroData.base_attack_min || '?') + '-' + (heroData.attack_max || heroData.base_attack_max || '?') + '</div><div class="hero-modal-stat-item-label">УРОН</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.base_attack_min || '?') + '-' + (heroData.base_attack_max || '?') + '</div><div class="hero-modal-stat-item-label">УРОН</div></div>';
         html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.attack_rate || '?') + '</div><div class="hero-modal-stat-item-label">СКОРОСТЬ</div></div>';
         html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.attack_range || '?') + '</div><div class="hero-modal-stat-item-label">ДАЛЬНОСТЬ</div></div>';
         html += '        </div>';
@@ -259,8 +255,8 @@
         html += '        <div class="hero-modal-stat-block-title">МОБИЛЬНОСТЬ</div>';
         html += '        <div class="hero-modal-stat-block-values">';
         html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.move_speed || '?') + '</div><div class="hero-modal-stat-item-label">СКОРОСТЬ</div></div>';
-        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.day_vision || 1800) + '</div><div class="hero-modal-stat-item-label">ОБЗОР (ДЕНЬ)</div></div>';
-        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">' + (heroData.night_vision || 800) + '</div><div class="hero-modal-stat-item-label">ОБЗОР (НОЧЬ)</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">1800</div><div class="hero-modal-stat-item-label">ОБЗОР (ДЕНЬ)</div></div>';
+        html += '            <div class="hero-modal-stat-item"><div class="hero-modal-stat-item-value">800</div><div class="hero-modal-stat-item-label">ОБЗОР (НОЧЬ)</div></div>';
         html += '        </div>';
         html += '    </div>';
         html += '</div>';
@@ -279,21 +275,11 @@
 
             for (var i = 0; i < abilities.length; i++) {
                 var ability = abilities[i];
-                var abilityName = ability.dname || ability.name || 'Способность';
-                var abilityDesc = ability.desc || ability.description || 'Описание отсутствует';
-                
-                // Определяем тип способности
-                var isInnate = abilityName.toLowerCase().includes('врождённая') || abilityName.toLowerCase().includes('innate');
-                var isScepter = abilityName.toLowerCase().includes('аганим') || abilityName.toLowerCase().includes('scepter') || abilityName.toLowerCase().includes('аган');
-                var isShard = abilityName.toLowerCase().includes('шард') || abilityName.toLowerCase().includes('shard');
-
-                var badge = '';
-                if (isInnate) badge = ' <span style="font-size:0.5rem; background:rgba(78,205,196,0.2); color:#4ecdc4; padding:2px 8px; border-radius:10px;">Врождённая</span>';
-                else if (isScepter) badge = ' <span style="font-size:0.5rem; background:rgba(240,185,11,0.2); color:#f0b90b; padding:2px 8px; border-radius:10px;">Аганим</span>';
-                else if (isShard) badge = ' <span style="font-size:0.5rem; background:rgba(255,107,107,0.2); color:#ff6b6b; padding:2px 8px; border-radius:10px;">Шард</span>';
+                var abilityName = ability.dname || 'Способность';
+                var abilityDesc = ability.desc || ability.notes || 'Описание отсутствует';
 
                 // Иконка способности
-                var imgSrc = ability.img || ability.icon || '';
+                var imgSrc = ability.img || '';
                 if (imgSrc && !imgSrc.startsWith('http')) {
                     imgSrc = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/' + imgSrc;
                 }
@@ -304,12 +290,12 @@
                     html += '        <img src="' + imgSrc + '" alt="' + abilityName + '" onerror="this.style.display=\'none\'">';
                 }
                 html += '    </div>';
-                html += '    <div class="hero-modal-ability-name">' + abilityName + badge + '</div>';
+                html += '    <div class="hero-modal-ability-name">' + abilityName + '</div>';
                 html += '    <div class="hero-modal-ability-tooltip">';
                 html += '        <div class="ability-tooltip-name">' + abilityName + '</div>';
                 html += '        <div class="ability-tooltip-desc">' + abilityDesc + '</div>';
                 
-                // Дополнительные детали способности
+                // Детали способности
                 if (ability.dmg || ability.mana_cost || ability.cooldown) {
                     html += '    <div class="ability-tooltip-details">';
                     if (ability.dmg) {
