@@ -183,9 +183,12 @@
     function renderHeroModal(data, hero) {
         var heroData = data.data;
         var abilities = data.abilities || [];
-        var stats = data.stats || {};
 
-        // Определяем атрибут
+        if (!heroData) {
+            modalBody.innerHTML = '<p style="color:#ff6b6b; text-align:center; padding:20px;">Ошибка: данные героя не загружены</p>';
+            return;
+        }
+
         var primaryAttr = heroData.primary_attr || hero.attribute;
         var attrClass = {
             'str': 'strength',
@@ -278,7 +281,6 @@
                 var abilityName = ability.dname || 'Способность';
                 var abilityDesc = ability.desc || ability.notes || 'Описание отсутствует';
 
-                // Иконка способности
                 var imgSrc = ability.img || '';
                 if (imgSrc && !imgSrc.startsWith('http')) {
                     imgSrc = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/' + imgSrc;
@@ -295,7 +297,6 @@
                 html += '        <div class="ability-tooltip-name">' + abilityName + '</div>';
                 html += '        <div class="ability-tooltip-desc">' + abilityDesc + '</div>';
                 
-                // Детали способности
                 if (ability.dmg || ability.mana_cost || ability.cooldown) {
                     html += '    <div class="ability-tooltip-details">';
                     if (ability.dmg) {
