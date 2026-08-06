@@ -155,7 +155,10 @@
     var modalClose = document.getElementById('heroModalClose');
 
     function openHeroModal(heroIcon) {
-        if (!modal) return;
+        if (!modal) {
+            console.error('❌ Модальное окно не найдено!');
+            return;
+        }
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         modalBody.innerHTML = '<div class="hero-modal-loading"><div class="loader"></div><p>Загрузка...</p></div>';
@@ -166,16 +169,19 @@
             return;
         }
 
+        console.log('📡 Запрос данных для героя:', heroIcon);
+
         fetch('/api/hero/' + heroIcon)
             .then(function(response) {
-                if (!response.ok) throw new Error('Ошибка загрузки');
+                if (!response.ok) throw new Error('Ошибка загрузки: ' + response.status);
                 return response.json();
             })
             .then(function(data) {
+                console.log('✅ Данные героя получены');
                 renderHeroModal(data, hero);
             })
             .catch(function(error) {
-                console.error('Ошибка:', error);
+                console.error('❌ Ошибка:', error);
                 modalBody.innerHTML = '<p style="color:#ff6b6b; text-align:center; padding:20px;">Не удалось загрузить данные героя</p>';
             });
     }
@@ -215,7 +221,6 @@
 
         var html = '';
 
-        // ===== ШАПКА =====
         html += '<div class="hero-modal-header">';
         html += '    <div class="hero-modal-avatar">';
         html += '        <img src="/static/assets/icons/' + heroIcon + '.png" alt="' + heroName + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'18\' font-family=\'sans-serif\'%3E' + heroName.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
@@ -226,14 +231,11 @@
         html += '    </div>';
         html += '</div>';
 
-        // ===== ОПИСАНИЕ =====
         var bioText = heroData.bio || 'Описание героя временно недоступно.';
         html += '<p class="hero-modal-description">' + bioText + '</p>';
 
-        // ===== СТАТИСТИКА =====
         html += '<div class="hero-modal-stats">';
 
-        // Атака
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">АТАКА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -243,7 +245,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // Защита
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">ЗАЩИТА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -253,7 +254,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // Мобильность
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">МОБИЛЬНОСТЬ</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -264,14 +264,12 @@
         html += '    </div>';
         html += '</div>';
 
-        // ===== ОСНОВНЫЕ АТРИБУТЫ =====
         html += '<div class="hero-modal-attributes">';
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">СИЛА</span><span class="attr-value">' + (heroData.base_str || '?') + ' +' + (heroData.str_gain || '?') + '</span></div>';
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">ЛОВКОСТЬ</span><span class="attr-value">' + (heroData.base_agi || '?') + ' +' + (heroData.agi_gain || '?') + '</span></div>';
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">ИНТЕЛЛЕКТ</span><span class="attr-value">' + (heroData.base_int || '?') + ' +' + (heroData.int_gain || '?') + '</span></div>';
         html += '</div>';
 
-        // ===== СПОСОБНОСТИ =====
         if (abilities && abilities.length > 0) {
             html += '<div class="hero-modal-abilities-title"><span>Способности</span></div>';
             html += '<div class="hero-modal-abilities-grid" style="justify-content: center;">';
@@ -392,10 +390,17 @@
         var items = document.querySelectorAll('.hero-item');
         for (var j = 0; j < items.length; j++) {
             var item = items[j];
-            item.addEventListener('click', function() {
-                var heroIcon = this.dataset.icon;
-                if (heroIcon) openHeroModal(heroIcon);
-            });
+            var heroIcon = item.dataset.icon;
+
+            // Удаляем старые обработчики, чтобы не было дублирования
+            item.removeEventListener('click', item._clickHandler);
+            
+            item._clickHandler = function() {
+                var icon = this.dataset.icon;
+                console.log('🖱️ Клик по герою:', icon);
+                if (icon) openHeroModal(icon);
+            };
+            item.addEventListener('click', item._clickHandler);
 
             var tiltWrap = item.querySelector('.tilt-wrap');
             item.addEventListener('mousemove', function(e) {
@@ -420,6 +425,8 @@
                 }
             });
         }
+        
+        console.log('✅ Рендер героев завершён, карточек:', items.length);
     }
 
     var filterBtns = document.querySelectorAll('.filter-btn');
@@ -462,16 +469,27 @@
     }
 
     var searchInput = document.getElementById('heroSearch');
-    searchInput.addEventListener('input', function(e) {
-        searchQuery = e.target.value;
-        renderHeroes();
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            searchQuery = e.target.value;
+            renderHeroes();
+        });
+    }
 
     var styleEl = document.createElement('style');
     styleEl.textContent = '.hero-grid { transition: opacity 0.3s ease, transform 0.3s ease; }';
     document.head.appendChild(styleEl);
 
+    // ============================================================
+    // ПЕРВЫЙ РЕНДЕР И ПРИНУДИТЕЛЬНЫЙ ПОВТОР
+    // ============================================================
     renderHeroes();
+
+    // Принудительный ререндер через 500мс (гарантия, что карточки создадутся)
+    setTimeout(function() {
+        renderHeroes();
+        console.log('🔄 Принудительный ререндер героев');
+    }, 500);
 
     // ============================================================
     // НАВИГАЦИЯ
