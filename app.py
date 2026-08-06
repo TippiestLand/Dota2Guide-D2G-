@@ -180,12 +180,12 @@ def update_news_from_rss():
     return len(new_items)
 
 # ============================================================
-# ПАРСИНГ С ОФИЦИАЛЬНОГО САЙТА
+# ПАРСИНГ С ОФИЦИАЛЬНОГО САЙТА (без lxml)
 # ============================================================
 def parse_hero_from_official(hero_name):
     """
     Парсит данные героя с официального сайта dota2.com/hero/hero_name
-    Возвращает словарь с данными или None
+    Использует html5lib вместо lxml
     """
     try:
         url = f'https://www.dota2.com/hero/{hero_name}'
@@ -196,7 +196,8 @@ def parse_hero_from_official(hero_name):
             print(f"❌ Не удалось загрузить страницу {hero_name}: {response.status_code}")
             return None
         
-        soup = BeautifulSoup(response.content, 'html.parser')
+        # Используем html5lib вместо lxml
+        soup = BeautifulSoup(response.content, 'html5lib')
         
         # Ищем все скрипты с данными
         scripts = soup.find_all('script')
