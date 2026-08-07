@@ -185,7 +185,6 @@ HERO_CACHE = {}
 HEROES_LIST_CACHE = None
 
 def get_heroes_list():
-    """Получает список всех героев из OpenDota API"""
     global HEROES_LIST_CACHE
     if HEROES_LIST_CACHE:
         return HEROES_LIST_CACHE
@@ -203,55 +202,47 @@ def get_heroes_list():
     return []
 
 def find_hero_id(hero_name):
-    """Находит ID героя по имени (с поддержкой разных форматов)"""
     heroes = get_heroes_list()
     if not heroes:
         return None
     
-    # Пробуем разные форматы имени
-    possible_names = [
-        hero_name,                          # "abaddon"
-        f'npc_dota_hero_{hero_name}',       # "npc_dota_hero_abaddon"
-        hero_name.replace('_', ''),         # "abaddon" (без подчёркиваний)
-        hero_name.lower(),                  # "abaddon" (нижний регистр)
-        hero_name.capitalize(),             # "Abaddon"
+    search_variants = [
+        hero_name.lower(),
+        hero_name.capitalize(),
+        f'npc_dota_hero_{hero_name}',
+        hero_name.replace('_', '').lower(),
+        hero_name.replace(' ', '_').lower(),
     ]
+    search_variants = list(set(search_variants))
     
-    # Ищем точное совпадение
-    for h in heroes:
-        hero_api_name = h.get('name', '')
-        hero_localized_name = h.get('localized_name', '').lower()
-        hero_id = h.get('id')
+    print(f"🔍 Поиск героя '{hero_name}' по вариантам: {search_variants}")
+    
+    for hero in heroes:
+        api_name = hero.get('name', '').lower()
+        localized_name = hero.get('localized_name', '').lower()
+        hero_id = hero.get('id')
         
-        # Проверяем по имени в API
-        for name_variant in possible_names:
-            if hero_api_name == name_variant:
-                print(f"✅ Найден ID для {hero_name}: {hero_id} (по имени {name_variant})")
+        for variant in search_variants:
+            if api_name == variant or localized_name == variant:
+                print(f"✅ Найден ID для {hero_name}: {hero_id} (совпадение: {variant})")
                 return hero_id
-        
-        # Проверяем по локализованному имени (без учёта регистра)
-        if hero_localized_name == hero_name.lower():
-            print(f"✅ Найден ID для {hero_name}: {hero_id} (по локализованному имени)")
-            return hero_id
+            if variant in api_name or variant in localized_name:
+                print(f"✅ Найден ID для {hero_name}: {hero_id} (частичное совпадение: {variant})")
+                return hero_id
     
-    # Если не нашли — пробуем поиск по части имени
-    for h in heroes:
-        hero_api_name = h.get('name', '')
-        hero_localized_name = h.get('localized_name', '').lower()
-        hero_id = h.get('id')
-        
-        # Проверяем, содержится ли имя в API имени или локализованном имени
-        if hero_name.lower() in hero_api_name.lower() or hero_name.lower() in hero_localized_name:
-            print(f"✅ Найден ID для {hero_name}: {hero_id} (по частичному совпадению)")
+    for hero in heroes:
+        api_name = hero.get('name', '').lower()
+        localized_name = hero.get('localized_name', '').lower()
+        hero_id = hero.get('id')
+        if hero_name.lower() in api_name or hero_name.lower() in localized_name:
+            print(f"✅ Найден ID для {hero_name}: {hero_id} (по части имени)")
             return hero_id
     
     print(f"❌ Герой {hero_name} не найден в списке")
     return None
 
 def get_hero_data(hero_name):
-    """Получает данные о герое из OpenDota API"""
     global HERO_CACHE
-    
     if hero_name in HERO_CACHE:
         print(f"📦 Данные {hero_name} из кэша")
         return HERO_CACHE[hero_name]
@@ -263,7 +254,6 @@ def get_hero_data(hero_name):
     try:
         print(f"🆔 ID героя {hero_name}: {hero_id}")
         
-        # Получаем данные героя
         response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
         if response.status_code != 200:
             print(f"❌ API героя вернул код: {response.status_code}")
@@ -271,11 +261,9 @@ def get_hero_data(hero_name):
         
         data = response.json()
         
-        # Получаем способности
         abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
         abilities = abilities_response.json() if abilities_response.status_code == 200 else []
         
-        # Добавляем иконку героя
         data['icon'] = hero_name
         
         result = {
@@ -302,9 +290,17 @@ def index():
 def get_news():
     return jsonify(load_news())
 
+@app.route('/test-hero/<hero_name>')
+def test_hero(hero_name):
+    return f"""
+    <h1>Тест маршрута героя</h1>
+    <p>Герой: <strong>{hero_name}</strong></p>
+    <p>Если вы видите это сообщение — маршрут работает!</p>
+    <p><a href="/">На главную</a></p>
+    """
+
 @app.route('/api/hero/<hero_name>')
 def api_hero(hero_name):
-    """API для получения данных героя из OpenDota"""
     print(f"🔍 API запрос героя: {hero_name}")
     
     hero_data = get_hero_data(hero_name)
