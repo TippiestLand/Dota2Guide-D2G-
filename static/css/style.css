@@ -811,7 +811,7 @@ section {
 }
 
 /* ============================================================
-   НОВОСТИ (СТИЛЬ КАК В STEAM, БЕЗ AUTHOR)
+   НОВОСТИ
    ============================================================ */
 .news-feed {
     display: flex;
@@ -1192,7 +1192,7 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   МОДАЛЬНОЕ ОКНО ГЕРОЯ
+   МОДАЛЬНОЕ ОКНО ГЕРОЯ (ОСНОВНОЙ КОНТЕЙНЕР)
    ============================================================ */
 .hero-modal {
     display: none;
@@ -1282,24 +1282,75 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   ВЕРХНЯЯ ЧАСТЬ — ИМЯ + АТРИБУТ + АВАТАР
+   МОДАЛЬНОЕ ОКНО - СТИЛЬ DOTA 2 (НОВЫЙ)
    ============================================================ */
-.hero-modal-header {
+
+/* Бейдж атрибута */
+.hero-modal-attribute-badge {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-modal-attribute-badge.strength { 
+    color: #e55a5a; 
+    border-color: rgba(229, 90, 90, 0.3); 
+    background: rgba(229, 90, 90, 0.1);
+}
+
+.hero-modal-attribute-badge.agility { 
+    color: #5ae55a; 
+    border-color: rgba(90, 229, 90, 0.3); 
+    background: rgba(90, 229, 90, 0.1);
+}
+
+.hero-modal-attribute-badge.intelligence { 
+    color: #5a5ae5; 
+    border-color: rgba(90, 90, 229, 0.3); 
+    background: rgba(90, 90, 229, 0.1);
+}
+
+.hero-modal-attribute-badge.universal { 
+    color: #f0b90b; 
+    border-color: rgba(240, 185, 11, 0.3); 
+    background: rgba(240, 185, 11, 0.1);
+}
+
+/* Имя героя */
+.hero-modal-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+/* Основной блок с аватаром и био */
+.hero-modal-main {
     display: flex;
-    align-items: center;
     gap: 30px;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 20px 0 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border-left: 3px solid rgba(240, 185, 11, 0.2);
 }
 
 .hero-modal-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 2px solid rgba(240, 185, 11, 0.25);
+    width: 120px;
+    height: 120px;
     flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(240, 185, 11, 0.2);
     background: rgba(0, 0, 0, 0.3);
 }
 
@@ -1309,294 +1360,173 @@ h1::before, h2::before {
     object-fit: cover;
 }
 
-.hero-modal-title {
+.hero-modal-bio {
     flex: 1;
 }
 
-.hero-modal-name {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 3rem;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1.1;
-}
-
-.hero-modal-name .highlight {
-    color: var(--gold);
-    text-shadow: 0 0 40px rgba(240, 185, 11, 0.2);
-}
-
-.hero-modal-attribute {
-    display: inline-block;
-    padding: 6px 24px;
-    border-radius: 30px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-top: 8px;
-}
-
-.hero-modal-attribute.strength {
-    background: rgba(229, 90, 90, 0.2);
-    color: #e55a5a;
-    border: 1px solid rgba(229, 90, 90, 0.3);
-}
-
-.hero-modal-attribute.agility {
-    background: rgba(90, 229, 90, 0.2);
-    color: #5ae55a;
-    border: 1px solid rgba(90, 229, 90, 0.3);
-}
-
-.hero-modal-attribute.intelligence {
-    background: rgba(90, 90, 229, 0.2);
-    color: #5a5ae5;
-    border: 1px solid rgba(90, 90, 229, 0.3);
-}
-
-.hero-modal-attribute.universal {
-    background: rgba(240, 185, 11, 0.2);
-    color: #f0b90b;
-    border: 1px solid rgba(240, 185, 11, 0.3);
-}
-
-/* ============================================================
-   ОПИСАНИЕ ГЕРОЯ
-   ============================================================ */
-.hero-modal-description {
+.hero-modal-bio p {
     color: #b0b0c0;
-    font-size: 1.05rem;
-    line-height: 1.9;
-    margin-bottom: 24px;
-    padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border-left: 3px solid rgba(240, 185, 11, 0.2);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 12px;
 }
 
-/* ============================================================
-   СТАТИСТИКА (КАК НА ОФИЦИАЛЬНОМ САЙТЕ)
-   ============================================================ */
+.hero-modal-tags {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hero-modal-tags .tag {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #8888a0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Статистика */
 .hero-modal-stats {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
-    margin-bottom: 28px;
+    margin-bottom: 30px;
 }
 
-.hero-modal-stat-block {
+.stat-block {
     background: rgba(255, 255, 255, 0.02);
     border-radius: 12px;
     padding: 16px;
-    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.hero-modal-stat-block-title {
-    font-size: 0.65rem;
-    color: #8888a0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-}
-
-.hero-modal-stat-block-values {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-}
-
-.hero-modal-stat-item {
-    text-align: center;
-}
-
-.hero-modal-stat-item-value {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #fff;
-}
-
-.hero-modal-stat-item-label {
+.stat-label {
     font-size: 0.6rem;
     color: #8888a0;
     text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    text-align: center;
 }
 
-/* ============================================================
-   ОСНОВНЫЕ АТРИБУТЫ
-   ============================================================ */
-.hero-modal-attributes {
+.stat-values {
     display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin: 20px 0 28px 0;
+    justify-content: space-around;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    display: block;
+}
+
+.stat-sub {
+    font-size: 0.7rem;
+    color: #4ecdc4;
+    display: block;
+    margin-top: -2px;
+}
+
+.stat-label-small {
+    font-size: 0.55rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Способности */
+.hero-modal-abilities-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    color: #fff;
+    margin: 30px 0 20px;
+    letter-spacing: 2px;
+}
+
+.hero-modal-abilities-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.ability-card {
+    display: flex;
+    gap: 16px;
     padding: 16px;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 12px;
-}
-
-.hero-modal-attribute-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.hero-modal-attribute-item .attr-label {
-    font-size: 0.65rem;
-    color: #8888a0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.hero-modal-attribute-item .attr-value {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fff;
-}
-
-/* ============================================================
-   СПОСОБНОСТИ В РЯД С ВСПЛЫВАЮЩИМИ ПОДСКАЗКАМИ
-   ============================================================ */
-.hero-modal-abilities-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: flex-start;
-}
-
-.hero-modal-ability {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     transition: all 0.3s ease;
-    cursor: pointer;
-    min-width: 70px;
-    flex: 0 0 auto;
 }
 
-.hero-modal-ability:hover {
-    border-color: rgba(240, 185, 11, 0.3);
-    background: rgba(255, 255, 255, 0.06);
+.ability-card:hover {
+    border-color: rgba(240, 185, 11, 0.15);
+    background: rgba(255, 255, 255, 0.04);
     transform: translateY(-2px);
 }
 
-.hero-modal-ability-icon {
+.ability-card-icon {
     width: 48px;
     height: 48px;
+    flex-shrink: 0;
     border-radius: 8px;
     overflow: hidden;
-    flex-shrink: 0;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.hero-modal-ability-icon img {
+.ability-card-icon img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.hero-modal-ability-name {
-    font-size: 0.7rem;
-    color: #b0b0c0;
-    text-align: center;
-    font-weight: 500;
-    max-width: 80px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.ability-card-info {
+    flex: 1;
+    min-width: 0;
 }
 
-/* ===== ВСПЛЫВАЮЩАЯ ПОДСКАЗКА ===== */
-.hero-modal-ability-tooltip {
-    display: none;
-    position: absolute;
-    bottom: calc(100% + 12px);
-    left: 50%;
-    transform: translateX(-50%);
-    min-width: 280px;
-    max-width: 320px;
-    padding: 16px 18px;
-    background: rgba(10, 10, 15, 0.95);
-    border: 1px solid rgba(240, 185, 11, 0.2);
-    border-radius: 12px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(12px);
-    z-index: 100;
-    pointer-events: none;
-}
-
-.hero-modal-ability:hover .hero-modal-ability-tooltip {
-    display: block;
-    animation: tooltipFadeIn 0.25s ease;
-}
-
-@keyframes tooltipFadeIn {
-    0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
-    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.ability-tooltip-name {
+.ability-card-name {
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #fff;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
-.ability-tooltip-desc {
+.ability-card-desc {
     font-size: 0.85rem;
     color: #b0b0c0;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
-.ability-tooltip-details {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+.ability-card-details {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 16px;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.ability-tooltip-detail {
+.ability-detail {
     font-size: 0.7rem;
     color: #8888a0;
 }
 
-.ability-tooltip-detail span {
+.ability-detail strong {
     color: #fff;
     font-weight: 600;
-}
-
-/* ===== СТРЕЛКА ПОДСКАЗКИ ===== */
-.hero-modal-ability-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 8px solid transparent;
-    border-top-color: rgba(240, 185, 11, 0.2);
-}
-
-.hero-modal-ability-tooltip::before {
-    content: '';
-    position: absolute;
-    top: calc(100% - 1px);
-    left: 50%;
-    transform: translateX(-50%);
-    border: 7px solid transparent;
-    border-top-color: rgba(10, 10, 15, 0.95);
-    z-index: 1;
 }
 
 /* ============================================================
@@ -1706,15 +1636,15 @@ h1::before, h2::before {
         max-height: 92vh;
     }
 
-    .hero-modal-header {
+    .hero-modal-main {
         flex-direction: column;
+        align-items: center;
         text-align: center;
-        gap: 12px;
     }
 
     .hero-modal-avatar {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
     }
 
     .hero-modal-name {
@@ -1727,43 +1657,18 @@ h1::before, h2::before {
     }
 
     .hero-modal-abilities-grid {
-        flex-wrap: wrap;
-        gap: 8px;
+        grid-template-columns: 1fr;
     }
 
-    .hero-modal-ability {
-        min-width: 60px;
-        padding: 8px 10px 10px;
+    .ability-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
-    .hero-modal-ability-icon {
+    .ability-card-icon {
         width: 40px;
         height: 40px;
-    }
-
-    .hero-modal-ability-name {
-        font-size: 0.6rem;
-        max-width: 60px;
-    }
-
-    .hero-modal-ability-tooltip {
-        min-width: 220px;
-        max-width: 260px;
-        padding: 12px 14px;
-        bottom: calc(100% + 10px);
-    }
-
-    .ability-tooltip-name {
-        font-size: 0.9rem;
-    }
-
-    .ability-tooltip-desc {
-        font-size: 0.8rem;
-    }
-
-    .hero-modal-description {
-        font-size: 0.95rem;
-        padding: 12px 16px;
     }
 
     .custom-cursor {
@@ -1829,58 +1734,24 @@ h1::before, h2::before {
     }
 
     .hero-modal-avatar {
-        width: 64px;
-        height: 64px;
+        width: 80px;
+        height: 80px;
     }
 
     .hero-modal-stats {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        grid-template-columns: 1fr;
     }
 
-    .hero-modal-stat-block {
-        padding: 12px;
+    .stat-values {
+        justify-content: center;
+        gap: 20px;
     }
 
     .hero-modal-abilities-grid {
-        gap: 6px;
+        gap: 10px;
     }
 
-    .hero-modal-ability {
-        min-width: 50px;
-        padding: 6px 8px 8px;
-    }
-
-    .hero-modal-ability-icon {
-        width: 32px;
-        height: 32px;
-    }
-
-    .hero-modal-ability-name {
-        font-size: 0.55rem;
-        max-width: 50px;
-    }
-
-    .hero-modal-ability-tooltip {
-        min-width: 180px;
-        max-width: 220px;
-        padding: 10px 12px;
-        bottom: calc(100% + 8px);
-        left: 0;
-        transform: translateX(0);
-    }
-
-    .hero-modal-ability-tooltip::after,
-    .hero-modal-ability-tooltip::before {
-        left: 20px;
-        transform: translateX(0);
-    }
-
-    .ability-tooltip-name {
-        font-size: 0.8rem;
-    }
-
-    .ability-tooltip-desc {
-        font-size: 0.75rem;
+    .ability-card {
+        padding: 12px;
     }
 }
