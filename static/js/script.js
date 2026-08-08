@@ -211,35 +211,39 @@
         }[primaryAttr] || 'universal';
 
         var attrName = {
-            'str': 'Сила',
-            'agi': 'Ловкость',
-            'int': 'Интеллект',
-            'universal': 'Универсальный',
-            'strength': 'Сила',
-            'agility': 'Ловкость',
-            'intelligence': 'Интеллект'
-        }[primaryAttr] || 'Универсальный';
+            'str': 'СИЛА',
+            'agi': 'ЛОВКОСТЬ',
+            'int': 'ИНТЕЛЛЕКТ',
+            'universal': 'УНИВЕРСАЛЬНЫЙ',
+            'strength': 'СИЛА',
+            'agility': 'ЛОВКОСТЬ',
+            'intelligence': 'ИНТЕЛЛЕКТ'
+        }[primaryAttr] || 'УНИВЕРСАЛЬНЫЙ';
 
         var heroName = heroData.localized_name || hero.name;
         var heroIcon = hero.icon;
 
         var html = '';
 
+        // ===== ВЕРХНЯЯ ЧАСТЬ =====
         html += '<div class="hero-modal-header">';
         html += '    <div class="hero-modal-avatar">';
         html += '        <img src="/static/assets/icons/' + heroIcon + '.png" alt="' + heroName + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'18\' font-family=\'sans-serif\'%3E' + heroName.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
         html += '    </div>';
         html += '    <div class="hero-modal-title">';
-        html += '        <div class="hero-modal-attribute ' + attrClass + '">' + attrName.toUpperCase() + '</div>';
+        html += '        <div class="hero-modal-attribute ' + attrClass + '">' + attrName + '</div>';
         html += '        <div class="hero-modal-name"><span class="highlight">' + heroName + '</span></div>';
         html += '    </div>';
         html += '</div>';
 
+        // ===== ОПИСАНИЕ =====
         var bioText = heroData.bio || 'Описание героя временно недоступно.';
         html += '<p class="hero-modal-description">' + bioText + '</p>';
 
+        // ===== СТАТИСТИКА =====
         html += '<div class="hero-modal-stats">';
 
+        // Атака
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">АТАКА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -249,6 +253,7 @@
         html += '        </div>';
         html += '    </div>';
 
+        // Защита
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">ЗАЩИТА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -258,6 +263,7 @@
         html += '        </div>';
         html += '    </div>';
 
+        // Мобильность
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">МОБИЛЬНОСТЬ</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -268,14 +274,16 @@
         html += '    </div>';
         html += '</div>';
 
+        // ===== АТРИБУТЫ =====
         html += '<div class="hero-modal-attributes">';
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">СИЛА</span><span class="attr-value">' + (heroData.base_str || '?') + ' +' + (heroData.str_gain || '?') + '</span></div>';
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">ЛОВКОСТЬ</span><span class="attr-value">' + (heroData.base_agi || '?') + ' +' + (heroData.agi_gain || '?') + '</span></div>';
         html += '    <div class="hero-modal-attribute-item"><span class="attr-label">ИНТЕЛЛЕКТ</span><span class="attr-value">' + (heroData.base_int || '?') + ' +' + (heroData.int_gain || '?') + '</span></div>';
         html += '</div>';
 
+        // ===== СПОСОБНОСТИ =====
         if (abilities && abilities.length > 0) {
-            html += '<div class="hero-modal-abilities-title"><span>Способности</span></div>';
+            html += '<div class="hero-modal-abilities-title"><span>СПОСОБНОСТИ</span></div>';
             html += '<div class="hero-modal-abilities-grid" style="justify-content: center;">';
 
             for (var i = 0; i < abilities.length; i++) {
