@@ -71,11 +71,13 @@
                 linkHtml = '<a href="' + newsLink + '" target="_blank" class="news-read-more">Steam →</a>';
             }
 
+            // Проверяем длину контента (без HTML тегов)
             var plainText = newsContent.replace(/<[^>]+>/g, '');
             var isLong = plainText.length > 500;
 
             var shortContent = newsContent;
             if (isLong) {
+                // Обрезаем до 500 символов, сохраняя HTML структуру
                 var shortPlain = plainText.substring(0, 500) + '...';
                 shortContent = shortPlain.replace(/\n/g, '<br>');
             }
@@ -90,9 +92,11 @@
 
             if (isLong) {
                 html += '            <div class="news-preview" id="news-text-' + newsId + '">' + shortContent + '</div>';
-                html += '            <button class="news-toggle-btn" data-id="' + newsId + '" data-full="' + escapeHtml(newsContent) + '" data-short="' + shortContent + '">';
+                html += '            <button class="news-toggle-btn" data-id="' + newsId + '">';
                 html += '                <span class="toggle-icon">▼</span> Развернуть';
                 html += '            </button>';
+                // Сохраняем полный и короткий контент в data атрибуты
+                html += '            <div style="display:none;" class="news-full-content" data-full="' + escapeHtml(newsContent) + '" data-short="' + shortContent + '"></div>';
             } else {
                 html += '            <div class="news-preview">' + newsContent + '</div>';
             }
@@ -107,21 +111,26 @@
 
         newsFeed.innerHTML = html;
 
+        // Обработчики для кнопок "Развернуть/Свернуть"
         var toggleBtns = document.querySelectorAll('.news-toggle-btn');
         for (var j = 0; j < toggleBtns.length; j++) {
             toggleBtns[j].addEventListener('click', function() {
                 var btn = this;
                 var id = btn.dataset.id;
                 var textEl = document.getElementById('news-text-' + id);
+                var fullContentEl = btn.parentElement.querySelector('.news-full-content');
 
-                if (!textEl) return;
+                if (!textEl || !fullContentEl) return;
+
+                var fullContent = fullContentEl.dataset.full;
+                var shortContent = fullContentEl.dataset.short;
 
                 if (btn.classList.contains('expanded')) {
-                    textEl.innerHTML = btn.dataset.short;
+                    textEl.innerHTML = shortContent;
                     btn.classList.remove('expanded');
                     btn.innerHTML = '<span class="toggle-icon">▼</span> Развернуть';
                 } else {
-                    textEl.innerHTML = btn.dataset.full;
+                    textEl.innerHTML = fullContent;
                     btn.classList.add('expanded');
                     btn.innerHTML = '<span class="toggle-icon">▲</span> Свернуть';
                 }
@@ -146,11 +155,6 @@
                 fetchNews();
             }
         }, 100);
-
-        if (document.getElementById('newsFeed')) {
-            clearInterval(checkInterval);
-            fetchNews();
-        }
     });
 
     console.log('📰 Модуль новостей загружен');

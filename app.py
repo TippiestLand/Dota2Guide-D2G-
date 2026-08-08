@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, send_from_directory, redirect, url_for
+from flask import Flask, render_template, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import json
@@ -7,7 +7,6 @@ import re
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
-import html
 import time
 
 app = Flask(__name__,
@@ -19,7 +18,7 @@ CORS(app)
 MSK = timezone(timedelta(hours=3))
 
 # ============================================================
-# КЭШ ГЕРОЕВ (обновляется раз в сутки)
+# КЭШ ГЕРОЕВ
 # ============================================================
 HERO_CACHE = {}
 HEROES_LIST_CACHE = None
@@ -52,6 +51,7 @@ def get_hero_data(hero_name):
     """Получает полные данные героя с кэшированием"""
     global HERO_CACHE
     
+    # Проверяем кэш
     if hero_name in HERO_CACHE:
         cache_time = HERO_CACHE[hero_name].get('cache_time', 0)
         if (time.time() - cache_time) < CACHE_DURATION:
@@ -60,14 +60,25 @@ def get_hero_data(hero_name):
     
     heroes = get_heroes_list()
     hero_id = None
+    hero_info = None
     
     # Ищем героя по имени
     for hero in heroes:
-        if hero.get('name', '').lower() == f'npc_dota_hero_{hero_name}'.lower():
+        hero_api_name = hero.get('name', '').lower()
+        hero_localized = hero.get('localized_name', '').lower()
+        
+        # Сравниваем с разными вариантами
+        if hero_api_name == f'npc_dota_hero_{hero_name}'.lower():
             hero_id = hero.get('id')
+            hero_info = hero
             break
-        if hero.get('localized_name', '').lower() == hero_name.replace('_', ' ').lower():
+        if hero_localized == hero_name.replace('_', ' ').lower():
             hero_id = hero.get('id')
+            hero_info = hero
+            break
+        if hero_name.lower() in hero_api_name or hero_name.lower() in hero_localized:
+            hero_id = hero.get('id')
+            hero_info = hero
             break
     
     if not hero_id:
@@ -80,13 +91,22 @@ def get_hero_data(hero_name):
         # Получаем данные героя
         response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
         if response.status_code != 200:
+            print(f"❌ Ошибка загрузки данных: {response.status_code}")
             return None
         
         hero_data = response.json()
         
+        # Добавляем недостающие поля из списка
+        if hero_info:
+            hero_data['localized_name'] = hero_info.get('localized_name', hero_name)
+            hero_data['primary_attr'] = hero_info.get('primary_attr', 'universal')
+        
         # Получаем способности
-        abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
-        abilities = abilities_response.json() if abilities_response.status_code == 200 else []
+        try:
+            abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
+            abilities = abilities_response.json() if abilities_response.status_code == 200 else []
+        except:
+            abilities = []
         
         # Добавляем локальное имя для иконки
         hero_data['icon'] = hero_name
@@ -112,6 +132,10 @@ def get_hero_data(hero_name):
 def index():
     return render_template('index.html')
 
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
+
 @app.route('/api/news', methods=['GET'])
 def get_news():
     return jsonify(load_news())
@@ -120,7 +144,6 @@ def get_news():
 def get_heroes_list_api():
     """Возвращает список всех героев для фронтенда"""
     heroes = get_heroes_list()
-    # Форматируем для фронтенда
     result = []
     for hero in heroes:
         result.append({
@@ -137,12 +160,14 @@ def api_hero(hero_name):
     
     hero_data = get_hero_data(hero_name)
     if not hero_data:
+        print(f"❌ Герой {hero_name} не найден")
         return jsonify({'error': 'Hero not found'}), 404
     
+    print(f"✅ Данные героя {hero_name} отправлены")
     return jsonify(hero_data)
 
 # ============================================================
-# НОВОСТИ (как было)
+# НОВОСТИ
 # ============================================================
 NEWS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'news.json')
 RSS_URL = 'https://store.steampowered.com/feeds/news/app/570/?l=russian'
@@ -185,56 +210,138 @@ def translate_title(title):
     return title
 
 def fetch_rss_news():
+    """Парсит RSS и возвращает новости с фиксированной датой"""
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         response = requests.get(RSS_URL, headers=headers, timeout=10)
         if response.status_code != 200:
             return []
+        
         root = ET.fromstring(response.content)
         news_items = []
+        
         for item in root.findall('.//item')[:15]:
             title_element = item.find('title')
             title_text = title_element.text if title_element is not None else 'Без названия'
             title_text = translate_title(title_text)
+            
+            # Получаем реальную дату из RSS
             pub_date_element = item.find('pubDate')
-            pub_date_text = pub_date_element.text if pub_date_element is not None else ''
+            if pub_date_element is not None and pub_date_element.text:
+                try:
+                    # Парсим дату из RSS
+                    date_obj = datetime.strptime(pub_date_element.text, '%a, %d %b %Y %H:%M:%S %Z')
+                    date_formatted = date_obj.strftime('%d %B %Y, %H:%M МСК')
+                except:
+                    date_formatted = datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК')
+            else:
+                date_formatted = datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК')
+            
             link_element = item.find('link')
             link_text = link_element.text if link_element is not None else ''
+            
             description_element = item.find('description')
             desc_text = description_element.text if description_element is not None else title_text
             desc_clean = re.sub(r'<[^>]+>', '', desc_text)
-            desc_clean = desc_clean[:500] + '...' if len(desc_clean) > 500 else desc_clean
+            
+            # Форматируем контент с сохранением структуры
+            content_html = format_news_content(desc_clean)
             
             hash_id = int(hashlib.md5(title_text.encode('utf-8')).hexdigest()[:8], 16)
+            
             news_items.append({
                 'id': hash_id,
                 'title': title_text,
-                'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
-                'content': desc_clean,
+                'date': date_formatted,
+                'content': content_html,
                 'link': link_text,
-                'source': 'rss'
+                'source': 'rss',
+                'timestamp': int(datetime.now().timestamp() * 1000)
             })
+        
         return news_items
     except Exception as e:
         print(f"Ошибка при получении RSS: {e}")
         return []
 
+def format_news_content(text):
+    """Форматирует текст новости в HTML"""
+    lines = text.split('\n')
+    html_parts = []
+    in_list = False
+    list_items = []
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            if in_list:
+                html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
+                list_items = []
+                in_list = False
+            html_parts.append('<br>')
+            continue
+        
+        # Проверяем, является ли строка элементом списка
+        is_list_item = False
+        clean_text = line
+        if line.startswith('• ') or line.startswith('- ') or line.startswith('* ') or line.startswith('— '):
+            is_list_item = True
+            clean_text = line[2:]
+        elif line.startswith('Fixed'):
+            is_list_item = True
+            clean_text = 'Исправлено: ' + line[6:]
+        
+        if is_list_item:
+            if not in_list:
+                in_list = True
+                list_items = []
+            list_items.append('  <li>' + clean_text + '</li>')
+        else:
+            if in_list:
+                html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
+                list_items = []
+                in_list = False
+            html_parts.append('<p>' + clean_text + '</p>')
+    
+    if in_list:
+        html_parts.append('<ul>\n' + '\n'.join(list_items) + '\n</ul>')
+    
+    return '\n'.join(html_parts)
+
 def initialize_news():
+    """Инициализация новостей при старте"""
     print("=" * 60)
     print("🚀 ИНИЦИАЛИЗАЦИЯ НОВОСТЕЙ")
     print("=" * 60)
     existing = load_news()
     print(f"📰 Существующих новостей: {len(existing)}")
+    
     if len(existing) > 0:
-        print("✅ Новости уже есть")
+        print("✅ Новости уже есть, пропускаем загрузку")
         return
+    
     print("📝 Загружаем свежие из RSS...")
     rss_news = fetch_rss_news()
     if rss_news:
         save_news(rss_news)
         print(f"✅ Добавлено {len(rss_news)} новостей")
+    else:
+        # Тестовые новости, если RSS не загрузился
+        test_news = [{
+            'id': 1,
+            'title': 'Добро пожаловать в Dota 2 Guide!',
+            'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
+            'content': '<p>Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.</p><ul><li>Все новости будут переведены на русский язык</li><li>Дата и время — по Московскому времени</li></ul>',
+            'link': 'https://store.steampowered.com/news/app/570',
+            'source': 'manual',
+            'timestamp': int(datetime.now().timestamp() * 1000)
+        }]
+        save_news(test_news)
+        print("✅ Добавлена тестовая новость")
+    
     print("=" * 60)
 
+# Запускаем инициализацию
 initialize_news()
 
 if __name__ == '__main__':
