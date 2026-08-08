@@ -48,7 +48,7 @@ def get_heroes_list():
     return HEROES_LIST_CACHE or []
 
 def get_hero_data(hero_name):
-    """Получает полные данные героя с кэшированием"""
+    """Получает полные данные героя"""
     global HERO_CACHE
     
     # Проверяем кэш
@@ -59,60 +59,85 @@ def get_hero_data(hero_name):
             return HERO_CACHE[hero_name]
     
     heroes = get_heroes_list()
-    hero_id = None
     hero_info = None
+    hero_id = None
     
     # Ищем героя по имени
     for hero in heroes:
         hero_api_name = hero.get('name', '').lower()
         hero_localized = hero.get('localized_name', '').lower()
+        search_name = hero_name.replace('_', ' ').lower()
         
-        # Сравниваем с разными вариантами
         if hero_api_name == f'npc_dota_hero_{hero_name}'.lower():
-            hero_id = hero.get('id')
             hero_info = hero
+            hero_id = hero.get('id')
             break
-        if hero_localized == hero_name.replace('_', ' ').lower():
-            hero_id = hero.get('id')
+        if hero_localized == search_name:
             hero_info = hero
+            hero_id = hero.get('id')
             break
         if hero_name.lower() in hero_api_name or hero_name.lower() in hero_localized:
-            hero_id = hero.get('id')
             hero_info = hero
+            hero_id = hero.get('id')
             break
     
-    if not hero_id:
-        print(f"❌ Герой {hero_name} не найден")
+    if not hero_info:
+        print(f"❌ Герой {hero_name} не найден в списке")
         return None
     
+    print(f"🆔 ID героя {hero_name}: {hero_id}")
+    
     try:
-        print(f"🆔 ID героя {hero_name}: {hero_id}")
+        # Пытаемся получить детальные данные через другой эндпоинт
+        detailed_data = None
+        abilities = []
         
-        # Получаем данные героя
-        response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
-        if response.status_code != 200:
-            print(f"❌ Ошибка загрузки данных: {response.status_code}")
-            return None
+        # Пробуем получить данные через /api/heroes/{id}
+        try:
+            response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}', timeout=10)
+            if response.status_code == 200:
+                detailed_data = response.json()
+                print(f"✅ Детальные данные получены для {hero_name}")
+        except Exception as e:
+            print(f"⚠️ Не удалось получить детальные данные: {e}")
         
-        hero_data = response.json()
+        # Если детальные данные не получены, используем данные из списка
+        if not detailed_data:
+            detailed_data = hero_info.copy()
+            # Добавляем недостающие поля
+            detailed_data['base_str'] = hero_info.get('base_str', 0)
+            detailed_data['base_agi'] = hero_info.get('base_agi', 0)
+            detailed_data['base_int'] = hero_info.get('base_int', 0)
+            detailed_data['str_gain'] = hero_info.get('str_gain', 0)
+            detailed_data['agi_gain'] = hero_info.get('agi_gain', 0)
+            detailed_data['int_gain'] = hero_info.get('int_gain', 0)
+            detailed_data['base_health'] = hero_info.get('base_health', 0)
+            detailed_data['base_mana'] = hero_info.get('base_mana', 0)
+            detailed_data['base_armor'] = hero_info.get('base_armor', 0)
+            detailed_data['move_speed'] = hero_info.get('move_speed', 0)
+            detailed_data['attack_range'] = hero_info.get('attack_range', 0)
+            detailed_data['attack_rate'] = hero_info.get('attack_rate', 0)
+            detailed_data['base_attack_min'] = hero_info.get('base_attack_min', 0)
+            detailed_data['base_attack_max'] = hero_info.get('base_attack_max', 0)
+            detailed_data['attack_type'] = hero_info.get('attack_type', 'Ближний бой')
+            detailed_data['primary_attr'] = hero_info.get('primary_attr', 'universal')
+            detailed_data['localized_name'] = hero_info.get('localized_name', hero_name)
+            detailed_data['bio'] = hero_info.get('bio', 'Описание героя временно недоступно.')
         
-        # Добавляем недостающие поля из списка
-        if hero_info:
-            hero_data['localized_name'] = hero_info.get('localized_name', hero_name)
-            hero_data['primary_attr'] = hero_info.get('primary_attr', 'universal')
-        
-        # Получаем способности
+        # Пытаемся получить способности
         try:
             abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
-            abilities = abilities_response.json() if abilities_response.status_code == 200 else []
-        except:
-            abilities = []
+            if abilities_response.status_code == 200:
+                abilities = abilities_response.json()
+                print(f"✅ Получено {len(abilities)} способностей для {hero_name}")
+        except Exception as e:
+            print(f"⚠️ Не удалось получить способности: {e}")
         
         # Добавляем локальное имя для иконки
-        hero_data['icon'] = hero_name
+        detailed_data['icon'] = hero_name
         
         result = {
-            'data': hero_data,
+            'data': detailed_data,
             'abilities': abilities,
             'cache_time': time.time()
         }
@@ -210,26 +235,21 @@ def translate_title(title):
     return title
 
 def fetch_rss_news():
-    """Парсит RSS и возвращает новости с фиксированной датой"""
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         response = requests.get(RSS_URL, headers=headers, timeout=10)
         if response.status_code != 200:
             return []
-        
         root = ET.fromstring(response.content)
         news_items = []
-        
         for item in root.findall('.//item')[:15]:
             title_element = item.find('title')
             title_text = title_element.text if title_element is not None else 'Без названия'
             title_text = translate_title(title_text)
             
-            # Получаем реальную дату из RSS
             pub_date_element = item.find('pubDate')
             if pub_date_element is not None and pub_date_element.text:
                 try:
-                    # Парсим дату из RSS
                     date_obj = datetime.strptime(pub_date_element.text, '%a, %d %b %Y %H:%M:%S %Z')
                     date_formatted = date_obj.strftime('%d %B %Y, %H:%M МСК')
                 except:
@@ -243,12 +263,9 @@ def fetch_rss_news():
             description_element = item.find('description')
             desc_text = description_element.text if description_element is not None else title_text
             desc_clean = re.sub(r'<[^>]+>', '', desc_text)
-            
-            # Форматируем контент с сохранением структуры
             content_html = format_news_content(desc_clean)
             
             hash_id = int(hashlib.md5(title_text.encode('utf-8')).hexdigest()[:8], 16)
-            
             news_items.append({
                 'id': hash_id,
                 'title': title_text,
@@ -258,14 +275,12 @@ def fetch_rss_news():
                 'source': 'rss',
                 'timestamp': int(datetime.now().timestamp() * 1000)
             })
-        
         return news_items
     except Exception as e:
         print(f"Ошибка при получении RSS: {e}")
         return []
 
 def format_news_content(text):
-    """Форматирует текст новости в HTML"""
     lines = text.split('\n')
     html_parts = []
     in_list = False
@@ -281,7 +296,6 @@ def format_news_content(text):
             html_parts.append('<br>')
             continue
         
-        # Проверяем, является ли строка элементом списка
         is_list_item = False
         clean_text = line
         if line.startswith('• ') or line.startswith('- ') or line.startswith('* ') or line.startswith('— '):
@@ -309,39 +323,21 @@ def format_news_content(text):
     return '\n'.join(html_parts)
 
 def initialize_news():
-    """Инициализация новостей при старте"""
     print("=" * 60)
     print("🚀 ИНИЦИАЛИЗАЦИЯ НОВОСТЕЙ")
     print("=" * 60)
     existing = load_news()
     print(f"📰 Существующих новостей: {len(existing)}")
-    
     if len(existing) > 0:
-        print("✅ Новости уже есть, пропускаем загрузку")
+        print("✅ Новости уже есть")
         return
-    
     print("📝 Загружаем свежие из RSS...")
     rss_news = fetch_rss_news()
     if rss_news:
         save_news(rss_news)
         print(f"✅ Добавлено {len(rss_news)} новостей")
-    else:
-        # Тестовые новости, если RSS не загрузился
-        test_news = [{
-            'id': 1,
-            'title': 'Добро пожаловать в Dota 2 Guide!',
-            'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
-            'content': '<p>Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.</p><ul><li>Все новости будут переведены на русский язык</li><li>Дата и время — по Московскому времени</li></ul>',
-            'link': 'https://store.steampowered.com/news/app/570',
-            'source': 'manual',
-            'timestamp': int(datetime.now().timestamp() * 1000)
-        }]
-        save_news(test_news)
-        print("✅ Добавлена тестовая новость")
-    
     print("=" * 60)
 
-# Запускаем инициализацию
 initialize_news()
 
 if __name__ == '__main__':
