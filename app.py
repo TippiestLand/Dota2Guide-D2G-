@@ -34,24 +34,40 @@ def get_heroes_list():
         print("📦 Список героев из кэша")
         return HEROES_LIST_CACHE
     
-    try:
-        print("📡 Запрос списка героев из OpenDota API...")
-        response = requests.get('https://api.opendota.com/api/heroes', timeout=10)
-        if response.status_code == 200:
-            HEROES_LIST_CACHE = response.json()
-            HEROES_CACHE_TIME = current_time
-            print(f"✅ Получено {len(HEROES_LIST_CACHE)} героев")
-            return HEROES_LIST_CACHE
-    except Exception as e:
-        print(f"❌ Ошибка загрузки списка героев: {e}")
+    # Пробуем разные API
+    apis = [
+        'https://api.opendota.com/api/heroes',
+        'https://api.stratz.com/api/v1/hero',
+        'https://api.steampowered.com/IEconDOTA2_570/GetHeroes/v1/?key='
+    ]
     
+    for api_url in apis:
+        try:
+            print(f"📡 Запрос списка героев из: {api_url[:50]}...")
+            response = requests.get(api_url, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                if 'heroes' in data:
+                    HEROES_LIST_CACHE = data['heroes']
+                elif isinstance(data, list):
+                    HEROES_LIST_CACHE = data
+                else:
+                    continue
+                HEROES_CACHE_TIME = current_time
+                print(f"✅ Получено {len(HEROES_LIST_CACHE)} героев")
+                return HEROES_LIST_CACHE
+        except Exception as e:
+            print(f"⚠️ Ошибка API {api_url[:30]}: {e}")
+            continue
+    
+    # Если все API не работают - возвращаем кэш или пустой список
     return HEROES_LIST_CACHE or []
 
 def get_hero_stats(hero_id):
-    """Получает детальную статистику героя из другого источника"""
+    """Получает детальную статистику героя"""
     try:
-        # Пробуем получить данные через /api/heroStats
-        response = requests.get(f'https://api.opendota.com/api/heroStats', timeout=10)
+        # Пробуем через heroStats
+        response = requests.get('https://api.opendota.com/api/heroStats', timeout=5)
         if response.status_code == 200:
             stats = response.json()
             for hero in stats:
@@ -59,6 +75,7 @@ def get_hero_stats(hero_id):
                     return hero
     except Exception as e:
         print(f"⚠️ Ошибка получения heroStats: {e}")
+    
     return None
 
 def get_hero_data(hero_name):
@@ -102,63 +119,60 @@ def get_hero_data(hero_name):
     print(f"🆔 ID героя {hero_name}: {hero_id}")
     
     try:
-        # Пытаемся получить детальную статистику
+        # Получаем статистику
         hero_stats = get_hero_stats(hero_id)
         
-        # Используем данные из списка героев как основу
+        # Используем данные из списка как основу
         detailed_data = hero_info.copy()
         
-        # Если есть статистика - обновляем данные
+        # Обновляем из статистики если есть
         if hero_stats:
             print(f"✅ Получена статистика для {hero_name}")
             detailed_data.update(hero_stats)
         
-        # Добавляем все необходимые поля (если их нет)
-        detailed_data['base_str'] = detailed_data.get('base_str', detailed_data.get('base_str', 0))
-        detailed_data['base_agi'] = detailed_data.get('base_agi', detailed_data.get('base_agi', 0))
-        detailed_data['base_int'] = detailed_data.get('base_int', detailed_data.get('base_int', 0))
-        detailed_data['str_gain'] = detailed_data.get('str_gain', detailed_data.get('str_gain', 0))
-        detailed_data['agi_gain'] = detailed_data.get('agi_gain', detailed_data.get('agi_gain', 0))
-        detailed_data['int_gain'] = detailed_data.get('int_gain', detailed_data.get('int_gain', 0))
-        detailed_data['base_health'] = detailed_data.get('base_health', detailed_data.get('base_health', 200))
-        detailed_data['base_mana'] = detailed_data.get('base_mana', detailed_data.get('base_mana', 75))
-        detailed_data['base_armor'] = detailed_data.get('base_armor', detailed_data.get('base_armor', 0))
-        detailed_data['move_speed'] = detailed_data.get('move_speed', detailed_data.get('move_speed', 300))
-        detailed_data['attack_range'] = detailed_data.get('attack_range', detailed_data.get('attack_range', 150))
-        detailed_data['attack_rate'] = detailed_data.get('attack_rate', detailed_data.get('attack_rate', 1.7))
-        detailed_data['base_attack_min'] = detailed_data.get('base_attack_min', detailed_data.get('base_attack_min', 20))
-        detailed_data['base_attack_max'] = detailed_data.get('base_attack_max', detailed_data.get('base_attack_max', 30))
-        detailed_data['attack_type'] = detailed_data.get('attack_type', 'Melee')
-        detailed_data['primary_attr'] = detailed_data.get('primary_attr', 'universal')
-        detailed_data['localized_name'] = detailed_data.get('localized_name', hero_name)
-        detailed_data['bio'] = detailed_data.get('bio', 'Описание героя временно недоступно.')
+        # Добавляем недостающие поля со значениями по умолчанию
+        detailed_data.setdefault('base_str', 0)
+        detailed_data.setdefault('base_agi', 0)
+        detailed_data.setdefault('base_int', 0)
+        detailed_data.setdefault('str_gain', 0)
+        detailed_data.setdefault('agi_gain', 0)
+        detailed_data.setdefault('int_gain', 0)
+        detailed_data.setdefault('base_health', 200)
+        detailed_data.setdefault('base_mana', 75)
+        detailed_data.setdefault('base_armor', 0)
+        detailed_data.setdefault('move_speed', 300)
+        detailed_data.setdefault('attack_range', 150)
+        detailed_data.setdefault('attack_rate', 1.7)
+        detailed_data.setdefault('base_attack_min', 20)
+        detailed_data.setdefault('base_attack_max', 30)
+        detailed_data.setdefault('attack_type', 'Melee')
+        detailed_data.setdefault('primary_attr', 'universal')
+        detailed_data.setdefault('localized_name', hero_name)
+        detailed_data.setdefault('bio', 'Описание героя временно недоступно.')
+        detailed_data.setdefault('roles', [])
         detailed_data['icon'] = hero_name
-        detailed_data['roles'] = detailed_data.get('roles', [])
         
-        # Пытаемся получить способности
+        # Получаем способности
         abilities = []
         try:
-            abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=10)
+            abilities_response = requests.get(f'https://api.opendota.com/api/heroes/{hero_id}/abilities', timeout=5)
             if abilities_response.status_code == 200:
                 abilities = abilities_response.json()
                 print(f"✅ Получено {len(abilities)} способностей для {hero_name}")
         except Exception as e:
             print(f"⚠️ Не удалось получить способности: {e}")
         
-        # Если способностей нет, пробуем через другой эндпоинт
+        # Если способностей нет - пробуем через другой эндпоинт
         if not abilities:
             try:
-                # Пробуем через /api/constants/hero_abilities
-                response = requests.get('https://api.opendota.com/api/constants/hero_abilities', timeout=10)
+                response = requests.get('https://api.opendota.com/api/constants/hero_abilities', timeout=5)
                 if response.status_code == 200:
                     all_abilities = response.json()
-                    hero_abilities = []
                     for key, ability in all_abilities.items():
                         if ability.get('hero_id') == hero_id:
-                            hero_abilities.append(ability)
-                    if hero_abilities:
-                        abilities = hero_abilities
-                        print(f"✅ Получено {len(abilities)} способностей через constants для {hero_name}")
+                            abilities.append(ability)
+                    if abilities:
+                        print(f"✅ Получено {len(abilities)} способностей через constants")
             except Exception as e:
                 print(f"⚠️ Не удалось получить способности через constants: {e}")
         
@@ -304,7 +318,7 @@ def format_news_content(text):
     return '\n'.join(html_parts)
 
 def fetch_rss_news():
-    """Парсит RSS и возвращает новости с фиксированной датой"""
+    """Парсит RSS и возвращает новости"""
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         response = requests.get(RSS_URL, headers=headers, timeout=10)
@@ -371,21 +385,6 @@ def initialize_news():
     if rss_news:
         save_news(rss_news)
         print(f"✅ Добавлено {len(rss_news)} новостей")
-        for item in rss_news[:3]:
-            print(f"   📌 {item['title']}")
-    else:
-        test_news = [{
-            'id': 1,
-            'title': 'Добро пожаловать в Dota 2 Guide!',
-            'date': datetime.now(MSK).strftime('%d %B %Y, %H:%M МСК'),
-            'content': '<p>Новости Dota 2 будут загружаться автоматически из официального RSS-канала Steam.</p><ul><li>Все новости будут переведены на русский язык</li><li>Дата и время — по Московскому времени</li><li>Форматирование — как в официальных новостях Steam</li></ul>',
-            'link': 'https://store.steampowered.com/news/app/570',
-            'source': 'manual',
-            'timestamp': int(datetime.now().timestamp() * 1000)
-        }]
-        save_news(test_news)
-        print("✅ Добавлена тестовая новость")
-    
     print("=" * 60)
 
 # Запускаем инициализацию
