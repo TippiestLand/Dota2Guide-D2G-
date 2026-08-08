@@ -1,9 +1,6 @@
 (function() {
     'use strict';
 
-    // ============================================================
-    // ЛОКАЛЬНЫЕ ДАННЫЕ ГЕРОЕВ (для фильтров и отображения)
-    // ============================================================
     var heroesData = [
         { name: 'Alchemist', attribute: 'strength', icon: 'alchemist' },
         { name: 'Axe', attribute: 'strength', icon: 'axe' },
@@ -132,7 +129,6 @@
         { name: 'Windranger', attribute: 'universal', icon: 'windrunner' }
     ];
 
-    // Убираем дубликаты
     var heroMap = new Map();
     for (var i = 0; i < heroesData.length; i++) {
         var hero = heroesData[i];
@@ -223,19 +219,29 @@
         var heroName = heroData.localized_name || hero.name;
         var heroIcon = hero.icon;
 
-        // Пути к иконкам атрибутов
-        var attrIcons = {
-            'strength': '/static/assets/icons/Strength_attribute_symbol.png',
-            'agility': '/static/assets/icons/Agility_attribute_symbol.png',
-            'intelligence': '/static/assets/icons/Intelligence_attribute_symbol.png',
-            'universal': '/static/assets/icons/Dota2_Universal_icon_solid_allmode.png'
-        };
+        var attackType = heroData.attack_type || 'Melee';
+        var attackTypeRu = attackType === 'Melee' ? 'Ближний бой' : 'Дальний бой';
 
-        var iconPath = attrIcons[attrClass] || attrIcons.universal;
+        var complexity = 2;
+        if (heroData.roles) {
+            complexity = Math.min(3, Math.max(1, heroData.roles.length));
+        }
+
+        function renderComplexity(level) {
+            var html = '';
+            for (var i = 1; i <= 3; i++) {
+                if (i <= level) {
+                    html += '<span class="complexity-dot filled"></span>';
+                } else {
+                    html += '<span class="complexity-dot empty"></span>';
+                }
+            }
+            return html;
+        }
 
         var html = '';
 
-        // ===== ХЕДЕР: АВАТАР + ИМЯ =====
+        // ===== ХЕДЕР =====
         html += '<div class="hero-modal-header">';
         html += '    <div class="hero-modal-avatar">';
         html += '        <img src="/static/assets/icons/' + heroIcon + '.png" alt="' + heroName + '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'%3E%3Crect width=\'80\' height=\'80\' fill=\'%23222\'/%3E%3Ctext x=\'40\' y=\'48\' text-anchor=\'middle\' fill=\'%23666\' font-size=\'16\' font-family=\'sans-serif\'%3E' + heroName.charAt(0) + '%3C/text%3E%3C/svg%3E\'">';
@@ -248,24 +254,21 @@
 
         // ===== ОПИСАНИЕ =====
         var bioText = heroData.bio || 'Описание героя временно недоступно.';
-        // Выделяем жирным ключевые слова в описании
         bioText = bioText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         html += '<div class="hero-modal-description">' + bioText + '</div>';
 
-        // ===== ТЕГИ: ТИП АТАКИ + СЛОЖНОСТЬ =====
-        var attackType = heroData.attack_type || 'Ближний бой';
-        var complexity = heroData.roles ? heroData.roles.length : 2;
-        var complexityText = complexity <= 2 ? 'Низкая' : complexity <= 4 ? 'Средняя' : 'Высокая';
-
+        // ===== ТЕГИ + СЛОЖНОСТЬ =====
         html += '<div class="hero-modal-tags">';
-        html += '    <span class="hero-modal-tag"><span class="tag-icon">⚔️</span> ' + attackType + '</span>';
-        html += '    <span class="hero-modal-tag"><span class="tag-icon">📊</span> Сложность: ' + complexityText + '</span>';
+        html += '    <span class="hero-modal-tag"><span class="tag-icon">⚔️</span> ' + attackTypeRu + '</span>';
+        html += '    <span class="hero-modal-tag">';
+        html += '        <span class="tag-icon">📊</span> Сложность: ';
+        html += renderComplexity(complexity);
+        html += '    </span>';
         html += '</div>';
 
-        // ===== СТАТИСТИКА: 3 КОЛОНКИ =====
+        // ===== СТАТИСТИКА =====
         html += '<div class="hero-modal-stats">';
 
-        // АТАКА
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">АТАКА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -275,7 +278,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // ЗАЩИТА
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">ЗАЩИТА</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -285,7 +287,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // МОБИЛЬНОСТЬ
         html += '    <div class="hero-modal-stat-block">';
         html += '        <div class="hero-modal-stat-block-title">МОБИЛЬНОСТЬ</div>';
         html += '        <div class="hero-modal-stat-block-values">';
@@ -297,10 +298,9 @@
 
         html += '</div>';
 
-        // ===== АТРИБУТЫ С ИКОНКАМИ =====
+        // ===== АТРИБУТЫ =====
         html += '<div class="hero-modal-attributes">';
         
-        // Сила
         html += '    <div class="hero-modal-attribute-item">';
         html += '        <img src="/static/assets/icons/Strength_attribute_symbol.png" alt="Сила" class="attr-icon">';
         html += '        <div class="attr-info">';
@@ -309,7 +309,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // Ловкость
         html += '    <div class="hero-modal-attribute-item">';
         html += '        <img src="/static/assets/icons/Agility_attribute_symbol.png" alt="Ловкость" class="attr-icon">';
         html += '        <div class="attr-info">';
@@ -318,7 +317,6 @@
         html += '        </div>';
         html += '    </div>';
 
-        // Интеллект
         html += '    <div class="hero-modal-attribute-item">';
         html += '        <img src="/static/assets/icons/Intelligence_attribute_symbol.png" alt="Интеллект" class="attr-icon">';
         html += '        <div class="attr-info">';
@@ -488,9 +486,6 @@
         console.log('✅ Рендер героев завершён, карточек:', items.length);
     }
 
-    // ============================================================
-    // ФИЛЬТРЫ
-    // ============================================================
     var filterBtns = document.querySelectorAll('.filter-btn');
     for (var k = 0; k < filterBtns.length; k++) {
         filterBtns[k].addEventListener('click', function() {
@@ -530,9 +525,6 @@
         });
     }
 
-    // ============================================================
-    // ПОИСК
-    // ============================================================
     var searchInput = document.getElementById('heroSearch');
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
@@ -545,9 +537,6 @@
     styleEl.textContent = '.hero-grid { transition: opacity 0.3s ease, transform 0.3s ease; }';
     document.head.appendChild(styleEl);
 
-    // ============================================================
-    // ПЕРВЫЙ РЕНДЕР
-    // ============================================================
     renderHeroes();
 
     // ============================================================
