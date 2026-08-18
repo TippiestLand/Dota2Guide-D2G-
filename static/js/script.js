@@ -2,12 +2,15 @@
     'use strict';
 
     // ============================================================
-    // ПОЛНЫЙ СПИСОК ВСЕХ 127 ГЕРОЕВ (ВОССТАНОВЛЕН)
+    // ПОЛНЫЙ СПИСОК ВСЕХ 126 ГЕРОЕВ DOTA 2 (АВГУСТ 2026)
     // ============================================================
     var heroesData = [
-        // Strength (Сила) - 35 героев
+        // ===== STRENGTH (СИЛА) — 39 героев =====
+        { name: 'Abaddon', attribute: 'strength', icon: 'abaddon' },
         { name: 'Alchemist', attribute: 'strength', icon: 'alchemist' },
         { name: 'Axe', attribute: 'strength', icon: 'axe' },
+        { name: 'Beastmaster', attribute: 'strength', icon: 'beastmaster' },
+        { name: 'Brewmaster', attribute: 'strength', icon: 'brewmaster' },
         { name: 'Bristleback', attribute: 'strength', icon: 'bristleback' },
         { name: 'Centaur Warrunner', attribute: 'strength', icon: 'centaur' },
         { name: 'Chaos Knight', attribute: 'strength', icon: 'chaos_knight' },
@@ -23,6 +26,8 @@
         { name: 'Legion Commander', attribute: 'strength', icon: 'legion_commander' },
         { name: 'Lifestealer', attribute: 'strength', icon: 'life_stealer' },
         { name: 'Lycan', attribute: 'strength', icon: 'lycan' },
+        { name: 'Magnus', attribute: 'strength', icon: 'magnataur' },
+        { name: 'Marci', attribute: 'strength', icon: 'marci' },
         { name: 'Mars', attribute: 'strength', icon: 'mars' },
         { name: 'Night Stalker', attribute: 'strength', icon: 'night_stalker' },
         { name: 'Ogre Magi', attribute: 'strength', icon: 'ogre_magi' },
@@ -41,9 +46,10 @@
         { name: 'Underlord', attribute: 'strength', icon: 'abyssal_underlord' },
         { name: 'Undying', attribute: 'strength', icon: 'undying' },
         { name: 'Wraith King', attribute: 'strength', icon: 'skeleton_king' },
-        
-        // Agility (Ловкость) - 34 героя
+
+        // ===== AGILITY (ЛОВКОСТЬ) — 40 героев =====
         { name: 'Anti-Mage', attribute: 'agility', icon: 'antimage' },
+        { name: 'Arc Warden', attribute: 'agility', icon: 'arc_warden' },
         { name: 'Bloodseeker', attribute: 'agility', icon: 'bloodseeker' },
         { name: 'Bounty Hunter', attribute: 'agility', icon: 'bounty_hunter' },
         { name: 'Broodmother', attribute: 'agility', icon: 'broodmother' },
@@ -54,6 +60,7 @@
         { name: 'Gyrocopter', attribute: 'agility', icon: 'gyrocopter' },
         { name: 'Hoodwink', attribute: 'agility', icon: 'hoodwink' },
         { name: 'Juggernaut', attribute: 'agility', icon: 'juggernaut' },
+        { name: 'Kez', attribute: 'agility', icon: 'kez' },
         { name: 'Lone Druid', attribute: 'agility', icon: 'lone_druid' },
         { name: 'Luna', attribute: 'agility', icon: 'luna' },
         { name: 'Medusa', attribute: 'agility', icon: 'medusa' },
@@ -75,17 +82,22 @@
         { name: 'Troll Warlord', attribute: 'agility', icon: 'troll_warlord' },
         { name: 'Ursa', attribute: 'agility', icon: 'ursa' },
         { name: 'Vengeful Spirit', attribute: 'agility', icon: 'vengefulspirit' },
+        { name: 'Venomancer', attribute: 'agility', icon: 'venomancer' },
         { name: 'Viper', attribute: 'agility', icon: 'viper' },
         { name: 'Weaver', attribute: 'agility', icon: 'weaver' },
-        
-        // Intelligence (Интеллект) - 34 героя
+
+        // ===== INTELLIGENCE (ИНТЕЛЛЕКТ) — 38 героев =====
         { name: 'Ancient Apparition', attribute: 'intelligence', icon: 'ancient_apparition' },
+        { name: 'Bane', attribute: 'intelligence', icon: 'bane' },
+        { name: 'Batrider', attribute: 'intelligence', icon: 'batrider' },
         { name: 'Chen', attribute: 'intelligence', icon: 'chen' },
         { name: 'Crystal Maiden', attribute: 'intelligence', icon: 'crystal_maiden' },
         { name: 'Dark Seer', attribute: 'intelligence', icon: 'dark_seer' },
         { name: 'Dark Willow', attribute: 'intelligence', icon: 'dark_willow' },
+        { name: 'Death Prophet', attribute: 'intelligence', icon: 'death_prophet' },
         { name: 'Disruptor', attribute: 'intelligence', icon: 'disruptor' },
         { name: 'Enchantress', attribute: 'intelligence', icon: 'enchantress' },
+        { name: 'Enigma', attribute: 'intelligence', icon: 'enigma' },
         { name: 'Grimstroke', attribute: 'intelligence', icon: 'grimstroke' },
         { name: 'Invoker', attribute: 'intelligence', icon: 'invoker' },
         { name: 'Jakiro', attribute: 'intelligence', icon: 'jakiro' },
@@ -101,7 +113,6 @@
         { name: 'Puck', attribute: 'intelligence', icon: 'puck' },
         { name: 'Pugna', attribute: 'intelligence', icon: 'pugna' },
         { name: 'Queen of Pain', attribute: 'intelligence', icon: 'queenofpain' },
-        { name: 'Ringmaster', attribute: 'intelligence', icon: 'ringmaster' },
         { name: 'Rubick', attribute: 'intelligence', icon: 'rubick' },
         { name: 'Shadow Demon', attribute: 'intelligence', icon: 'shadow_demon' },
         { name: 'Shadow Shaman', attribute: 'intelligence', icon: 'shadow_shaman' },
@@ -113,27 +124,17 @@
         { name: 'Winter Wyvern', attribute: 'intelligence', icon: 'winter_wyvern' },
         { name: 'Witch Doctor', attribute: 'intelligence', icon: 'witch_doctor' },
         { name: 'Zeus', attribute: 'intelligence', icon: 'zuus' },
-        
-        // Universal (Универсальные) - 24 героя
-        { name: 'Abaddon', attribute: 'universal', icon: 'abaddon' },
-        { name: 'Arc Warden', attribute: 'universal', icon: 'arc_warden' },
-        { name: 'Bane', attribute: 'universal', icon: 'bane' },
-        { name: 'Batrider', attribute: 'universal', icon: 'batrider' },
-        { name: 'Beastmaster', attribute: 'universal', icon: 'beastmaster' },
-        { name: 'Brewmaster', attribute: 'universal', icon: 'brewmaster' },
+
+        // ===== UNIVERSAL (УНИВЕРСАЛЬНЫЕ) — 12 героев =====
         { name: 'Dazzle', attribute: 'universal', icon: 'dazzle' },
-        { name: 'Death Prophet', attribute: 'universal', icon: 'death_prophet' },
-        { name: 'Enigma', attribute: 'universal', icon: 'enigma' },
         { name: 'Io', attribute: 'universal', icon: 'wisp' },
-        { name: 'Magnus', attribute: 'universal', icon: 'magnataur' },
-        { name: 'Marci', attribute: 'universal', icon: 'marci' },
         { name: "Nature's Prophet", attribute: 'universal', icon: 'furion' },
         { name: 'Nyx Assassin', attribute: 'universal', icon: 'nyx_assassin' },
         { name: 'Pangolier', attribute: 'universal', icon: 'pangolier' },
+        { name: 'Ringmaster', attribute: 'universal', icon: 'ringmaster' },
         { name: 'Sand King', attribute: 'universal', icon: 'sand_king' },
         { name: 'Snapfire', attribute: 'universal', icon: 'snapfire' },
         { name: 'Techies', attribute: 'universal', icon: 'techies' },
-        { name: 'Venomancer', attribute: 'universal', icon: 'venomancer' },
         { name: 'Visage', attribute: 'universal', icon: 'visage' },
         { name: 'Void Spirit', attribute: 'universal', icon: 'void_spirit' },
         { name: 'Windranger', attribute: 'universal', icon: 'windrunner' }
@@ -360,7 +361,7 @@
     });
 
     // ============================================================
-    // РЕНДЕР ГЕРОЕВ (СТАРАЯ ВЕРСИЯ С КАРТОЧКАМИ)
+    // РЕНДЕР ГЕРОЕВ
     // ============================================================
     function getAttributeClass(attribute) {
         var classes = {
