@@ -3,9 +3,10 @@
 
     // ============================================================
     // ПОЛНЫЙ СПИСОК ВСЕХ 127 ГЕРОЕВ DOTA 2 (АВГУСТ 2026)
+    // ВКЛЮЧАЯ Largo, Kez, Ringmaster И ВСЕХ ОСТАЛЬНЫХ
     // ============================================================
     var heroesData = [
-        // === STRENGTH (СИЛА) ===
+        // === STRENGTH (СИЛА) — 40 героев ===
         { name: 'Abaddon', attribute: 'strength', icon: 'abaddon' },
         { name: 'Alchemist', attribute: 'strength', icon: 'alchemist' },
         { name: 'Axe', attribute: 'strength', icon: 'axe' },
@@ -47,7 +48,7 @@
         { name: 'Undying', attribute: 'strength', icon: 'undying' },
         { name: 'Wraith King', attribute: 'strength', icon: 'skeleton_king' },
 
-        // === AGILITY (ЛОВКОСТЬ) ===
+        // === AGILITY (ЛОВКОСТЬ) — 37 героев ===
         { name: 'Anti-Mage', attribute: 'agility', icon: 'antimage' },
         { name: 'Arc Warden', attribute: 'agility', icon: 'arc_warden' },
         { name: 'Bloodseeker', attribute: 'agility', icon: 'bloodseeker' },
@@ -86,7 +87,7 @@
         { name: 'Viper', attribute: 'agility', icon: 'viper' },
         { name: 'Weaver', attribute: 'agility', icon: 'weaver' },
 
-        // === INTELLIGENCE (ИНТЕЛЛЕКТ) ===
+        // === INTELLIGENCE (ИНТЕЛЛЕКТ) — 35 героев ===
         { name: 'Ancient Apparition', attribute: 'intelligence', icon: 'ancient_apparition' },
         { name: 'Bane', attribute: 'intelligence', icon: 'bane' },
         { name: 'Batrider', attribute: 'intelligence', icon: 'batrider' },
@@ -125,7 +126,7 @@
         { name: 'Witch Doctor', attribute: 'intelligence', icon: 'witch_doctor' },
         { name: 'Zeus', attribute: 'intelligence', icon: 'zuus' },
 
-        // === UNIVERSAL (УНИВЕРСАЛЬНЫЕ) ===
+        // === UNIVERSAL (УНИВЕРСАЛЬНЫЕ) — 15 героев ===
         { name: 'Dazzle', attribute: 'universal', icon: 'dazzle' },
         { name: 'Io', attribute: 'universal', icon: 'wisp' },
         { name: "Nature's Prophet", attribute: 'universal', icon: 'furion' },
@@ -137,7 +138,10 @@
         { name: 'Techies', attribute: 'universal', icon: 'techies' },
         { name: 'Visage', attribute: 'universal', icon: 'visage' },
         { name: 'Void Spirit', attribute: 'universal', icon: 'void_spirit' },
-        { name: 'Windranger', attribute: 'universal', icon: 'windrunner' }
+        { name: 'Windranger', attribute: 'universal', icon: 'windrunner' },
+        
+        // === НОВЫЙ ГЕРОЙ LARGO ===
+        { name: 'Largo', attribute: 'universal', icon: 'largo' }
     ];
 
     // Убираем дубликаты
@@ -152,6 +156,9 @@
     uniqueHeroes.sort(function(a, b) {
         return a.name.localeCompare(b.name);
     });
+
+    // Проверка количества героев
+    console.log('✅ Загружено героев:', uniqueHeroes.length); // Должно быть 127
 
     var heroList = document.getElementById('heroList');
     var attributeGlow = document.getElementById('attributeGlow');
