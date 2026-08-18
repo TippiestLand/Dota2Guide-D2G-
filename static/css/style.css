@@ -40,6 +40,53 @@ body {
 }
 
 /* ============================================================
+   ОТКЛЮЧЕНИЕ СТАНДАРТНОГО КУРСОРА
+   ============================================================ */
+
+/* Убираем стандартный курсор со всех элементов */
+* {
+    cursor: none !important;
+}
+
+/* Убираем стандартный курсор у интерактивных элементов */
+a, button, input, textarea, select, 
+.hero-item, .glass-card, .item-card, .guide-card, .news-card-vk,
+.filter-btn, .hero-modal-close, .btn, .news-toggle-btn,
+[style*="cursor"], [onclick] {
+    cursor: none !important;
+}
+
+/* Убираем курсор у поля ввода (поиск) */
+input, textarea {
+    cursor: none !important;
+}
+
+/* Убираем курсор у ссылок */
+a {
+    cursor: none !important;
+}
+
+/* Убираем курсор у кнопок */
+button {
+    cursor: none !important;
+}
+
+/* Убираем курсор у всех элементов с pointer-events */
+*[style*="cursor: pointer"] {
+    cursor: none !important;
+}
+
+/* Для мобильных устройств — возвращаем стандартный курсор */
+@media (max-width: 768px) {
+    * {
+        cursor: default !important;
+    }
+    a, button, input, textarea, select {
+        cursor: default !important;
+    }
+}
+
+/* ============================================================
    ФОНОВЫЕ ЭФФЕКТЫ
    ============================================================ */
 .stars {
@@ -1192,7 +1239,7 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   МОДАЛЬНОЕ ОКНО - СТИЛЬ DOTA 2
+   МОДАЛЬНОЕ ОКНО
    ============================================================ */
 .hero-modal {
     display: none;
@@ -1221,24 +1268,27 @@ h1::before, h2::before {
 }
 
 .hero-modal-content {
-    background: rgba(10, 10, 18, 0.97);
-    border: 1px solid rgba(240, 185, 11, 0.12);
-    border-radius: 16px;
-    padding: 32px 36px;
-    max-width: 900px;
+    background: rgba(15, 15, 25, 0.95);
+    border: 1px solid rgba(240, 185, 11, 0.15);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 1100px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
 }
 
 .hero-modal-content::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
 }
+
 .hero-modal-content::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
 }
+
 .hero-modal-content::-webkit-scrollbar-thumb {
     background: var(--gold);
     border-radius: 4px;
@@ -1278,7 +1328,9 @@ h1::before, h2::before {
     margin: 0 auto 20px;
 }
 
-/* ===== ХЕДЕР ===== */
+/* ============================================================
+   МОДАЛЬНОЕ ОКНО - СТИЛЬ DOTA 2
+   ============================================================ */
 .hero-modal-header {
     display: flex;
     align-items: center;
@@ -1355,12 +1407,11 @@ h1::before, h2::before {
     color: var(--gold);
 }
 
-/* ===== ОПИСАНИЕ ===== */
 .hero-modal-description {
     color: #b0b0c0;
     font-size: 0.92rem;
     line-height: 1.7;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     padding: 14px 18px;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 8px;
@@ -1373,7 +1424,6 @@ h1::before, h2::before {
     font-weight: 600;
 }
 
-/* ===== ТЕГИ ===== */
 .hero-modal-tags {
     display: flex;
     gap: 12px;
@@ -1399,34 +1449,11 @@ h1::before, h2::before {
     font-size: 0.8rem;
 }
 
-/* ===== СЛОЖНОСТЬ - КРУЖОЧКИ ===== */
-.complexity-dot {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin: 0 2px;
-    border: 1.5px solid rgba(255, 255, 255, 0.3);
-    transition: all 0.3s ease;
-}
-
-.complexity-dot.filled {
-    background: #fff;
-    border-color: #fff;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-}
-
-.complexity-dot.empty {
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* ===== СТАТИСТИКА ===== */
 .hero-modal-stats {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .hero-modal-stat-block {
@@ -1473,7 +1500,6 @@ h1::before, h2::before {
     margin-top: 1px;
 }
 
-/* ===== АТРИБУТЫ ===== */
 .hero-modal-attributes {
     display: flex;
     justify-content: center;
@@ -1524,12 +1550,11 @@ h1::before, h2::before {
     font-weight: 400;
 }
 
-/* ===== СПОСОБНОСТИ ===== */
 .hero-modal-abilities-title {
     font-family: 'Orbitron', sans-serif;
     font-size: 1rem;
     color: #fff;
-    margin: 20px 0 16px;
+    margin: 24px 0 16px;
     letter-spacing: 2px;
     text-align: center;
 }
@@ -1590,7 +1615,6 @@ h1::before, h2::before {
     text-overflow: ellipsis;
 }
 
-/* ===== ВСПЛЫВАЮЩАЯ ПОДСКАЗКА ===== */
 .hero-modal-ability-tooltip {
     display: none;
     position: absolute;
@@ -1740,8 +1764,21 @@ h1::before, h2::before {
         font-size: 1.05rem;
     }
 
+    .news-preview {
+        font-size: 0.88rem;
+        line-height: 1.7;
+    }
+
+    .news-content ul li {
+        font-size: 0.88rem;
+    }
+
+    .news-content p {
+        font-size: 0.88rem;
+    }
+
     .hero-modal-content {
-        padding: 20px 18px;
+        padding: 24px 18px;
         max-height: 92vh;
     }
 
@@ -1816,9 +1853,35 @@ h1::before, h2::before {
         font-size: 0.95rem;
     }
 
+    .news-preview {
+        font-size: 0.82rem;
+    }
+
+    .news-toggle-btn {
+        font-size: 0.75rem;
+    }
+
+    .news-content ul li {
+        font-size: 0.82rem;
+        padding-left: 18px;
+    }
+
+    .news-content p {
+        font-size: 0.82rem;
+    }
+
     .hero-modal-content {
-        padding: 14px 12px;
+        padding: 16px 12px;
         border-radius: 12px;
+    }
+
+    .hero-modal-name {
+        font-size: 1.2rem;
+    }
+
+    .hero-modal-avatar {
+        width: 56px;
+        height: 56px;
     }
 
     .hero-modal-stats {
@@ -1835,15 +1898,5 @@ h1::before, h2::before {
 
     .hero-modal-stat-item-value {
         font-size: 0.85rem;
-    }
-
-    .hero-modal-attributes {
-        gap: 12px;
-        padding: 10px 12px;
-    }
-
-    .hero-modal-attribute-item .attr-icon {
-        width: 20px;
-        height: 20px;
     }
 }
