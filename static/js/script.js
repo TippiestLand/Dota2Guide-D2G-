@@ -2,10 +2,10 @@
     'use strict';
 
     // ============================================================
-    // ПОЛНЫЙ СПИСОК ВСЕХ 126 ГЕРОЕВ DOTA 2 (АВГУСТ 2026)
+    // ПОЛНЫЙ СПИСОК ВСЕХ 127 ГЕРОЕВ DOTA 2 (АВГУСТ 2026)
     // ============================================================
     var heroesData = [
-        // ===== STRENGTH (СИЛА) — 39 героев =====
+        // === STRENGTH (СИЛА) ===
         { name: 'Abaddon', attribute: 'strength', icon: 'abaddon' },
         { name: 'Alchemist', attribute: 'strength', icon: 'alchemist' },
         { name: 'Axe', attribute: 'strength', icon: 'axe' },
@@ -47,7 +47,7 @@
         { name: 'Undying', attribute: 'strength', icon: 'undying' },
         { name: 'Wraith King', attribute: 'strength', icon: 'skeleton_king' },
 
-        // ===== AGILITY (ЛОВКОСТЬ) — 40 героев =====
+        // === AGILITY (ЛОВКОСТЬ) ===
         { name: 'Anti-Mage', attribute: 'agility', icon: 'antimage' },
         { name: 'Arc Warden', attribute: 'agility', icon: 'arc_warden' },
         { name: 'Bloodseeker', attribute: 'agility', icon: 'bloodseeker' },
@@ -86,7 +86,7 @@
         { name: 'Viper', attribute: 'agility', icon: 'viper' },
         { name: 'Weaver', attribute: 'agility', icon: 'weaver' },
 
-        // ===== INTELLIGENCE (ИНТЕЛЛЕКТ) — 38 героев =====
+        // === INTELLIGENCE (ИНТЕЛЛЕКТ) ===
         { name: 'Ancient Apparition', attribute: 'intelligence', icon: 'ancient_apparition' },
         { name: 'Bane', attribute: 'intelligence', icon: 'bane' },
         { name: 'Batrider', attribute: 'intelligence', icon: 'batrider' },
@@ -125,7 +125,7 @@
         { name: 'Witch Doctor', attribute: 'intelligence', icon: 'witch_doctor' },
         { name: 'Zeus', attribute: 'intelligence', icon: 'zuus' },
 
-        // ===== UNIVERSAL (УНИВЕРСАЛЬНЫЕ) — 12 героев =====
+        // === UNIVERSAL (УНИВЕРСАЛЬНЫЕ) ===
         { name: 'Dazzle', attribute: 'universal', icon: 'dazzle' },
         { name: 'Io', attribute: 'universal', icon: 'wisp' },
         { name: "Nature's Prophet", attribute: 'universal', icon: 'furion' },
@@ -412,7 +412,6 @@
             var item = items[j];
             var heroIcon = item.dataset.icon;
 
-            // Удаляем старые обработчики
             item.removeEventListener('click', item._clickHandler);
             
             item._clickHandler = function() {
@@ -422,7 +421,6 @@
             };
             item.addEventListener('click', item._clickHandler);
 
-            // Эффект наклона
             var tiltWrap = item.querySelector('.tilt-wrap');
             item.addEventListener('mousemove', function(e) {
                 var rect = this.getBoundingClientRect();
