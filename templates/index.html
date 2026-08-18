@@ -68,8 +68,6 @@
         <section class="page" id="page-heroes">
             <div class="heroes-header">
                 <h2 class="section-title"><span>Выберите</span> героя</h2>
-                <p class="heroes-subtitle">Наведите на героя, чтобы узнать его имя и атрибут</p>
-                <p style="text-align:center; color:#666; font-size:0.8rem; margin-top:-20px; margin-bottom:20px;">Всего героев: 127 (по состоянию на 2026 год)</p>
             </div>
             <div class="hero-controls">
                 <div class="hero-search">
@@ -139,35 +137,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ===== ТЕСТОВАЯ КНОПКА ДЛЯ ОТЛАДКИ ===== -->
-    <button onclick="testAPI()" style="position:fixed; bottom:20px; right:20px; z-index:9999; padding:12px 20px; background:#f0b90b; color:#0a0a0f; border:none; border-radius:8px; font-weight:700; font-size:0.9rem; cursor:pointer; box-shadow:0 4px 20px rgba(240,185,11,0.4);">
-        🧪 Тест API
-    </button>
-
-    <script>
-        function testAPI() {
-            console.log('🧪 Тест API: запрос к /api/hero/abaddon');
-            fetch('/api/hero/abaddon')
-                .then(response => {
-                    console.log('📡 Статус ответа:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('✅ Ответ API:', data);
-                    if (data.data) {
-                        alert('✅ API работает! Данные получены. Смотри консоль (F12)');
-                    } else {
-                        alert('❌ API вернул ошибку: ' + JSON.stringify(data));
-                    }
-                })
-                .catch(error => {
-                    console.error('❌ Ошибка запроса:', error);
-                    alert('❌ Ошибка запроса к API. Смотри консоль (F12)');
-                });
-        }
-        console.log('🔧 Нажми на жёлтую кнопку в правом нижнем углу для теста API');
-    </script>
 
     <script src="{{ url_for('static', filename='js/news.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
