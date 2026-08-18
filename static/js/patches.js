@@ -21,6 +21,7 @@
                 return response.json();
             })
             .then(function(data) {
+                console.log('📦 Получены патчи:', data);
                 if (data && data.length > 0) {
                     renderPatches(data);
                 } else {
@@ -34,7 +35,7 @@
                 }
             })
             .catch(function(error) {
-                console.error('Ошибка загрузки патчей:', error);
+                console.error('❌ Ошибка загрузки патчей:', error);
                 patchesFeed.innerHTML = '' +
                     '<div class="news-empty">' +
                     '    <p>Не удалось загрузить патчи</p>' +
@@ -56,10 +57,10 @@
             
             var patchType = patch.type || 'minor';
             var typeClass = patchType === 'major' ? 'major' : 'minor';
-            var typeLabel = patchType === 'major' ? 'Мажорный' : 'Минорный';
+            var typeLabel = patchType === 'major' ? '⭐ Мажорный' : '🔄 Минорный';
 
             var description = patch.description || '';
-            var shortDesc = description.length > 300 ? description.substring(0, 300) + '...' : description;
+            var shortDesc = description.length > 200 ? description.substring(0, 200) + '...' : description;
 
             var stats = patch.stats || {};
             var heroesCount = stats.heroes || 0;
@@ -70,8 +71,8 @@
             
             html += '    <div class="patch-header">';
             html += '        <span class="patch-version">' + escapeHtml(patch.version) + '</span>';
-            html += '        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">';
-            html += '            <span class="patch-date">' + escapeHtml(patch.date) + '</span>';
+            html += '        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">';
+            html += '            <span class="patch-date">📅 ' + escapeHtml(patch.date) + '</span>';
             html += '            <span class="patch-type ' + typeClass + '">' + typeLabel + '</span>';
             html += '        </div>';
             html += '    </div>';
@@ -80,30 +81,31 @@
                 html += '    <div class="patch-title">' + escapeHtml(patch.title) + '</div>';
             }
             
-            html += '    <div class="patch-description" id="patch-desc-' + i + '">' + shortDesc + '</div>';
+            html += '    <div class="patch-description" id="patch-desc-' + i + '" data-full="' + escapeHtml(description) + '">' + shortDesc + '</div>';
             
             html += '    <div class="patch-stats">';
             if (heroesCount > 0) {
-                html += '        <span class="patch-stat">Героев: <span class="stat-value">' + heroesCount + '</span></span>';
+                html += '        <span class="patch-stat"><span class="stat-icon">⚔️</span> Героев: <span class="stat-value">' + heroesCount + '</span></span>';
             }
             if (itemsCount > 0) {
-                html += '        <span class="patch-stat">Предметов: <span class="stat-value">' + itemsCount + '</span></span>';
+                html += '        <span class="patch-stat"><span class="stat-icon">📦</span> Предметов: <span class="stat-value">' + itemsCount + '</span></span>';
             }
             if (generalCount > 0) {
-                html += '        <span class="patch-stat">Общих: <span class="stat-value">' + generalCount + '</span></span>';
+                html += '        <span class="patch-stat"><span class="stat-icon">📋</span> Общих: <span class="stat-value">' + generalCount + '</span></span>';
             }
             if (patch.days_since_prev) {
-                html += '        <span class="patch-stat">Дней: <span class="stat-value">' + patch.days_since_prev + '</span></span>';
+                html += '        <span class="patch-stat"><span class="stat-icon">📅</span> Дней: <span class="stat-value">' + patch.days_since_prev + '</span></span>';
             }
             html += '    </div>';
             
             if (patch.heroes && patch.heroes.length > 0) {
                 html += '    <div class="patch-heroes">';
-                for (var j = 0; j < Math.min(patch.heroes.length, 10); j++) {
-                    html += '        <span class="patch-hero-tag">' + escapeHtml(patch.heroes[j]) + '</span>';
+                var heroList = patch.heroes;
+                for (var j = 0; j < Math.min(heroList.length, 8); j++) {
+                    html += '        <span class="patch-hero-tag">' + escapeHtml(heroList[j]) + '</span>';
                 }
-                if (patch.heroes.length > 10) {
-                    html += '        <span class="patch-hero-tag">+' + (patch.heroes.length - 10) + ' ещё</span>';
+                if (heroList.length > 8) {
+                    html += '        <span class="patch-hero-tag">+' + (heroList.length - 8) + ' ещё</span>';
                 }
                 html += '    </div>';
             }
@@ -114,28 +116,9 @@
             
             html += '    <div class="patch-full-content" id="patch-full-' + i + '">';
             html += '        <div class="patch-section">';
-            html += '            <div class="patch-section-title">Полное описание</div>';
+            html += '            <div class="patch-section-title">📝 Полное описание</div>';
             html += '            <div class="patch-section-item">' + escapeHtml(description) + '</div>';
             html += '        </div>';
-            
-            if (patch.details) {
-                for (var key in patch.details) {
-                    if (patch.details.hasOwnProperty(key)) {
-                        html += '        <div class="patch-section">';
-                        html += '            <div class="patch-section-title">' + escapeHtml(key) + '</div>';
-                        var items = patch.details[key];
-                        if (Array.isArray(items)) {
-                            for (var k = 0; k < items.length; k++) {
-                                html += '            <div class="patch-section-item">' + escapeHtml(items[k]) + '</div>';
-                            }
-                        } else {
-                            html += '            <div class="patch-section-item">' + escapeHtml(items) + '</div>';
-                        }
-                        html += '        </div>';
-                    }
-                }
-            }
-            
             html += '    </div>';
             html += '</div>';
         }
@@ -156,7 +139,7 @@
                     this.innerHTML = '<span class="toggle-icon">▼</span> Подробнее';
                     if (desc) {
                         var fullText = desc.dataset.full || desc.textContent;
-                        desc.textContent = fullText.length > 300 ? fullText.substring(0, 300) + '...' : fullText;
+                        desc.textContent = fullText.length > 200 ? fullText.substring(0, 200) + '...' : fullText;
                     }
                 } else {
                     fullContent.classList.add('open');
@@ -189,5 +172,5 @@
         }, 100);
     });
 
-    console.log('Модуль патчей загружен');
+    console.log('🔄 Модуль патчей загружен');
 })();
