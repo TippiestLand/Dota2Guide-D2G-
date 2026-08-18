@@ -40,6 +40,37 @@ body {
 }
 
 /* ============================================================
+   ОТКЛЮЧЕНИЕ СТАНДАРТНОГО КУРСОРА
+   ============================================================ */
+* {
+    cursor: none !important;
+}
+
+a, button, input, textarea, select,
+.hero-item, .glass-card, .item-card, .guide-card, .news-card-vk,
+.filter-btn, .hero-modal-close, .btn, .news-toggle-btn,
+.patch-card, .patch-expand-btn, .tab-btn,
+[style*="cursor"], [onclick] {
+    cursor: none !important;
+}
+
+input, textarea {
+    cursor: none !important;
+}
+
+a {
+    cursor: none !important;
+}
+
+button {
+    cursor: none !important;
+}
+
+*[style*="cursor: pointer"] {
+    cursor: none !important;
+}
+
+/* ============================================================
    ФОНОВЫЕ ЭФФЕКТЫ
    ============================================================ */
 .stars {
@@ -492,7 +523,6 @@ section {
     font-size: 1rem;
     transition: all 0.3s ease;
     font-family: 'Inter', sans-serif;
-    cursor: none;
 }
 
 .hero-search input:focus {
@@ -812,8 +842,51 @@ section {
 }
 
 /* ============================================================
-   НОВОСТИ
+   НОВОСТИ И ПАТЧИ
    ============================================================ */
+.news-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0 30px;
+}
+
+.tab-btn {
+    padding: 12px 32px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #8888a0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: none;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    border-color: rgba(240, 185, 11, 0.3);
+    background: rgba(240, 185, 11, 0.05);
+}
+
+.tab-btn.active {
+    background: rgba(240, 185, 11, 0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 30px rgba(240, 185, 11, 0.05);
+}
+
+.tab-content {
+    display: none;
+    animation: fadePage 0.4s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ===== НОВОСТИ ===== */
 .news-feed {
     display: flex;
     flex-direction: column;
@@ -997,59 +1070,11 @@ section {
     text-shadow: 0 0 20px rgba(240, 185, 11, 0.3);
 }
 
-/* ============================================================
-   ВКЛАДКИ НОВОСТЕЙ / ПАТЧЕЙ
-   ============================================================ */
-.news-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin: 20px 0 30px;
-}
-
-.tab-btn {
-    padding: 10px 32px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.02);
-    color: #8888a0;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: none;
-    transition: all 0.3s ease;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: 0.5px;
-}
-
-.tab-btn:hover {
-    color: #fff;
-    border-color: rgba(240, 185, 11, 0.25);
-    background: rgba(240, 185, 11, 0.05);
-}
-
-.tab-btn.active {
-    background: rgba(240, 185, 11, 0.12);
-    border-color: var(--gold);
-    color: var(--gold);
-    box-shadow: 0 0 20px rgba(240, 185, 11, 0.04);
-}
-
-.tab-content {
-    display: none;
-    animation: fadePage 0.4s ease;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* ============================================================
-   КАРТОЧКИ ПАТЧЕЙ
-   ============================================================ */
+/* ===== ПАТЧИ ===== */
 .patches-feed {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
     max-width: 900px;
     margin: 0 auto;
     padding: 0 15px;
@@ -1058,7 +1083,7 @@ section {
 .patch-card {
     background: rgba(20, 20, 30, 0.7);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     padding: 24px 28px;
     transition: all 0.3s ease;
@@ -1074,14 +1099,14 @@ section {
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--gold), #d49b0a, var(--gold));
-    opacity: 0.4;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), #ff8c00, var(--gold));
+    opacity: 0.6;
 }
 
 .patch-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(240, 185, 11, 0.12);
+    transform: translateY(-4px);
+    border-color: rgba(240, 185, 11, 0.15);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -1091,24 +1116,30 @@ section {
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .patch-version {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.3rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--gold);
-    letter-spacing: 0.5px;
+}
+
+.patch-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .patch-date {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #8888a0;
     padding: 4px 14px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .patch-type {
@@ -1117,51 +1148,44 @@ section {
     letter-spacing: 1px;
     padding: 4px 14px;
     border-radius: 20px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .patch-type.major {
-    background: rgba(240, 185, 11, 0.1);
+    background: rgba(240, 185, 11, 0.15);
     color: var(--gold);
-    border: 1px solid rgba(240, 185, 11, 0.15);
+    border: 1px solid rgba(240, 185, 11, 0.2);
 }
 
 .patch-type.minor {
-    background: rgba(100, 200, 255, 0.06);
+    background: rgba(100, 200, 255, 0.1);
     color: #64c8ff;
-    border: 1px solid rgba(100, 200, 255, 0.08);
-}
-
-.patch-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 8px;
-    line-height: 1.4;
+    border: 1px solid rgba(100, 200, 255, 0.15);
 }
 
 .patch-description {
     color: #b0b0c0;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     line-height: 1.7;
-    margin-bottom: 14px;
+    margin: 8px 0 14px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border-left: 3px solid rgba(240, 185, 11, 0.1);
 }
 
 .patch-stats {
     display: flex;
     flex-wrap: wrap;
-    gap: 14px 24px;
-    padding: 12px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    gap: 12px 20px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     margin-bottom: 14px;
 }
 
 .patch-stat {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     color: #8888a0;
 }
 
@@ -1170,25 +1194,71 @@ section {
     font-weight: 600;
 }
 
+.patch-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 16px 0 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(240, 185, 11, 0.1);
+}
+
+.patch-changes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.patch-change-item {
+    font-size: 0.85rem;
+    color: #b0b0c0;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    border-left: 2px solid rgba(240, 185, 11, 0.1);
+    line-height: 1.5;
+}
+
+.patch-change-item strong {
+    color: #fff;
+    margin-right: 6px;
+}
+
+.patch-change-item .change-ability {
+    color: #64c8ff;
+    margin-right: 6px;
+}
+
+.patch-change-item .change-values {
+    color: #4ecdc4;
+    margin-right: 6px;
+}
+
+.patch-change-item .change-desc {
+    color: #b0b0c0;
+}
+
 .patch-heroes {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 2px;
+    margin-bottom: 4px;
 }
 
 .patch-hero-tag {
     padding: 3px 12px;
-    border-radius: 20px;
-    font-size: 0.68rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     color: #b0b0c0;
-    transition: all 0.2s ease;
 }
 
 .patch-hero-tag:hover {
-    border-color: rgba(240, 185, 11, 0.2);
+    border-color: rgba(240, 185, 11, 0.3);
     color: #fff;
 }
 
@@ -1196,59 +1266,32 @@ section {
     background: none;
     border: none;
     color: var(--gold);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     cursor: pointer;
-    padding: 8px 0 4px;
+    padding: 8px 0;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    opacity: 0.8;
 }
 
 .patch-expand-btn:hover {
-    opacity: 1;
     color: #ffd700;
+    text-shadow: 0 0 20px rgba(240, 185, 11, 0.3);
 }
 
 .patch-full-content {
     display: none;
-    padding-top: 14px;
+    padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
-    margin-top: 14px;
+    margin-top: 16px;
 }
 
 .patch-full-content.open {
     display: block;
     animation: fadePage 0.3s ease;
-}
-
-.patch-full-content .patch-section {
-    margin-bottom: 14px;
-}
-
-.patch-full-content .patch-section-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-}
-
-.patch-full-content .patch-section-item {
-    font-size: 0.85rem;
-    color: #b0b0c0;
-    padding: 3px 0 3px 16px;
-    border-left: 2px solid rgba(240, 185, 11, 0.12);
-    margin-bottom: 3px;
-    line-height: 1.6;
-}
-
-.patch-full-content .patch-section-item strong {
-    color: #fff;
 }
 
 /* ============================================================
@@ -1381,34 +1424,6 @@ footer .gold {
     animation-duration: 1s;
 }
 
-/* ОТКЛЮЧЕНИЕ СТАНДАРТНОГО КУРСОРА */
-* {
-    cursor: none !important;
-}
-
-a, button, input, textarea, select, 
-.hero-item, .glass-card, .item-card, .guide-card, .news-card-vk,
-.filter-btn, .hero-modal-close, .btn, .news-toggle-btn,
-.patch-expand-btn, .tab-btn {
-    cursor: none !important;
-}
-
-input, textarea {
-    cursor: none !important;
-}
-
-@media (max-width: 768px) {
-    * {
-        cursor: default !important;
-    }
-    a, button, input, textarea, select {
-        cursor: default !important;
-    }
-    .custom-cursor {
-        display: none !important;
-    }
-}
-
 /* ============================================================
    ЧАСТИЦЫ
    ============================================================ */
@@ -1504,16 +1519,16 @@ h1::before, h2::before {
 }
 
 .hero-modal-content {
-    background: rgba(15, 15, 25, 0.95);
-    border: 1px solid rgba(240, 185, 11, 0.15);
-    border-radius: 24px;
-    padding: 40px;
+    background: rgba(10, 10, 18, 0.97);
+    border: 1px solid rgba(240, 185, 11, 0.12);
+    border-radius: 16px;
+    padding: 40px 48px;
     max-width: 1100px;
     width: 100%;
-    max-height: 90vh;
+    max-height: 92vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
 }
 
 .hero-modal-content::-webkit-scrollbar {
@@ -1564,73 +1579,25 @@ h1::before, h2::before {
     margin: 0 auto 20px;
 }
 
-/* ============================================================
-   МОДАЛЬНОЕ ОКНО - СТИЛЬ DOTA 2
-   ============================================================ */
-.hero-modal-attribute-badge {
-    display: inline-block;
-    padding: 4px 16px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.hero-modal-attribute-badge.strength { 
-    color: #e55a5a; 
-    border-color: rgba(229, 90, 90, 0.3); 
-    background: rgba(229, 90, 90, 0.1);
-}
-
-.hero-modal-attribute-badge.agility { 
-    color: #5ae55a; 
-    border-color: rgba(90, 229, 90, 0.3); 
-    background: rgba(90, 229, 90, 0.1);
-}
-
-.hero-modal-attribute-badge.intelligence { 
-    color: #5a5ae5; 
-    border-color: rgba(90, 90, 229, 0.3); 
-    background: rgba(90, 90, 229, 0.1);
-}
-
-.hero-modal-attribute-badge.universal { 
-    color: #f0b90b; 
-    border-color: rgba(240, 185, 11, 0.3); 
-    background: rgba(240, 185, 11, 0.1);
-}
-
-.hero-modal-name {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.8rem;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1.2;
-    margin-bottom: 10px;
-}
-
-.hero-modal-main {
+/* ===== ХЕДЕР МОДАЛЬНОГО ОКНА ===== */
+.hero-modal-header {
     display: flex;
-    gap: 30px;
-    margin: 20px 0 30px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border-left: 3px solid rgba(240, 185, 11, 0.2);
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .hero-modal-avatar {
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
     flex-shrink: 0;
-    border-radius: 12px;
+    border-radius: 50%;
     overflow: hidden;
     border: 2px solid rgba(240, 185, 11, 0.2);
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 30px rgba(240, 185, 11, 0.05);
 }
 
 .hero-modal-avatar img {
@@ -1639,169 +1606,347 @@ h1::before, h2::before {
     object-fit: cover;
 }
 
-.hero-modal-bio {
+.hero-modal-title {
     flex: 1;
 }
 
-.hero-modal-bio p {
-    color: #b0b0c0;
-    font-size: 0.95rem;
-    line-height: 1.8;
-    margin-bottom: 12px;
+.hero-modal-attribute {
+    display: inline-block;
+    padding: 2px 16px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 4px;
 }
 
+.hero-modal-attribute.strength {
+    color: #e55a5a;
+    border-color: rgba(229, 90, 90, 0.25);
+    background: rgba(229, 90, 90, 0.08);
+}
+
+.hero-modal-attribute.agility {
+    color: #5ae55a;
+    border-color: rgba(90, 229, 90, 0.25);
+    background: rgba(90, 229, 90, 0.08);
+}
+
+.hero-modal-attribute.intelligence {
+    color: #5a5ae5;
+    border-color: rgba(90, 90, 229, 0.25);
+    background: rgba(90, 90, 229, 0.08);
+}
+
+.hero-modal-attribute.universal {
+    color: #f0b90b;
+    border-color: rgba(240, 185, 11, 0.25);
+    background: rgba(240, 185, 11, 0.08);
+}
+
+.hero-modal-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.hero-modal-name .highlight {
+    color: var(--gold);
+}
+
+/* ===== ОПИСАНИЕ ГЕРОЯ ===== */
+.hero-modal-description {
+    color: #b0b0c0;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border-left: 3px solid rgba(240, 185, 11, 0.15);
+    font-weight: 300;
+}
+
+.hero-modal-description strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ===== ТЕГИ ===== */
 .hero-modal-tags {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
-.hero-modal-tags .tag {
+.hero-modal-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 4px 14px;
     border-radius: 20px;
     font-size: 0.7rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     color: #8888a0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
+/* ===== СЛОЖНОСТЬ - КРУЖОЧКИ ===== */
+.complexity-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 2px;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.complexity-dot.filled {
+    background: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.complexity-dot.empty {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ===== СТАТИСТИКА ГЕРОЯ ===== */
 .hero-modal-stats {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 30px;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
-.stat-block {
+.hero-modal-stat-block {
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 10px;
+    padding: 14px 12px;
     border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.stat-label {
-    font-size: 0.6rem;
-    color: #8888a0;
+.hero-modal-stat-block-title {
+    font-size: 0.55rem;
+    color: #666;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     text-align: center;
+    font-weight: 700;
 }
 
-.stat-values {
+.hero-modal-stat-block-values {
     display: flex;
     justify-content: space-around;
 }
 
-.stat-item {
+.hero-modal-stat-item {
     text-align: center;
 }
 
-.stat-value {
+.hero-modal-stat-item-value {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #fff;
     display: block;
+    line-height: 1.3;
 }
 
-.stat-sub {
-    font-size: 0.7rem;
-    color: #4ecdc4;
-    display: block;
-    margin-top: -2px;
-}
-
-.stat-label-small {
-    font-size: 0.55rem;
-    color: #666;
+.hero-modal-stat-item-label {
+    font-size: 0.5rem;
+    color: #555;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: block;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
+/* ===== АТРИБУТЫ С ИКОНКАМИ ===== */
+.hero-modal-attributes {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 20px 0 24px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.hero-modal-attribute-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hero-modal-attribute-item .attr-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    opacity: 0.7;
+}
+
+.hero-modal-attribute-item .attr-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-modal-attribute-item .attr-label {
+    font-size: 0.5rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hero-modal-attribute-item .attr-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.hero-modal-attribute-item .attr-value .attr-gain {
+    font-size: 0.7rem;
+    color: #4ecdc4;
+    font-weight: 400;
+}
+
+/* ===== СПОСОБНОСТИ ===== */
 .hero-modal-abilities-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #fff;
-    margin: 30px 0 20px;
+    margin: 24px 0 16px;
     letter-spacing: 2px;
+    text-align: center;
+}
+
+.hero-modal-abilities-title span {
+    color: var(--gold);
 }
 
 .hero-modal-abilities-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
 }
 
-.ability-card {
+.hero-modal-ability {
     display: flex;
-    gap: 16px;
-    padding: 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 10px 14px;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.04);
     transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
 }
 
-.ability-card:hover {
+.hero-modal-ability:hover {
     border-color: rgba(240, 185, 11, 0.15);
     background: rgba(255, 255, 255, 0.04);
-    transform: translateY(-2px);
 }
 
-.ability-card-icon {
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
+.hero-modal-ability-icon {
+    width: 44px;
+    height: 44px;
     border-radius: 8px;
     overflow: hidden;
+    flex-shrink: 0;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.ability-card-icon img {
+.hero-modal-ability-icon img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.ability-card-info {
-    flex: 1;
-    min-width: 0;
+.hero-modal-ability-name {
+    font-size: 0.6rem;
+    color: #b0b0c0;
+    text-align: center;
+    font-weight: 500;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.ability-card-name {
+/* ===== ВСПЛЫВАЮЩАЯ ПОДСКАЗКА ===== */
+.hero-modal-ability-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 240px;
+    max-width: 280px;
+    padding: 14px 16px;
+    background: rgba(10, 10, 18, 0.95);
+    border: 1px solid rgba(240, 185, 11, 0.15);
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    pointer-events: none;
+}
+
+.hero-modal-ability:hover .hero-modal-ability-tooltip {
+    display: block;
+    animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+    0% { opacity: 0; transform: translateX(-50%) translateY(6px); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.ability-tooltip-name {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #fff;
     margin-bottom: 4px;
 }
 
-.ability-card-desc {
-    font-size: 0.85rem;
+.ability-tooltip-desc {
+    font-size: 0.78rem;
     color: #b0b0c0;
     line-height: 1.5;
 }
 
-.ability-card-details {
+.ability-tooltip-details {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    gap: 6px 12px;
 }
 
-.ability-detail {
-    font-size: 0.7rem;
-    color: #8888a0;
+.ability-tooltip-detail {
+    font-size: 0.65rem;
+    color: #666;
 }
 
-.ability-detail strong {
+.ability-tooltip-detail span {
     color: #fff;
     font-weight: 600;
 }
@@ -1889,53 +2034,31 @@ h1::before, h2::before {
 
     .news-tabs {
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 8px;
     }
-    
+
     .tab-btn {
-        padding: 8px 18px;
-        font-size: 0.82rem;
+        padding: 10px 20px;
+        font-size: 0.85rem;
         flex: 1;
-        min-width: 80px;
-        text-align: center;
-    }
-
-    .news-card-vk {
-        padding: 18px 16px;
-    }
-
-    .news-title {
-        font-size: 1.05rem;
-    }
-
-    .news-preview {
-        font-size: 0.88rem;
-        line-height: 1.7;
-    }
-
-    .news-content ul li {
-        font-size: 0.88rem;
-    }
-
-    .news-content p {
-        font-size: 0.88rem;
+        min-width: 100px;
     }
 
     .patch-card {
         padding: 18px 16px;
     }
-    
+
     .patch-version {
         font-size: 1.1rem;
     }
-    
+
     .patch-header {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .patch-stats {
-        gap: 8px 14px;
+        gap: 10px 16px;
     }
 
     .hero-modal-content {
@@ -1943,43 +2066,44 @@ h1::before, h2::before {
         max-height: 92vh;
     }
 
-    .hero-modal-main {
+    .hero-modal-header {
         flex-direction: column;
-        align-items: center;
         text-align: center;
+        gap: 12px;
     }
 
     .hero-modal-avatar {
-        width: 100px;
-        height: 100px;
+        width: 64px;
+        height: 64px;
     }
 
     .hero-modal-name {
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
 
     .hero-modal-stats {
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        gap: 8px;
+    }
+
+    .hero-modal-attributes {
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 12px 16px;
     }
 
     .hero-modal-abilities-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .ability-card {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .ability-card-icon {
-        width: 40px;
-        height: 40px;
+        grid-template-columns: 1fr 1fr;
     }
 
     .custom-cursor {
         display: none !important;
+    }
+    body {
+        cursor: default !important;
+    }
+    * {
+        cursor: default !important;
     }
 }
 
@@ -2000,28 +2124,6 @@ h1::before, h2::before {
     .filter-icon {
         width: 20px;
         height: 20px;
-    }
-
-    .tab-btn {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-        min-width: 60px;
-    }
-
-    .patch-card {
-        padding: 14px 12px;
-    }
-    
-    .patch-title {
-        font-size: 0.92rem;
-    }
-    
-    .patch-description {
-        font-size: 0.82rem;
-    }
-    
-    .patch-stat {
-        font-size: 0.7rem;
     }
 
     .news-card-vk {
@@ -2050,18 +2152,32 @@ h1::before, h2::before {
         font-size: 0.82rem;
     }
 
+    .tab-btn {
+        padding: 8px 14px;
+        font-size: 0.75rem;
+        min-width: 70px;
+    }
+
+    .patch-card {
+        padding: 14px 12px;
+    }
+
+    .patch-title {
+        font-size: 0.95rem;
+    }
+
     .hero-modal-content {
         padding: 16px 12px;
-        border-radius: 16px;
+        border-radius: 12px;
     }
 
     .hero-modal-name {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
     }
 
     .hero-modal-avatar {
-        width: 80px;
-        height: 80px;
+        width: 50px;
+        height: 50px;
     }
 
     .hero-modal-stats {
@@ -2074,10 +2190,14 @@ h1::before, h2::before {
     }
 
     .hero-modal-abilities-grid {
-        gap: 10px;
+        grid-template-columns: 1fr;
     }
 
-    .ability-card {
-        padding: 12px;
+    .hero-modal-attribute-item .attr-value {
+        font-size: 0.85rem;
+    }
+
+    .hero-modal-stat-item-value {
+        font-size: 0.85rem;
     }
 }

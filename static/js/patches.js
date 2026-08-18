@@ -28,9 +28,6 @@
                     patchesFeed.innerHTML = '' +
                         '<div class="news-empty">' +
                         '    <p>Патчи не найдены</p>' +
-                        '    <p style="font-size:0.8rem; color:#666; margin-top:8px;">' +
-                        '        Информация о патчах появится позже' +
-                        '    </p>' +
                         '</div>';
                 }
             })
@@ -57,100 +54,142 @@
             
             var patchType = patch.type || 'minor';
             var typeClass = patchType === 'major' ? 'major' : 'minor';
-            var typeLabel = patchType === 'major' ? '⭐ Мажорный' : '🔄 Минорный';
-
-            var description = patch.description || '';
-            var shortDesc = description.length > 200 ? description.substring(0, 200) + '...' : description;
+            var typeLabel = patchType === 'major' ? 'MAJOR PATCH' : 'MINOR PATCH';
 
             var stats = patch.stats || {};
             var heroesCount = stats.heroes || 0;
             var itemsCount = stats.items || 0;
+            var neutralCount = stats.neutral_items || 0;
             var generalCount = stats.general || 0;
 
             html += '<div class="patch-card" data-id="' + (patch.id || i) + '">';
             
+            // Header
             html += '    <div class="patch-header">';
-            html += '        <span class="patch-version">' + escapeHtml(patch.version) + '</span>';
-            html += '        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">';
-            html += '            <span class="patch-date">📅 ' + escapeHtml(patch.date) + '</span>';
+            html += '        <div class="patch-version">' + escapeHtml(patch.version) + '</div>';
+            html += '        <div class="patch-meta">';
+            html += '            <span class="patch-date">' + escapeHtml(patch.date) + '</span>';
             html += '            <span class="patch-type ' + typeClass + '">' + typeLabel + '</span>';
             html += '        </div>';
             html += '    </div>';
             
-            if (patch.title) {
-                html += '    <div class="patch-title">' + escapeHtml(patch.title) + '</div>';
-            }
-            
-            html += '    <div class="patch-description" id="patch-desc-' + i + '" data-full="' + escapeHtml(description) + '">' + shortDesc + '</div>';
-            
+            // Stats
             html += '    <div class="patch-stats">';
+            if (patch.days_since_prev) {
+                html += '        <span class="patch-stat">Days after prev: <span class="stat-value">' + patch.days_since_prev + '</span></span>';
+            }
+            if (patch.days_active) {
+                html += '        <span class="patch-stat">Active: <span class="stat-value">' + patch.days_active + ' days</span></span>';
+            }
             if (heroesCount > 0) {
-                html += '        <span class="patch-stat"><span class="stat-icon">⚔️</span> Героев: <span class="stat-value">' + heroesCount + '</span></span>';
+                html += '        <span class="patch-stat">Heroes: <span class="stat-value">' + heroesCount + '</span></span>';
             }
             if (itemsCount > 0) {
-                html += '        <span class="patch-stat"><span class="stat-icon">📦</span> Предметов: <span class="stat-value">' + itemsCount + '</span></span>';
+                html += '        <span class="patch-stat">Items: <span class="stat-value">' + itemsCount + '</span></span>';
+            }
+            if (neutralCount > 0) {
+                html += '        <span class="patch-stat">Neutral Items: <span class="stat-value">' + neutralCount + '</span></span>';
             }
             if (generalCount > 0) {
-                html += '        <span class="patch-stat"><span class="stat-icon">📋</span> Общих: <span class="stat-value">' + generalCount + '</span></span>';
-            }
-            if (patch.days_since_prev) {
-                html += '        <span class="patch-stat"><span class="stat-icon">📅</span> Дней: <span class="stat-value">' + patch.days_since_prev + '</span></span>';
+                html += '        <span class="patch-stat">General: <span class="stat-value">' + generalCount + '</span></span>';
             }
             html += '    </div>';
             
+            // Description
+            if (patch.description) {
+                html += '    <div class="patch-description">' + escapeHtml(patch.description) + '</div>';
+            }
+            
+            // Most picked heroes
             if (patch.heroes && patch.heroes.length > 0) {
+                html += '    <div class="patch-section-title">MOST PICKED HEROES</div>';
                 html += '    <div class="patch-heroes">';
-                var heroList = patch.heroes;
-                for (var j = 0; j < Math.min(heroList.length, 8); j++) {
-                    html += '        <span class="patch-hero-tag">' + escapeHtml(heroList[j]) + '</span>';
-                }
-                if (heroList.length > 8) {
-                    html += '        <span class="patch-hero-tag">+' + (heroList.length - 8) + ' ещё</span>';
+                for (var j = 0; j < patch.heroes.length; j++) {
+                    html += '        <span class="patch-hero-tag">' + escapeHtml(patch.heroes[j]) + '</span>';
                 }
                 html += '    </div>';
             }
             
-            html += '    <button class="patch-expand-btn" data-id="' + i + '">';
-            html += '        <span class="toggle-icon">▼</span> Подробнее';
-            html += '    </button>';
+            // Hero changes
+            if (patch.hero_changes && patch.hero_changes.length > 0) {
+                html += '    <div class="patch-section-title">HERO CHANGES</div>';
+                html += '    <div class="patch-changes-list">';
+                for (var h = 0; h < patch.hero_changes.length; h++) {
+                    var change = patch.hero_changes[h];
+                    html += '        <div class="patch-change-item">';
+                    if (change.hero) {
+                        html += '            <strong>' + escapeHtml(change.hero) + '</strong>';
+                    }
+                    if (change.ability) {
+                        html += '            <span class="change-ability">' + escapeHtml(change.ability) + '</span>';
+                    }
+                    if (change.old_value && change.new_value) {
+                        html += '            <span class="change-values">' + escapeHtml(change.old_value) + ' → ' + escapeHtml(change.new_value) + '</span>';
+                    }
+                    if (change.description) {
+                        html += '            <span class="change-desc">' + escapeHtml(change.description) + '</span>';
+                    }
+                    html += '        </div>';
+                }
+                html += '    </div>';
+            }
             
-            html += '    <div class="patch-full-content" id="patch-full-' + i + '">';
-            html += '        <div class="patch-section">';
-            html += '            <div class="patch-section-title">📝 Полное описание</div>';
-            html += '            <div class="patch-section-item">' + escapeHtml(description) + '</div>';
-            html += '        </div>';
-            html += '    </div>';
+            // Item changes
+            if (patch.item_changes && patch.item_changes.length > 0) {
+                html += '    <div class="patch-section-title">ITEM CHANGES</div>';
+                html += '    <div class="patch-changes-list">';
+                for (var it = 0; it < patch.item_changes.length; it++) {
+                    var change = patch.item_changes[it];
+                    html += '        <div class="patch-change-item">';
+                    if (change.item) {
+                        html += '            <strong>' + escapeHtml(change.item) + '</strong>';
+                    }
+                    if (change.old_value && change.new_value) {
+                        html += '            <span class="change-values">' + escapeHtml(change.old_value) + ' → ' + escapeHtml(change.new_value) + '</span>';
+                    }
+                    if (change.description) {
+                        html += '            <span class="change-desc">' + escapeHtml(change.description) + '</span>';
+                    }
+                    html += '        </div>';
+                }
+                html += '    </div>';
+            }
+            
+            // Neutral item changes
+            if (patch.neutral_item_changes && patch.neutral_item_changes.length > 0) {
+                html += '    <div class="patch-section-title">NEUTRAL ITEM CHANGES</div>';
+                html += '    <div class="patch-changes-list">';
+                for (var n = 0; n < patch.neutral_item_changes.length; n++) {
+                    var change = patch.neutral_item_changes[n];
+                    html += '        <div class="patch-change-item">';
+                    if (change.item) {
+                        html += '            <strong>' + escapeHtml(change.item) + '</strong>';
+                    }
+                    if (change.old_value && change.new_value) {
+                        html += '            <span class="change-values">' + escapeHtml(change.old_value) + ' → ' + escapeHtml(change.new_value) + '</span>';
+                    }
+                    if (change.description) {
+                        html += '            <span class="change-desc">' + escapeHtml(change.description) + '</span>';
+                    }
+                    html += '        </div>';
+                }
+                html += '    </div>';
+            }
+            
+            // General changes
+            if (patch.general_changes && patch.general_changes.length > 0) {
+                html += '    <div class="patch-section-title">GENERAL CHANGES</div>';
+                html += '    <div class="patch-changes-list">';
+                for (var g = 0; g < patch.general_changes.length; g++) {
+                    html += '        <div class="patch-change-item">' + escapeHtml(patch.general_changes[g]) + '</div>';
+                }
+                html += '    </div>';
+            }
+            
             html += '</div>';
         }
 
         patchesFeed.innerHTML = html;
-
-        var expandBtns = document.querySelectorAll('.patch-expand-btn');
-        for (var e = 0; e < expandBtns.length; e++) {
-            expandBtns[e].addEventListener('click', function() {
-                var id = this.dataset.id;
-                var fullContent = document.getElementById('patch-full-' + id);
-                var desc = document.getElementById('patch-desc-' + id);
-                
-                if (!fullContent) return;
-                
-                if (fullContent.classList.contains('open')) {
-                    fullContent.classList.remove('open');
-                    this.innerHTML = '<span class="toggle-icon">▼</span> Подробнее';
-                    if (desc) {
-                        var fullText = desc.dataset.full || desc.textContent;
-                        desc.textContent = fullText.length > 200 ? fullText.substring(0, 200) + '...' : fullText;
-                    }
-                } else {
-                    fullContent.classList.add('open');
-                    this.innerHTML = '<span class="toggle-icon">▲</span> Свернуть';
-                    if (desc) {
-                        var fullText = desc.dataset.full || desc.textContent;
-                        desc.textContent = fullText;
-                    }
-                }
-            });
-        }
     }
 
     function escapeHtml(text) {
@@ -172,5 +211,5 @@
         }, 100);
     });
 
-    console.log('🔄 Модуль патчей загружен');
+    console.log('Patch module loaded');
 })();
