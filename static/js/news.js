@@ -1,14 +1,35 @@
 (function() {
     'use strict';
 
+    // ===== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК =====
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    var tabContents = document.querySelectorAll('.tab-content');
+
+    for (var i = 0; i < tabBtns.length; i++) {
+        tabBtns[i].addEventListener('click', function() {
+            var tabId = this.dataset.tab;
+            
+            for (var j = 0; j < tabBtns.length; j++) {
+                tabBtns[j].classList.remove('active');
+            }
+            for (var k = 0; k < tabContents.length; k++) {
+                tabContents[k].classList.remove('active');
+            }
+            
+            this.classList.add('active');
+            var target = document.getElementById('tab-' + tabId);
+            if (target) {
+                target.classList.add('active');
+            }
+        });
+    }
+
+    // ===== НОВОСТИ =====
     var API_URL = '/api/news';
     var newsFeed = document.getElementById('newsFeed');
 
     function fetchNews() {
-        if (!newsFeed) {
-            console.warn('Элемент #newsFeed не найден на странице');
-            return;
-        }
+        if (!newsFeed) return;
 
         newsFeed.innerHTML = '' +
             '<div class="news-loading">' +
@@ -18,9 +39,7 @@
 
         fetch(API_URL + '?t=' + Date.now())
             .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('Ошибка загрузки: ' + response.status);
-                }
+                if (!response.ok) throw new Error('Ошибка загрузки: ' + response.status);
                 return response.json();
             })
             .then(function(data) {
@@ -30,9 +49,6 @@
                     newsFeed.innerHTML = '' +
                         '<div class="news-empty">' +
                         '    <p>Новостей пока нет</p>' +
-                        '    <p style="font-size:0.8rem; color:#666; margin-top:8px;">' +
-                        '        Новости появятся здесь автоматически' +
-                        '    </p>' +
                         '</div>';
                 }
             })
@@ -71,13 +87,11 @@
                 linkHtml = '<a href="' + newsLink + '" target="_blank" class="news-read-more">Steam →</a>';
             }
 
-            // Проверяем длину контента (без HTML тегов)
             var plainText = newsContent.replace(/<[^>]+>/g, '');
             var isLong = plainText.length > 500;
 
             var shortContent = newsContent;
             if (isLong) {
-                // Обрезаем до 500 символов, сохраняя HTML структуру
                 var shortPlain = plainText.substring(0, 500) + '...';
                 shortContent = shortPlain.replace(/\n/g, '<br>');
             }
@@ -95,7 +109,6 @@
                 html += '            <button class="news-toggle-btn" data-id="' + newsId + '">';
                 html += '                <span class="toggle-icon">▼</span> Развернуть';
                 html += '            </button>';
-                // Сохраняем полный и короткий контент в data атрибуты
                 html += '            <div style="display:none;" class="news-full-content" data-full="' + escapeHtml(newsContent) + '" data-short="' + shortContent + '"></div>';
             } else {
                 html += '            <div class="news-preview">' + newsContent + '</div>';
@@ -111,7 +124,6 @@
 
         newsFeed.innerHTML = html;
 
-        // Обработчики для кнопок "Развернуть/Свернуть"
         var toggleBtns = document.querySelectorAll('.news-toggle-btn');
         for (var j = 0; j < toggleBtns.length; j++) {
             toggleBtns[j].addEventListener('click', function() {
@@ -157,5 +169,5 @@
         }, 100);
     });
 
-    console.log('📰 Модуль новостей загружен');
+    console.log('Модуль новостей загружен');
 })();

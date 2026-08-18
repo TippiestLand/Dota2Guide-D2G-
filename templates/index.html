@@ -100,11 +100,28 @@
 
         <!-- ===== СТРАНИЦА: НОВОСТИ ===== -->
         <section class="page" id="page-news">
-            <h2 class="section-title"><span>Новости</span> Dota 2</h2>
-            <div class="news-feed" id="newsFeed">
-                <div class="news-loading">
-                    <div class="loader"></div>
-                    <p>Загрузка новостей...</p>
+            <h2 class="section-title"><span>Новости</span> и <span>Патчи</span> Dota 2</h2>
+            
+            <div class="news-tabs">
+                <button class="tab-btn active" data-tab="news">Новости</button>
+                <button class="tab-btn" data-tab="patches">Патчи</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-news">
+                <div class="news-feed" id="newsFeed">
+                    <div class="news-loading">
+                        <div class="loader"></div>
+                        <p>Загрузка новостей...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="tab-patches">
+                <div class="patches-feed" id="patchesFeed">
+                    <div class="news-loading">
+                        <div class="loader"></div>
+                        <p>Загрузка патчей...</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -139,6 +156,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/news.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/patches.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
