@@ -1142,6 +1142,14 @@ section {
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.patch-days {
+    font-size: 0.7rem;
+    color: #8888a0;
+    padding: 2px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+}
+
 .patch-type {
     font-size: 0.65rem;
     text-transform: uppercase;
@@ -1205,6 +1213,51 @@ section {
     border-bottom: 1px solid rgba(240, 185, 11, 0.1);
 }
 
+.patch-heroes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.patch-hero-card {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.2s ease;
+}
+
+.patch-hero-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(240, 185, 11, 0.15);
+}
+
+.patch-hero-name {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.patch-hero-stat {
+    font-size: 0.7rem;
+    color: #8888a0;
+}
+
+.patch-hero-stat span {
+    color: #b0b0c0;
+    font-weight: 500;
+}
+
+.patch-hero-stat.positive span {
+    color: #4ecdc4;
+}
+
+.patch-hero-stat.negative span {
+    color: #ff6b6b;
+}
+
 .patch-changes-list {
     display: flex;
     flex-direction: column;
@@ -1215,11 +1268,12 @@ section {
 .patch-change-item {
     font-size: 0.85rem;
     color: #b0b0c0;
-    padding: 6px 12px;
+    padding: 8px 12px;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 6px;
     border-left: 2px solid rgba(240, 185, 11, 0.1);
     line-height: 1.5;
+    margin-bottom: 4px;
 }
 
 .patch-change-item strong {
@@ -1237,61 +1291,26 @@ section {
     margin-right: 6px;
 }
 
-.patch-change-item .change-desc {
+.change-details {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 0 0;
+}
+
+.change-details li {
+    font-size: 0.82rem;
     color: #b0b0c0;
+    padding: 2px 0 2px 16px;
+    position: relative;
+    line-height: 1.5;
 }
 
-.patch-heroes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 4px;
-}
-
-.patch-hero-tag {
-    padding: 3px 12px;
-    border-radius: 14px;
-    font-size: 0.7rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #b0b0c0;
-}
-
-.patch-hero-tag:hover {
-    border-color: rgba(240, 185, 11, 0.3);
-    color: #fff;
-}
-
-.patch-expand-btn {
-    background: none;
-    border: none;
+.change-details li::before {
+    content: '•';
+    position: absolute;
+    left: 2px;
     color: var(--gold);
-    font-size: 0.85rem;
-    cursor: pointer;
-    padding: 8px 0;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.patch-expand-btn:hover {
-    color: #ffd700;
-    text-shadow: 0 0 20px rgba(240, 185, 11, 0.3);
-}
-
-.patch-full-content {
-    display: none;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    margin-top: 16px;
-}
-
-.patch-full-content.open {
-    display: block;
-    animation: fadePage 0.3s ease;
+    font-size: 0.8rem;
 }
 
 /* ============================================================
@@ -2061,6 +2080,20 @@ h1::before, h2::before {
         gap: 10px 16px;
     }
 
+    .patch-heroes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .patch-change-item {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+
+    .patch-days {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+
     .hero-modal-content {
         padding: 24px 18px;
         max-height: 92vh;
@@ -2166,6 +2199,18 @@ h1::before, h2::before {
         font-size: 0.95rem;
     }
 
+    .patch-heroes-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .patch-hero-card {
+        padding: 8px 10px;
+    }
+
+    .patch-hero-name {
+        font-size: 0.8rem;
+    }
+
     .hero-modal-content {
         padding: 16px 12px;
         border-radius: 12px;
@@ -2199,138 +2244,5 @@ h1::before, h2::before {
 
     .hero-modal-stat-item-value {
         font-size: 0.85rem;
-    }
-}
-
-/* ===== ПАТЧИ - ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ===== */
-.patch-days {
-    font-size: 0.7rem;
-    color: #8888a0;
-    padding: 2px 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-}
-
-.patch-heroes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.patch-hero-card {
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    padding: 10px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    transition: all 0.2s ease;
-}
-
-.patch-hero-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(240, 185, 11, 0.15);
-}
-
-.patch-hero-name {
-    font-weight: 600;
-    color: #fff;
-    font-size: 0.9rem;
-    margin-bottom: 4px;
-}
-
-.patch-hero-stat {
-    font-size: 0.7rem;
-    color: #8888a0;
-}
-
-.patch-hero-stat span {
-    color: #b0b0c0;
-    font-weight: 500;
-}
-
-.patch-hero-stat.positive span {
-    color: #4ecdc4;
-}
-
-.patch-hero-stat.negative span {
-    color: #ff6b6b;
-}
-
-.change-details {
-    list-style: none;
-    padding: 0;
-    margin: 4px 0 0 0;
-}
-
-.change-details li {
-    font-size: 0.82rem;
-    color: #b0b0c0;
-    padding: 2px 0 2px 16px;
-    position: relative;
-    line-height: 1.5;
-}
-
-.change-details li::before {
-    content: '•';
-    position: absolute;
-    left: 2px;
-    color: var(--gold);
-    font-size: 0.8rem;
-}
-
-.patch-change-item {
-    font-size: 0.85rem;
-    color: #b0b0c0;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 6px;
-    border-left: 2px solid rgba(240, 185, 11, 0.1);
-    line-height: 1.5;
-    margin-bottom: 4px;
-}
-
-.patch-change-item strong {
-    color: #fff;
-    margin-right: 6px;
-}
-
-.patch-change-item .change-ability {
-    color: #64c8ff;
-    margin-right: 6px;
-}
-
-.patch-change-item .change-values {
-    color: #4ecdc4;
-    margin-right: 6px;
-}
-
-/* ===== АДАПТИВ ДЛЯ ПАТЧЕЙ ===== */
-@media (max-width: 768px) {
-    .patch-heroes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    }
-    
-    .patch-change-item {
-        font-size: 0.8rem;
-        padding: 6px 10px;
-    }
-    
-    .patch-days {
-        font-size: 0.65rem;
-        padding: 2px 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    .patch-heroes-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .patch-hero-card {
-        padding: 8px 10px;
-    }
-    
-    .patch-hero-name {
-        font-size: 0.8rem;
     }
 }
