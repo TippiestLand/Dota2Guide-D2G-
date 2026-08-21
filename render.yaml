@@ -1,25 +1,24 @@
 services:
+  # Python (Flask) сервер
   - type: web
     name: dota2-guide
     runtime: python
-    repo: https://github.com/TippiestLand/dota2-guide
-    plan: free
-    region: frankfurt
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: SECRET_KEY
-        generateValue: true
-      - key: ADMIN_USERNAME
-        value: tippi
-      - key: FLASK_ENV
-        value: production
+      - key: PATCHES_API_URL
+        value: http://localhost:5001
+      - key: PORT
+        value: 8000
+    plan: free
 
-  - type: cron
-    name: rss-updater
-    repo: https://github.com/TippiestLand/dota2-guide
-    schedule: "*/5 * * * *"
-    command: python rss_updater.py
+  # Node.js сервер для патчей
+  - type: web
+    name: dota2-patches
+    runtime: node
+    buildCommand: npm install
+    startCommand: node patches-server.js
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.0
+      - key: PORT
+        value: 5001
+    plan: free
