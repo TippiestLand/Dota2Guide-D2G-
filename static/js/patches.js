@@ -64,7 +64,7 @@
             
             // Общие изменения
             if (patch.general_changes && patch.general_changes.length > 0) {
-                html += '    <div class="patch-section-title">ОБЩИЕ ИЗМЕНЕНИЯ</div>';
+                html += '    <div class="patch-section-title">ОБЩИЕ ИЗМЕНЕНИЯ <span class="patch-count">' + patch.general_changes.length + '</span></div>';
                 html += '    <div class="patch-changes-list">';
                 for (var g = 0; g < patch.general_changes.length; g++) {
                     html += '        <div class="patch-change-item">' + escapeHtml(patch.general_changes[g]) + '</div>';
@@ -74,11 +74,11 @@
             
             // Изменения предметов
             if (patch.item_changes && patch.item_changes.length > 0) {
-                html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ ПРЕДМЕТОВ</div>';
+                html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ ПРЕДМЕТОВ <span class="patch-count">' + patch.item_changes.length + '</span></div>';
                 html += '    <div class="patch-item-changes">';
                 for (var it = 0; it < patch.item_changes.length; it++) {
                     var change = patch.item_changes[it];
-                    var itemIcon = change.item ? change.item.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '') : 'unknown';
+                    var itemIcon = getItemIconName(change.item);
                     var iconUrl = ITEM_ICON_BASE + itemIcon + '.png';
                     
                     html += '        <div class="patch-item-change" data-item="' + escapeHtml(change.item) + '" data-detail="' + escapeHtml(change.detail || '') + '">';
@@ -94,11 +94,11 @@
             
             // Изменения нейтральных предметов
             if (patch.neutral_item_changes && patch.neutral_item_changes.length > 0) {
-                html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ НЕЙТРАЛЬНЫХ ПРЕДМЕТОВ</div>';
+                html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ НЕЙТРАЛЬНЫХ ПРЕДМЕТОВ <span class="patch-count">' + patch.neutral_item_changes.length + '</span></div>';
                 html += '    <div class="patch-item-changes">';
                 for (var n = 0; n < patch.neutral_item_changes.length; n++) {
                     var change = patch.neutral_item_changes[n];
-                    var itemIcon = change.item ? change.item.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '') : 'unknown';
+                    var itemIcon = getItemIconName(change.item);
                     var iconUrl = ITEM_ICON_BASE + itemIcon + '.png';
                     
                     html += '        <div class="patch-item-change" data-item="' + escapeHtml(change.item) + '" data-detail="' + escapeHtml(change.detail || '') + '">';
@@ -114,11 +114,11 @@
             
             // Изменения героев
             if (patch.hero_changes && patch.hero_changes.length > 0) {
-                html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ ГЕРОЕВ</div>';
+                html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ ГЕРОЕВ <span class="patch-count">' + patch.hero_changes.length + '</span></div>';
                 html += '    <div class="patch-hero-changes">';
                 for (var h = 0; h < patch.hero_changes.length; h++) {
                     var hero = patch.hero_changes[h];
-                    var heroIcon = hero.hero ? hero.hero.toLowerCase().replace(/\s+/g, '_') : 'unknown';
+                    var heroIcon = getHeroIconName(hero.hero);
                     var iconUrl = ICON_BASE + heroIcon + '.png';
                     
                     var changesText = hero.changes ? hero.changes.join('; ') : '';
@@ -140,47 +140,49 @@
 
         patchesFeed.innerHTML = html;
 
-        // Добавляем всплывающие подсказки для героев
+        // Добавляем всплывающие подсказки
+        addTooltips();
+    }
+
+    function getHeroIconName(heroName) {
+        if (!heroName) return 'unknown';
+        return heroName.toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/'/g, '')
+            .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function getItemIconName(itemName) {
+        if (!itemName) return 'unknown';
+        return itemName.toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/'/g, '')
+            .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function addTooltips() {
+        // Подсказки для героев
         var heroChanges = document.querySelectorAll('.patch-hero-change');
         for (var hc = 0; hc < heroChanges.length; hc++) {
             (function(el) {
                 el.addEventListener('mouseenter', function(e) {
                     var detail = this.dataset.detail;
                     var hero = this.dataset.hero;
-                    if (detail) {
+                    if (detail && detail.length > 30) {
                         var tooltip = document.createElement('div');
                         tooltip.className = 'patch-tooltip';
-                        tooltip.innerHTML = '<strong>' + escapeHtml(hero) + '</strong><br><span style="color:#b0b0c0;font-size:0.85rem;">' + escapeHtml(detail) + '</span>';
-                        tooltip.style.position = 'fixed';
+                        tooltip.innerHTML = '<strong>' + escapeHtml(hero) + '</strong><span>' + escapeHtml(detail) + '</span>';
                         tooltip.style.left = (e.clientX + 15) + 'px';
                         tooltip.style.top = (e.clientY - 15) + 'px';
-                        tooltip.style.background = 'rgba(10,10,18,0.95)';
-                        tooltip.style.color = '#fff';
-                        tooltip.style.padding = '10px 16px';
-                        tooltip.style.borderRadius = '8px';
-                        tooltip.style.border = '1px solid rgba(240,185,11,0.25)';
-                        tooltip.style.fontSize = '0.85rem';
-                        tooltip.style.maxWidth = '320px';
-                        tooltip.style.pointerEvents = 'none';
-                        tooltip.style.zIndex = '9999';
-                        tooltip.style.backdropFilter = 'blur(8px)';
-                        tooltip.style.boxShadow = '0 8px 32px rgba(0,0,0,0.6)';
-                        tooltip.style.lineHeight = '1.5';
                         tooltip.id = 'patch-tooltip-hero';
                         document.body.appendChild(tooltip);
+                        positionTooltip(tooltip, e);
                     }
                 });
                 el.addEventListener('mousemove', function(e) {
                     var tooltip = document.getElementById('patch-tooltip-hero');
                     if (tooltip) {
-                        tooltip.style.left = (e.clientX + 15) + 'px';
-                        tooltip.style.top = (e.clientY - 15) + 'px';
-                        if (e.clientX + 320 > window.innerWidth) {
-                            tooltip.style.left = (e.clientX - 330) + 'px';
-                        }
-                        if (e.clientY + 100 > window.innerHeight) {
-                            tooltip.style.top = (e.clientY - 100) + 'px';
-                        }
+                        positionTooltip(tooltip, e);
                     }
                 });
                 el.addEventListener('mouseleave', function() {
@@ -192,47 +194,28 @@
             })(heroChanges[hc]);
         }
 
-        // Добавляем всплывающие подсказки для предметов
+        // Подсказки для предметов
         var itemChanges = document.querySelectorAll('.patch-item-change');
         for (var ic = 0; ic < itemChanges.length; ic++) {
             (function(el) {
                 el.addEventListener('mouseenter', function(e) {
                     var detail = this.dataset.detail;
                     var item = this.dataset.item;
-                    if (detail) {
+                    if (detail && detail.length > 30) {
                         var tooltip = document.createElement('div');
                         tooltip.className = 'patch-tooltip';
-                        tooltip.innerHTML = '<strong>' + escapeHtml(item) + '</strong><br><span style="color:#b0b0c0;font-size:0.85rem;">' + escapeHtml(detail) + '</span>';
-                        tooltip.style.position = 'fixed';
+                        tooltip.innerHTML = '<strong>' + escapeHtml(item) + '</strong><span>' + escapeHtml(detail) + '</span>';
                         tooltip.style.left = (e.clientX + 15) + 'px';
                         tooltip.style.top = (e.clientY - 15) + 'px';
-                        tooltip.style.background = 'rgba(10,10,18,0.95)';
-                        tooltip.style.color = '#fff';
-                        tooltip.style.padding = '10px 16px';
-                        tooltip.style.borderRadius = '8px';
-                        tooltip.style.border = '1px solid rgba(240,185,11,0.25)';
-                        tooltip.style.fontSize = '0.85rem';
-                        tooltip.style.maxWidth = '320px';
-                        tooltip.style.pointerEvents = 'none';
-                        tooltip.style.zIndex = '9999';
-                        tooltip.style.backdropFilter = 'blur(8px)';
-                        tooltip.style.boxShadow = '0 8px 32px rgba(0,0,0,0.6)';
-                        tooltip.style.lineHeight = '1.5';
                         tooltip.id = 'patch-tooltip-item';
                         document.body.appendChild(tooltip);
+                        positionTooltip(tooltip, e);
                     }
                 });
                 el.addEventListener('mousemove', function(e) {
                     var tooltip = document.getElementById('patch-tooltip-item');
                     if (tooltip) {
-                        tooltip.style.left = (e.clientX + 15) + 'px';
-                        tooltip.style.top = (e.clientY - 15) + 'px';
-                        if (e.clientX + 320 > window.innerWidth) {
-                            tooltip.style.left = (e.clientX - 330) + 'px';
-                        }
-                        if (e.clientY + 100 > window.innerHeight) {
-                            tooltip.style.top = (e.clientY - 100) + 'px';
-                        }
+                        positionTooltip(tooltip, e);
                     }
                 });
                 el.addEventListener('mouseleave', function() {
@@ -243,6 +226,31 @@
                 });
             })(itemChanges[ic]);
         }
+    }
+
+    function positionTooltip(tooltip, e) {
+        var left = e.clientX + 15;
+        var top = e.clientY - 15;
+        
+        // Проверяем выход за правый край
+        if (left + 340 > window.innerWidth) {
+            left = e.clientX - 340;
+        }
+        // Проверяем выход за левый край
+        if (left < 10) {
+            left = 10;
+        }
+        // Проверяем выход за нижний край
+        if (top + 100 > window.innerHeight) {
+            top = e.clientY - 100;
+        }
+        // Проверяем выход за верхний край
+        if (top < 10) {
+            top = 10;
+        }
+        
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
     }
 
     function escapeHtml(text) {
