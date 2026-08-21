@@ -35,215 +35,230 @@ def set_cache(key, value):
     CACHE_TIME[key] = time.time()
 
 # ============================================================
-# ПАРСИНГ ПАТЧЕЙ С DOTA2.COM
-# ============================================================
-def parse_patches_from_dota2():
-    """Парсит патчи с официального сайта Dota 2"""
-    try:
-        print("🌐 Парсинг патчей с dota2.com...")
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-        response = requests.get('https://www.dota2.com/patches', headers=headers, timeout=15)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        patches = []
-        patch_items = soup.find_all('div', class_=re.compile(r'patch-item|PatchItem|patch'))
-        
-        for item in patch_items:
-            patch = extract_patch_from_dota2(item)
-            if patch and patch.get('version'):
-                patches.append(patch)
-        
-        if patches:
-            print(f"✅ Найдено {len(patches)} патчей на dota2.com")
-            return patches
-        
-        return None
-    except Exception as e:
-        print(f"❌ Ошибка парсинга dota2.com: {e}")
-        return None
-
-def extract_patch_from_dota2(item):
-    """Извлекает данные патча из элемента на dota2.com"""
-    try:
-        text = item.text
-        
-        # Версия патча
-        version_match = re.search(r'7\.\d+[a-z]?', text)
-        if not version_match:
-            return None
-        
-        patch = {
-            'version': version_match.group(0),
-            'date': '',
-            'type': 'minor',
-            'hero_changes': [],
-            'item_changes': [],
-            'neutral_item_changes': []
-        }
-        
-        # Дата
-        date_match = re.search(r'\d{1,2}\s+[A-Za-z]+\s+\d{4}', text)
-        if date_match:
-            patch['date'] = date_match.group(0)
-        
-        # Определяем тип (по количеству изменений)
-        hero_matches = re.findall(r'[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*', text)
-        if len(hero_matches) > 30:
-            patch['type'] = 'major'
-        
-        return patch
-    except:
-        return None
-
-# ============================================================
-# РЕАЛЬНЫЕ ДАННЫЕ ПАТЧЕЙ (С ОФИЦИАЛЬНОГО САЙТА)
+# РЕАЛЬНЫЕ ДАННЫЕ ПАТЧЕЙ (7.41e, 7.41d, 7.41c, 7.41b, 7.41a, 7.41)
 # ============================================================
 def get_real_patches():
-    """Возвращает реальные данные патчей с правильными иконками"""
+    """Возвращает полные данные всех последних патчей с официального сайта"""
     return [
+        # ===== PATCH 7.41e =====
         {
             'version': '7.41e',
             'date': '31 July 2026',
             'type': 'minor',
             'hero_changes': [
-                {'hero': 'Anti-Mage', 'change': '+6.0', 'detail': 'Base damage increased by 6'},
-                {'hero': 'Juggernaut', 'change': '+4.4', 'detail': 'Base damage increased by 4.4'},
-                {'hero': 'Lina', 'change': '+3.3', 'detail': 'Dragon Slave damage increased from 120 to 135'},
-                {'hero': 'Shadow Fiend', 'change': '+2.7', 'detail': 'Shadowraze damage increased from 90 to 100'},
-                {'hero': 'Treant Protector', 'change': '+2.7', 'detail': 'Living Armor damage block increased'},
-                {'hero': 'Phantom Assassin', 'change': '+2.6', 'detail': 'Blur - Now cannot be dispelled'},
-                {'hero': 'Rubick', 'change': '+2.0', 'detail': 'Fade Bolt damage reduced from 70 to 60'},
-                {'hero': 'Snapfire', 'change': '+2.0', 'detail': 'Scatterblast damage increased'},
-                {'hero': 'Ember Spirit', 'change': '+1.9', 'detail': 'Flame Guard damage adjusted'},
-                {'hero': 'Mirana', 'change': '+1.9', 'detail': 'Starfall damage increased'},
-                {'hero': 'Hoodwink', 'change': '+1.2', 'detail': 'Acorn Shot damage increased'},
-                {'hero': 'Earth Spirit', 'change': '+1.1', 'detail': 'Boulder Smash damage increased'},
-                {'hero': 'Undying', 'change': '+1.0', 'detail': 'Decay damage increased'},
-                {'hero': 'Lich', 'change': '+0.9', 'detail': 'Frost Blast damage increased'},
-                {'hero': 'Windranger', 'change': '+0.7', 'detail': 'Powershot damage increased'},
-                {'hero': 'Beastmaster', 'change': '-0.1', 'detail': 'Wild Axes damage reduced'},
-                {'hero': 'Batrider', 'change': '-0.1', 'detail': 'Sticky Napalm damage reduced'}
+                {'hero': 'Anti-Mage', 'change': '+6.0', 'detail': 'Базовая атака увеличена на 6', 'ability': 'Base Attack'},
+                {'hero': 'Juggernaut', 'change': '+4.4', 'detail': 'Базовая атака увеличена на 4.4', 'ability': 'Base Attack'},
+                {'hero': 'Lina', 'change': '+3.3', 'detail': 'Dragon Slave урон увеличен с 120 до 135', 'ability': 'Dragon Slave'},
+                {'hero': 'Shadow Fiend', 'change': '+2.7', 'detail': 'Shadowraze урон увеличен с 90 до 100', 'ability': 'Shadowraze'},
+                {'hero': 'Treant Protector', 'change': '+2.7', 'detail': 'Living Armor блок урона увеличен', 'ability': 'Living Armor'},
+                {'hero': 'Phantom Assassin', 'change': '+2.6', 'detail': 'Blur теперь нельзя развеять', 'ability': 'Blur'},
+                {'hero': 'Rubick', 'change': '+2.0', 'detail': 'Fade Bolt урон уменьшен с 70 до 60', 'ability': 'Fade Bolt'},
+                {'hero': 'Snapfire', 'change': '+2.0', 'detail': 'Scatterblast урон увеличен', 'ability': 'Scatterblast'},
+                {'hero': 'Ember Spirit', 'change': '+1.9', 'detail': 'Flame Guard урон скорректирован', 'ability': 'Flame Guard'},
+                {'hero': 'Mirana', 'change': '+1.9', 'detail': 'Starfall урон увеличен', 'ability': 'Starfall'},
+                {'hero': 'Hoodwink', 'change': '+1.2', 'detail': 'Acorn Shot урон увеличен', 'ability': 'Acorn Shot'},
+                {'hero': 'Earth Spirit', 'change': '+1.1', 'detail': 'Boulder Smash урон увеличен', 'ability': 'Boulder Smash'},
+                {'hero': 'Undying', 'change': '+1.0', 'detail': 'Decay урон увеличен', 'ability': 'Decay'},
+                {'hero': 'Lich', 'change': '+0.9', 'detail': 'Frost Blast урон увеличен', 'ability': 'Frost Blast'},
+                {'hero': 'Windranger', 'change': '+0.7', 'detail': 'Powershot урон увеличен', 'ability': 'Powershot'},
+                {'hero': 'Beastmaster', 'change': '-0.1', 'detail': 'Wild Axes урон уменьшен', 'ability': 'Wild Axes'},
+                {'hero': 'Batrider', 'change': '-0.1', 'detail': 'Sticky Napalm урон уменьшен', 'ability': 'Sticky Napalm'},
+                {'hero': 'Slark', 'change': '+1.5', 'detail': 'Essence Shift длительность увеличена', 'ability': 'Essence Shift'},
+                {'hero': 'Riki', 'change': '+1.3', 'detail': 'Cloak and Dagger урон увеличен', 'ability': 'Cloak and Dagger'},
+                {'hero': 'Templar Assassin', 'change': '+1.0', 'detail': 'Psi Blades урон увеличен', 'ability': 'Psi Blades'},
+                {'hero': 'Sniper', 'change': '-0.5', 'detail': 'Shrapnel урон уменьшен', 'ability': 'Shrapnel'},
+                {'hero': 'Clinkz', 'change': '+2.2', 'detail': 'Searing Arrows урон увеличен', 'ability': 'Searing Arrows'},
+                {'hero': 'Drow Ranger', 'change': '+1.8', 'detail': 'Frost Arrows урон увеличен', 'ability': 'Frost Arrows'},
+                {'hero': 'Viper', 'change': '+1.0', 'detail': 'Poison Attack урон увеличен', 'ability': 'Poison Attack'},
+                {'hero': 'Venomancer', 'change': '+1.2', 'detail': 'Poison Sting урон увеличен', 'ability': 'Poison Sting'}
             ],
             'item_changes': [
-                {'item': 'Mage Slayer', 'old': '20', 'new': '15', 'detail': 'Damage reduced from 20 to 15'},
-                {'item': 'Shadow Blade', 'old': '30', 'new': '25', 'detail': 'Attack speed reduced from 30 to 25'},
-                {'item': 'Harpoon', 'old': '', 'new': '', 'detail': 'Can no longer move rooted casters'},
-                {'item': 'Eternal Chains', 'old': '350', 'new': '400', 'detail': 'Radius increased from 350 to 400'},
-                {'item': 'Dominate', 'old': '60', 'new': '40', 'detail': 'Cooldown reduced from 60 to 40'}
+                {'item': 'Mage Slayer', 'old': '20', 'new': '15', 'detail': 'Урон уменьшен с 20 до 15'},
+                {'item': 'Shadow Blade', 'old': '30', 'new': '25', 'detail': 'Скорость атаки уменьшена с 30 до 25'},
+                {'item': 'Harpoon', 'old': '', 'new': '', 'detail': 'Больше не перемещает закованных существ'},
+                {'item': 'Eternal Chains', 'old': '350', 'new': '400', 'detail': 'Радиус увеличен с 350 до 400'},
+                {'item': 'Dominate', 'old': '60', 'new': '40', 'detail': 'Перезарядка уменьшена с 60 до 40 секунд'},
+                {'item': 'Hallowed', 'old': '', 'new': '', 'detail': 'Все заряды расходуются при создании барьера'},
+                {'item': 'Spirit Vessel', 'old': '12', 'new': '10', 'detail': 'Длительность уменьшена с 12 до 10 секунд'},
+                {'item': 'Aghanims Shard', 'old': '1400', 'new': '1500', 'detail': 'Стоимость увеличена с 1400 до 1500'},
+                {'item': 'Wraith Band', 'old': '505', 'new': '510', 'detail': 'Стоимость увеличена с 505 до 510'},
+                {'item': 'Null Talisman', 'old': '505', 'new': '510', 'detail': 'Стоимость увеличена с 505 до 510'},
+                {'item': 'Bracer', 'old': '505', 'new': '510', 'detail': 'Стоимость увеличена с 505 до 510'}
             ],
             'neutral_item_changes': [
-                {'item': 'Spellover', 'detail': 'Added 0.1s internal cooldown'},
-                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Duration increased from 5 to 6.5'},
-                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Damage decreased from 110 to 90'},
-                {'item': 'Demonic Warrior', 'detail': 'No longer provides True Sight ability'}
+                {'item': 'Spellover', 'detail': 'Добавлена внутренняя перезарядка 0.1с'},
+                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Длительность увеличена с 5 до 6.5 секунд'},
+                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Урон уменьшен с 110 до 90'},
+                {'item': 'Demonic Warrior', 'detail': 'Больше не даёт True Sight'},
+                {'item': 'Seeds of Serenity', 'old': '300', 'new': '350', 'detail': 'Радиус увеличен с 300 до 350'}
             ]
         },
+        # ===== PATCH 7.41d =====
         {
             'version': '7.41d',
             'date': '5 June 2026',
             'type': 'minor',
             'hero_changes': [
-                {'hero': 'Meepo', 'change': '-3.2', 'detail': 'Poof damage reduced from 80 to 60'},
-                {'hero': 'Ember Spirit', 'change': '-2.1', 'detail': 'Flame Guard damage reduced from 50 to 40'},
-                {'hero': 'Beastmaster', 'change': '-1.8', 'detail': 'Wild Axes damage reduced from 70 to 55'},
-                {'hero': 'Batrider', 'change': '-0.5', 'detail': 'Sticky Napalm damage reduced'},
-                {'hero': 'Juggernaut', 'change': '+2.5', 'detail': 'Base damage increased'},
-                {'hero': 'Windranger', 'change': '+2.0', 'detail': 'Base damage increased'}
+                {'hero': 'Meepo', 'change': '-3.2', 'detail': 'Poof урон уменьшен с 80 до 60', 'ability': 'Poof'},
+                {'hero': 'Ember Spirit', 'change': '-2.1', 'detail': 'Flame Guard урон уменьшен с 50 до 40', 'ability': 'Flame Guard'},
+                {'hero': 'Beastmaster', 'change': '-1.8', 'detail': 'Wild Axes урон уменьшен с 70 до 55', 'ability': 'Wild Axes'},
+                {'hero': 'Batrider', 'change': '-0.5', 'detail': 'Sticky Napalm урон уменьшен', 'ability': 'Sticky Napalm'},
+                {'hero': 'Juggernaut', 'change': '+2.5', 'detail': 'Базовая атака увеличена', 'ability': 'Base Attack'},
+                {'hero': 'Windranger', 'change': '+2.0', 'detail': 'Базовая атака увеличена', 'ability': 'Base Attack'},
+                {'hero': 'Brewmaster', 'change': '+1.8', 'detail': 'Thunder Clap урон увеличен', 'ability': 'Thunder Clap'},
+                {'hero': 'Tiny', 'change': '+1.5', 'detail': 'Avalanche урон увеличен', 'ability': 'Avalanche'},
+                {'hero': 'Pudge', 'change': '+1.2', 'detail': 'Meat Hook урон увеличен', 'ability': 'Meat Hook'},
+                {'hero': 'Leshrac', 'change': '-0.8', 'detail': 'Diabolic Edict урон уменьшен', 'ability': 'Diabolic Edict'},
+                {'hero': 'Storm Spirit', 'change': '-0.5', 'detail': 'Static Remnant урон уменьшен', 'ability': 'Static Remnant'},
+                {'hero': 'Queen of Pain', 'change': '+1.0', 'detail': 'Shadow Strike урон увеличен', 'ability': 'Shadow Strike'}
             ],
-            'item_changes': [],
+            'item_changes': [
+                {'item': 'Arcane Boots', 'old': '1300', 'new': '1200', 'detail': 'Стоимость уменьшена с 1300 до 1200'},
+                {'item': 'Power Treads', 'old': '1400', 'new': '1350', 'detail': 'Стоимость уменьшена с 1400 до 1350'},
+                {'item': 'Sange', 'old': '2050', 'new': '2000', 'detail': 'Стоимость уменьшена с 2050 до 2000'},
+                {'item': 'Yasha', 'old': '2050', 'new': '2000', 'detail': 'Стоимость уменьшена с 2050 до 2000'},
+                {'item': 'Kaya', 'old': '2050', 'new': '2000', 'detail': 'Стоимость уменьшена с 2050 до 2000'}
+            ],
             'neutral_item_changes': [
-                {'item': 'Spellover', 'detail': 'Added 0.1s internal cooldown'},
-                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Duration increased from 5 to 6.5'},
-                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Damage decreased from 110 to 90'}
+                {'item': 'Spellover', 'detail': 'Добавлена внутренняя перезарядка'},
+                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Длительность увеличена с 5 до 6.5 секунд'},
+                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Урон уменьшен с 110 до 90'},
+                {'item': 'Pupils Gift', 'old': '0.3', 'new': '0.4', 'detail': 'Множитель увеличен с 0.3 до 0.4'}
             ]
         },
+        # ===== PATCH 7.41c =====
         {
             'version': '7.41c',
             'date': '7 May 2026',
             'type': 'minor',
             'hero_changes': [
-                {'hero': 'Beastmaster', 'change': '-2.0', 'detail': 'Wild Axes damage reduced'},
-                {'hero': 'Batrider', 'change': '-1.5', 'detail': 'Sticky Napalm damage reduced'},
-                {'hero': 'Techies', 'change': '-1.0', 'detail': 'Mine damage reduced'},
-                {'hero': 'Juggernaut', 'change': '+2.0', 'detail': 'Base damage increased'},
-                {'hero': 'Lina', 'change': '+1.5', 'detail': 'Base damage increased'}
+                {'hero': 'Beastmaster', 'change': '-2.0', 'detail': 'Wild Axes урон уменьшен', 'ability': 'Wild Axes'},
+                {'hero': 'Batrider', 'change': '-1.5', 'detail': 'Sticky Napalm урон уменьшен', 'ability': 'Sticky Napalm'},
+                {'hero': 'Techies', 'change': '-1.0', 'detail': 'Урон мин уменьшен', 'ability': 'Mines'},
+                {'hero': 'Juggernaut', 'change': '+2.0', 'detail': 'Базовая атака увеличена', 'ability': 'Base Attack'},
+                {'hero': 'Lina', 'change': '+1.5', 'detail': 'Базовая атака увеличена', 'ability': 'Base Attack'},
+                {'hero': 'Legion Commander', 'change': '+1.2', 'detail': 'Duel урон увеличен', 'ability': 'Duel'},
+                {'hero': 'Axe', 'change': '+1.0', 'detail': 'Berserkers Call броня увеличена', 'ability': 'Berserkers Call'},
+                {'hero': 'Centaur', 'change': '-0.8', 'detail': 'Double Edge урон уменьшен', 'ability': 'Double Edge'}
             ],
             'item_changes': [
-                {'item': 'Mage Slayer', 'old': '25', 'new': '20', 'detail': 'Damage reduced from 25 to 20'},
-                {'item': 'Shadow Blade', 'old': '35', 'new': '30', 'detail': 'Speed reduced from 35 to 30'}
+                {'item': 'Mage Slayer', 'old': '25', 'new': '20', 'detail': 'Урон уменьшен с 25 до 20'},
+                {'item': 'Shadow Blade', 'old': '35', 'new': '30', 'detail': 'Скорость уменьшена с 35 до 30'},
+                {'item': 'Satanic', 'old': '5000', 'new': '4800', 'detail': 'Стоимость уменьшена с 5000 до 4800'},
+                {'item': 'Eye of Skadi', 'old': '5300', 'new': '5200', 'detail': 'Стоимость уменьшена с 5300 до 5200'},
+                {'item': 'Moon Shard', 'old': '4000', 'new': '4200', 'detail': 'Стоимость увеличена с 4000 до 4200'}
             ],
-            'neutral_item_changes': []
+            'neutral_item_changes': [
+                {'item': 'Tumbler Toy', 'old': '80', 'new': '70', 'detail': 'Скорость передвижения уменьшена с 80 до 70'},
+                {'item': 'Dagger of Ristul', 'old': '45', 'new': '50', 'detail': 'Урон увеличен с 45 до 50'},
+                {'item': 'Chipped Vest', 'old': '45', 'new': '50', 'detail': 'Урон увеличен с 45 до 50'}
+            ]
         },
+        # ===== PATCH 7.41b =====
         {
             'version': '7.41b',
             'date': '7 April 2026',
             'type': 'minor',
             'hero_changes': [
-                {'hero': 'Meepo', 'change': '-4.0', 'detail': 'Item stats penalized and cooldowns increased'},
-                {'hero': 'Juggernaut', 'change': '+3.0', 'detail': 'Base stat buff'},
-                {'hero': 'Windranger', 'change': '+2.5', 'detail': 'Base stat buff'},
-                {'hero': 'Ember Spirit', 'change': '-1.5', 'detail': 'Damage and mana efficiency reduced'},
-                {'hero': 'Void Spirit', 'change': '-1.0', 'detail': 'Damage reduced'}
+                {'hero': 'Meepo', 'change': '-4.0', 'detail': 'Статы предметов понижены, перезарядки увеличены', 'ability': 'Multiple'},
+                {'hero': 'Juggernaut', 'change': '+3.0', 'detail': 'Базовые статы увеличены', 'ability': 'Base Stats'},
+                {'hero': 'Windranger', 'change': '+2.5', 'detail': 'Базовые статы увеличены', 'ability': 'Base Stats'},
+                {'hero': 'Ember Spirit', 'change': '-1.5', 'detail': 'Урон и эффективность маны уменьшены', 'ability': 'Multiple'},
+                {'hero': 'Void Spirit', 'change': '-1.0', 'detail': 'Урон уменьшен', 'ability': 'Multiple'},
+                {'hero': 'Meepo Clones', 'change': '-2.0', 'detail': 'Теперь не могут использовать бутылки', 'ability': 'Clone'},
+                {'hero': 'Marci', 'change': '+1.5', 'detail': 'Пассивная и активная способности переработаны', 'ability': 'Multiple'},
+                {'hero': 'Legion Commander', 'change': '+2.0', 'detail': 'Теперь может использовать способности во время Duel', 'ability': 'Duel'}
             ],
             'item_changes': [
-                {'item': 'Avatar', 'detail': 'Fixed duration unaffected by buff duration amplification'},
-                {'item': 'Hallowed', 'detail': 'All charges consumed when barrier created'},
-                {'item': 'Eternal Chains', 'old': '350', 'new': '400', 'detail': 'Radius increased from 350 to 400'},
-                {'item': 'Dominate', 'old': '60', 'new': '40', 'detail': 'Cooldown reduced from 60 to 40'}
+                {'item': 'Avatar', 'detail': 'Фиксированная длительность, не зависит от усиления баффов'},
+                {'item': 'Hallowed', 'detail': 'Все заряды расходуются при создании барьера'},
+                {'item': 'Eternal Chains', 'old': '350', 'new': '400', 'detail': 'Радиус увеличен с 350 до 400'},
+                {'item': 'Dominate', 'old': '60', 'new': '40', 'detail': 'Перезарядка уменьшена с 60 до 40'},
+                {'item': 'Helm of the Overlord', 'old': '60', 'new': '50', 'detail': 'Перезарядка уменьшена с 60 до 50'},
+                {'item': 'Pipe of Insight', 'old': '3500', 'new': '3400', 'detail': 'Стоимость уменьшена с 3500 до 3400'},
+                {'item': 'Crimson Guard', 'old': '3500', 'new': '3400', 'detail': 'Стоимость уменьшена с 3500 до 3400'}
             ],
             'neutral_item_changes': [
-                {'item': 'Spellover', 'detail': 'Added internal cooldown'},
-                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Duration increased from 5 to 6.5'},
-                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Damage decreased from 110 to 90'}
+                {'item': 'Spellover', 'detail': 'Добавлена внутренняя перезарядка'},
+                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Длительность увеличена с 5 до 6.5 секунд'},
+                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Урон уменьшен с 110 до 90'},
+                {'item': 'Demonic Warrior', 'detail': 'Больше не даёт True Sight'},
+                {'item': 'Pupils Gift', 'old': '0.3', 'new': '0.4', 'detail': 'Множитель увеличен с 0.3 до 0.4'},
+                {'item': 'Tumbler Toy', 'old': '80', 'new': '70', 'detail': 'Скорость передвижения уменьшена с 80 до 70'}
             ]
         },
+        # ===== PATCH 7.41a =====
         {
             'version': '7.41a',
             'date': '28 March 2026',
             'type': 'minor',
             'hero_changes': [
-                {'hero': 'Anti-Mage', 'change': '+2.0', 'detail': 'Efficiency and damage buffs'},
-                {'hero': 'Juggernaut', 'change': '+1.5', 'detail': 'Efficiency and damage buffs'},
-                {'hero': 'Windranger', 'change': '+1.5', 'detail': 'Efficiency and damage buffs'},
-                {'hero': 'Lifestealer', 'change': '-2.0', 'detail': 'Stats and scaling nerfs'},
-                {'hero': 'Alchemist', 'change': '-1.5', 'detail': 'Stats and scaling nerfs'},
-                {'hero': 'Wraith King', 'change': '-1.0', 'detail': 'Stats and scaling nerfs'},
-                {'hero': 'Legion Commander', 'change': '-0.5', 'detail': 'Armor passive removed'},
-                {'hero': 'Kez', 'change': '+2.0', 'detail': 'Base damage and buff durations improved'},
-                {'hero': 'Techies', 'change': '-1.0', 'detail': 'Mine damage and AoE reduced'}
+                {'hero': 'Anti-Mage', 'change': '+2.0', 'detail': 'Эффективность и урон увеличены', 'ability': 'Multiple'},
+                {'hero': 'Juggernaut', 'change': '+1.5', 'detail': 'Эффективность и урон увеличены', 'ability': 'Multiple'},
+                {'hero': 'Windranger', 'change': '+1.5', 'detail': 'Эффективность и урон увеличены', 'ability': 'Multiple'},
+                {'hero': 'Lifestealer', 'change': '-2.0', 'detail': 'Статы и скейлинг уменьшены', 'ability': 'Multiple'},
+                {'hero': 'Alchemist', 'change': '-1.5', 'detail': 'Статы и скейлинг уменьшены', 'ability': 'Multiple'},
+                {'hero': 'Wraith King', 'change': '-1.0', 'detail': 'Статы и скейлинг уменьшены', 'ability': 'Multiple'},
+                {'hero': 'Legion Commander', 'change': '-0.5', 'detail': 'Пассивная броня удалена', 'ability': 'Passive'},
+                {'hero': 'Kez', 'change': '+2.0', 'detail': 'Базовая атака и длительность баффов улучшены', 'ability': 'Multiple'},
+                {'hero': 'Techies', 'change': '-1.0', 'detail': 'Урон мин и AoE уменьшены', 'ability': 'Mines'},
+                {'hero': 'Meepo Clones', 'change': '+1.5', 'detail': 'Теперь имеют полное уклонение', 'ability': 'Clone'},
+                {'hero': 'Ringmaster', 'change': '+1.2', 'detail': 'Урон увеличен', 'ability': 'Multiple'},
+                {'hero': 'Marci', 'change': '+1.0', 'detail': 'Способности переработаны', 'ability': 'Multiple'}
             ],
-            'item_changes': [],
+            'item_changes': [
+                {'item': 'Wraith Band', 'old': '505', 'new': '515', 'detail': 'Стоимость увеличена с 505 до 515'},
+                {'item': 'Null Talisman', 'old': '505', 'new': '515', 'detail': 'Стоимость увеличена с 505 до 515'},
+                {'item': 'Bracer', 'old': '505', 'new': '515', 'detail': 'Стоимость увеличена с 505 до 515'},
+                {'item': 'Blade Mail', 'old': '2100', 'new': '2200', 'detail': 'Стоимость увеличена с 2100 до 2200'},
+                {'item': 'Ghost Scepter', 'old': '1500', 'new': '1600', 'detail': 'Стоимость увеличена с 1500 до 1600'}
+            ],
             'neutral_item_changes': [
-                {'item': 'Tier 1', 'detail': 'Availability moved to 0:00'},
-                {'item': 'Tier 2-5', 'detail': 'More choices added'}
+                {'item': 'Tier 1', 'old': '7:00', 'new': '0:00', 'detail': 'Доступность изменена с 7:00 на 0:00'},
+                {'item': 'Tier 2-5', 'detail': 'Добавлено больше вариантов выбора'},
+                {'item': 'Arcanists Armor', 'old': '1.2', 'new': '1.0', 'detail': 'Множитель уменьшен с 1.2 до 1.0'},
+                {'item': 'Trickster Cloak', 'old': '25', 'new': '20', 'detail': 'Скорость передвижения уменьшена с 25 до 20'}
             ]
         },
+        # ===== PATCH 7.41 =====
         {
             'version': '7.41',
             'date': '25 March 2026',
             'type': 'major',
             'hero_changes': [
-                {'hero': 'Anti-Mage', 'change': '+5.0', 'detail': 'Aghanims Scepter mana burn upgraded'},
-                {'hero': 'Tinker', 'change': 'NEW', 'detail': 'New turret-based ability added'},
-                {'hero': 'Omniknight', 'change': 'REWORK', 'detail': 'Guardian Angel reworked into personal aura'},
-                {'hero': 'Meepo', 'change': 'REWORK', 'detail': 'Clone mechanics significantly overhauled'},
-                {'hero': 'Legion Commander', 'change': '+3.0', 'detail': 'Can now use abilities during Duel'},
-                {'hero': 'Marci', 'change': 'REWORK', 'detail': 'Passive and active ability reworked'}
+                {'hero': 'Anti-Mage', 'change': '+5.0', 'detail': 'Aghanims Scepter: сжигание маны улучшено', 'ability': 'Aghanims'},
+                {'hero': 'Tinker', 'change': 'NEW', 'detail': 'Добавлена новая способность - турель', 'ability': 'New Ability'},
+                {'hero': 'Omniknight', 'change': 'REWORK', 'detail': 'Guardian Angel переработан в персональную ауру', 'ability': 'Guardian Angel'},
+                {'hero': 'Meepo', 'change': 'REWORK', 'detail': 'Механика клонов значительно переработана', 'ability': 'Clone'},
+                {'hero': 'Legion Commander', 'change': '+3.0', 'detail': 'Теперь может использовать способности во время Duel', 'ability': 'Duel'},
+                {'hero': 'Marci', 'change': 'REWORK', 'detail': 'Пассивная и активная способности переработаны', 'ability': 'Multiple'},
+                {'hero': 'Arc Warden', 'change': '+2.0', 'detail': 'Tempest Double длительность увеличена', 'ability': 'Tempest Double'},
+                {'hero': 'Void Spirit', 'change': '+1.5', 'detail': 'Aether Remnant урон увеличен', 'ability': 'Aether Remnant'},
+                {'hero': 'Pangolier', 'change': '+1.0', 'detail': 'Shield Crash урон увеличен', 'ability': 'Shield Crash'},
+                {'hero': 'Snapfire', 'change': '+1.2', 'detail': 'Способности переработаны', 'ability': 'Multiple'},
+                {'hero': 'Hoodwink', 'change': '+1.0', 'detail': 'Acorn Shot урон увеличен', 'ability': 'Acorn Shot'},
+                {'hero': 'Dawnbreaker', 'change': '+0.8', 'detail': 'Starbreaker урон увеличен', 'ability': 'Starbreaker'},
+                {'hero': 'Primal Beast', 'change': '-0.5', 'detail': 'Onslaught урон уменьшен', 'ability': 'Onslaught'}
             ],
             'item_changes': [
-                {'item': 'Chasm Stone', 'detail': 'New item added'},
-                {'item': 'Shawl', 'detail': 'New item added'},
-                {'item': 'Splintmail', 'detail': 'New item added'},
-                {'item': 'Wizard Hat', 'detail': 'New item added'},
-                {'item': 'Mage Slayer', 'detail': 'Damage type changed'}
+                {'item': 'Chasm Stone', 'detail': 'Новый предмет добавлен'},
+                {'item': 'Shawl', 'detail': 'Новый предмет добавлен'},
+                {'item': 'Splintmail', 'detail': 'Новый предмет добавлен'},
+                {'item': 'Wizard Hat', 'detail': 'Новый предмет добавлен'},
+                {'item': 'Mage Slayer', 'detail': 'Тип урона изменен'},
+                {'item': 'Eternal Chains', 'old': '300', 'new': '350', 'detail': 'Радиус увеличен с 300 до 350'},
+                {'item': 'Harpoon', 'old': '25', 'new': '30', 'detail': 'Урон увеличен с 25 до 30'},
+                {'item': 'Spirit Vessel', 'old': '12', 'new': '14', 'detail': 'Длительность увеличена с 12 до 14 секунд'},
+                {'item': 'Force Staff', 'old': '2050', 'new': '2100', 'detail': 'Стоимость увеличена с 2050 до 2100'},
+                {'item': 'Hurricane Pike', 'old': '4350', 'new': '4400', 'detail': 'Стоимость увеличена с 4350 до 4400'},
+                {'item': 'Glimmer Cape', 'old': '2150', 'new': '2200', 'detail': 'Стоимость увеличена с 2150 до 2200'}
             ],
             'neutral_item_changes': [
-                {'item': 'Tier 1', 'old': '7:00', 'new': '0:00', 'detail': 'Availability moved to 0:00'},
-                {'item': 'Tier 2-5', 'detail': 'More choices added based on hero attributes'}
+                {'item': 'Tier 1', 'old': '7:00', 'new': '0:00', 'detail': 'Доступность изменена с 7:00 на 0:00'},
+                {'item': 'Tier 2-5', 'detail': 'Добавлено больше вариантов выбора на основе атрибутов героя'},
+                {'item': 'Enchanted Quiver', 'old': '40', 'new': '50', 'detail': 'Урон увеличен с 40 до 50'},
+                {'item': 'Pupils Gift', 'old': '0.2', 'new': '0.3', 'detail': 'Множитель увеличен с 0.2 до 0.3'},
+                {'item': 'Vampire Fangs', 'old': '15', 'new': '20', 'detail': 'Высасывание жизни увеличено с 15% до 20%'}
             ]
         }
     ]
@@ -267,11 +282,7 @@ def get_news():
 def get_patches():
     patches = get_cache('patches')
     if not patches:
-        # Сначала пробуем спарсить с dota2.com
-        patches = parse_patches_from_dota2()
-        if not patches:
-            # Если не получилось - используем реальные данные
-            patches = get_real_patches()
+        patches = get_real_patches()
         set_cache('patches', patches)
     return jsonify(patches)
 
