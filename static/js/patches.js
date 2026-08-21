@@ -3,6 +3,18 @@
 
     var patchesFeed = document.getElementById('patchesFeed');
 
+    // Словарь перевода категорий
+    var ruTitles = {
+        'HERO CHANGES': 'ИЗМЕНЕНИЯ ГЕРОЕВ',
+        'ITEM CHANGES': 'ИЗМЕНЕНИЯ ПРЕДМЕТОВ',
+        'NEUTRAL ITEM CHANGES': 'ИЗМЕНЕНИЯ НЕЙТРАЛЬНЫХ ПРЕДМЕТОВ',
+        'WHAT CHANGED IN': 'ЧТО ИЗМЕНИЛОСЬ В'
+    };
+
+    // Базовый URL для иконок (CDN Dota 2)
+    var ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/';
+    var ITEM_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/';
+
     function fetchPatches() {
         if (!patchesFeed) {
             console.warn('Элемент #patchesFeed не найден');
@@ -52,46 +64,35 @@
         for (var i = 0; i < patches.length; i++) {
             var patch = patches[i];
             
-            var stats = patch.stats || {};
-            var heroesCount = stats.heroes || 0;
-            var itemsCount = stats.items || 0;
-            var neutralCount = stats.neutral_items || 0;
-
             html += '<div class="patch-card" data-id="' + (patch.id || i) + '">';
             
-            // WHAT CHANGED IN X.XX
-            html += '    <div class="patch-title-main">WHAT CHANGED IN ' + escapeHtml(patch.version) + '</div>';
+            // WHAT CHANGED IN X.XX (русский)
+            html += '    <div class="patch-title-main">' + ruTitles['WHAT CHANGED IN'] + ' ' + escapeHtml(patch.version) + '</div>';
             
-            // Статистика изменений
-            html += '    <div class="patch-stats-summary">';
-            if (heroesCount > 0) {
-                html += '        <span class="patch-stat-badge">HERO CHANGES <span class="stat-number">' + heroesCount + '</span></span>';
-            }
-            if (itemsCount > 0) {
-                html += '        <span class="patch-stat-badge">ITEM CHANGES <span class="stat-number">' + itemsCount + '</span></span>';
-            }
-            if (neutralCount > 0) {
-                html += '        <span class="patch-stat-badge">NEUTRAL ITEM CHANGES <span class="stat-number">' + neutralCount + '</span></span>';
-            }
-            html += '    </div>';
-            
-            // Hero Changes с иконками
+            // Hero Changes
             if (patch.hero_changes && patch.hero_changes.length > 0) {
-                html += '    <div class="patch-section-title">HERO CHANGES</div>';
+                html += '    <div class="patch-section-title">' + ruTitles['HERO CHANGES'] + '</div>';
                 html += '    <div class="patch-hero-changes">';
                 for (var h = 0; h < patch.hero_changes.length; h++) {
                     var change = patch.hero_changes[h];
-                    html += '        <div class="patch-hero-change" data-hero="' + escapeHtml(change.hero) + '">';
-                    if (change.hero_icon) {
-                        html += '            <img src="' + escapeHtml(change.hero_icon) + '" alt="' + escapeHtml(change.hero) + '" class="patch-hero-icon" onerror="this.style.display=\'none\'">';
+                    var heroIcon = change.hero ? change.hero.toLowerCase().replace(/\s+/g, '_') : 'unknown';
+                    var iconUrl = ICON_BASE + heroIcon + '.png';
+                    
+                    var valueClass = '';
+                    if (change.change && change.change.startsWith('-')) {
+                        valueClass = 'negative';
+                    } else if (change.change && (change.change.startsWith('+') || change.change === 'NEW' || change.change === 'REWORK')) {
+                        valueClass = 'positive';
                     }
+                    
+                    html += '        <div class="patch-hero-change" data-hero="' + escapeHtml(change.hero) + '" data-detail="' + escapeHtml(change.detail || '') + '">';
+                    html += '            <img src="' + iconUrl + '" alt="' + escapeHtml(change.hero) + '" class="patch-hero-icon" onerror="this.style.display=\'none\'">';
                     html += '            <span class="patch-hero-name">' + escapeHtml(change.hero) + '</span>';
-                    if (change.change_value) {
-                        var valueClass = change.change_value.startsWith('-') ? 'negative' : 'positive';
-                        html += '            <span class="patch-hero-value ' + valueClass + '">' + escapeHtml(change.change_value) + '</span>';
+                    if (change.change) {
+                        html += '            <span class="patch-hero-value ' + valueClass + '">' + escapeHtml(change.change) + '</span>';
                     }
-                    if (change.description) {
-                        html += '            <span class="patch-hero-desc">' + escapeHtml(change.description) + '</span>';
+                    if (change.detail) {
+                        html += '            <span class="patch-hero-desc">' + escapeHtml(change.detail) + '</span>';
                     }
                     html += '        </div>';
                 }
@@ -100,20 +101,21 @@
             
             // Item Changes
             if (patch.item_changes && patch.item_changes.length > 0) {
-                html += '    <div class="patch-section-title">ITEM CHANGES</div>';
+                html += '    <div class="patch-section-title">' + ruTitles['ITEM CHANGES'] + '</div>';
                 html += '    <div class="patch-item-changes">';
                 for (var it = 0; it < patch.item_changes.length; it++) {
                     var change = patch.item_changes[it];
+                    var itemIcon = change.item ? change.item.toLowerCase().replace(/\s+/g, '_') : 'unknown';
+                    var iconUrl = ITEM_ICON_BASE + itemIcon + '.png';
+                    
                     html += '        <div class="patch-item-change">';
-                    if (change.item_icon) {
-                        html += '            <img src="' + escapeHtml(change.item_icon) + '" alt="' + escapeHtml(change.item) + '" class="patch-item-icon" onerror="this.style.display=\'none\'">';
-                    }
+                    html += '            <img src="' + iconUrl + '" alt="' + escapeHtml(change.item) + '" class="patch-item-icon" onerror="this.style.display=\'none\'">';
                     html += '            <span class="patch-item-name">' + escapeHtml(change.item) + '</span>';
-                    if (change.old_value && change.new_value) {
-                        html += '            <span class="patch-item-values">' + escapeHtml(change.old_value) + ' → ' + escapeHtml(change.new_value) + '</span>';
+                    if (change.old && change.new) {
+                        html += '            <span class="patch-item-values">' + escapeHtml(change.old) + ' → ' + escapeHtml(change.new) + '</span>';
                     }
-                    if (change.description) {
-                        html += '            <span class="patch-item-desc">' + escapeHtml(change.description) + '</span>';
+                    if (change.detail) {
+                        html += '            <span class="patch-item-desc">' + escapeHtml(change.detail) + '</span>';
                     }
                     html += '        </div>';
                 }
@@ -122,20 +124,21 @@
             
             // Neutral Item Changes
             if (patch.neutral_item_changes && patch.neutral_item_changes.length > 0) {
-                html += '    <div class="patch-section-title">NEUTRAL ITEM CHANGES</div>';
+                html += '    <div class="patch-section-title">' + ruTitles['NEUTRAL ITEM CHANGES'] + '</div>';
                 html += '    <div class="patch-item-changes">';
                 for (var n = 0; n < patch.neutral_item_changes.length; n++) {
                     var change = patch.neutral_item_changes[n];
+                    var itemIcon = change.item ? change.item.toLowerCase().replace(/\s+/g, '_') : 'unknown';
+                    var iconUrl = ITEM_ICON_BASE + itemIcon + '.png';
+                    
                     html += '        <div class="patch-item-change">';
-                    if (change.item_icon) {
-                        html += '            <img src="' + escapeHtml(change.item_icon) + '" alt="' + escapeHtml(change.item) + '" class="patch-item-icon" onerror="this.style.display=\'none\'">';
-                    }
+                    html += '            <img src="' + iconUrl + '" alt="' + escapeHtml(change.item) + '" class="patch-item-icon" onerror="this.style.display=\'none\'">';
                     html += '            <span class="patch-item-name">' + escapeHtml(change.item) + '</span>';
-                    if (change.old_value && change.new_value) {
-                        html += '            <span class="patch-item-values">' + escapeHtml(change.old_value) + ' → ' + escapeHtml(change.new_value) + '</span>';
+                    if (change.old && change.new) {
+                        html += '            <span class="patch-item-values">' + escapeHtml(change.old) + ' → ' + escapeHtml(change.new) + '</span>';
                     }
-                    if (change.description) {
-                        html += '            <span class="patch-item-desc">' + escapeHtml(change.description) + '</span>';
+                    if (change.detail) {
+                        html += '            <span class="patch-item-desc">' + escapeHtml(change.detail) + '</span>';
                     }
                     html += '        </div>';
                 }
@@ -146,6 +149,49 @@
         }
 
         patchesFeed.innerHTML = html;
+
+        // Добавляем всплывающие подсказки при наведении
+        var heroChanges = document.querySelectorAll('.patch-hero-change');
+        for (var hc = 0; hc < heroChanges.length; hc++) {
+            (function(el) {
+                el.addEventListener('mouseenter', function(e) {
+                    var detail = this.dataset.detail;
+                    if (detail) {
+                        var tooltip = document.createElement('div');
+                        tooltip.className = 'patch-tooltip';
+                        tooltip.textContent = detail;
+                        tooltip.style.position = 'fixed';
+                        tooltip.style.left = (e.clientX + 10) + 'px';
+                        tooltip.style.top = (e.clientY - 10) + 'px';
+                        tooltip.style.background = 'rgba(10,10,18,0.95)';
+                        tooltip.style.color = '#fff';
+                        tooltip.style.padding = '8px 14px';
+                        tooltip.style.borderRadius = '6px';
+                        tooltip.style.border = '1px solid rgba(240,185,11,0.2)';
+                        tooltip.style.fontSize = '0.8rem';
+                        tooltip.style.maxWidth = '300px';
+                        tooltip.style.pointerEvents = 'none';
+                        tooltip.style.zIndex = '9999';
+                        tooltip.style.backdropFilter = 'blur(8px)';
+                        tooltip.id = 'patch-tooltip';
+                        document.body.appendChild(tooltip);
+                    }
+                });
+                el.addEventListener('mousemove', function(e) {
+                    var tooltip = document.getElementById('patch-tooltip');
+                    if (tooltip) {
+                        tooltip.style.left = (e.clientX + 10) + 'px';
+                        tooltip.style.top = (e.clientY - 10) + 'px';
+                    }
+                });
+                el.addEventListener('mouseleave', function() {
+                    var tooltip = document.getElementById('patch-tooltip');
+                    if (tooltip) {
+                        tooltip.remove();
+                    }
+                });
+            })(heroChanges[hc]);
+        }
     }
 
     function escapeHtml(text) {

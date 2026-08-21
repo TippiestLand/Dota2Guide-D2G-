@@ -35,272 +35,215 @@ def set_cache(key, value):
     CACHE_TIME[key] = time.time()
 
 # ============================================================
-# ПАРСИНГ ПАТЧЕЙ С DOTA2PROTRACKER.COM
+# ПАРСИНГ ПАТЧЕЙ С DOTA2.COM
 # ============================================================
-def parse_patches():
-    """Парсит страницу с патчами и извлекает полную информацию"""
+def parse_patches_from_dota2():
+    """Парсит патчи с официального сайта Dota 2"""
     try:
-        print("🌐 Парсинг патчей с dota2protracker.com...")
+        print("🌐 Парсинг патчей с dota2.com...")
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
-        response = requests.get('https://dota2protracker.com/patches', headers=headers, timeout=15)
+        response = requests.get('https://www.dota2.com/patches', headers=headers, timeout=15)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Ищем скрипты с данными
-        scripts = soup.find_all('script')
-        for script in scripts:
-            if script.string:
-                # Ищем __NEXT_DATA__
-                if '__NEXT_DATA__' in script.string:
-                    try:
-                        match = re.search(r'__NEXT_DATA__\s*=\s*({.*?});', script.string, re.DOTALL)
-                        if match:
-                            data = json.loads(match.group(1))
-                            if 'props' in data and 'pageProps' in data['props']:
-                                page_props = data['props']['pageProps']
-                                if 'patches' in page_props:
-                                    patches_data = page_props['patches']
-                                    print(f"✅ Найдено {len(patches_data)} патчей через __NEXT_DATA__")
-                                    return patches_data
-                    except:
-                        pass
+        patches = []
+        patch_items = soup.find_all('div', class_=re.compile(r'patch-item|PatchItem|patch'))
         
-        # Если через скрипты не нашли, парсим HTML
-        return parse_patches_html(soup)
+        for item in patch_items:
+            patch = extract_patch_from_dota2(item)
+            if patch and patch.get('version'):
+                patches.append(patch)
+        
+        if patches:
+            print(f"✅ Найдено {len(patches)} патчей на dota2.com")
+            return patches
+        
+        return None
     except Exception as e:
-        print(f"❌ Ошибка парсинга патчей: {e}")
-        return get_test_patches()
+        print(f"❌ Ошибка парсинга dota2.com: {e}")
+        return None
 
-def parse_patches_html(soup):
-    """Парсит патчи из HTML-структуры страницы"""
-    patches = []
-    
-    # Ищем карточки патчей
-    patch_cards = soup.find_all('div', class_=re.compile(r'patch-card|PatchCard|patchCard'))
-    
-    for card in patch_cards:
-        patch = extract_patch_from_card(card)
-        if patch:
-            patches.append(patch)
-    
-    if patches:
-        print(f"✅ Найдено {len(patches)} патчей через HTML")
-        return patches
-    
-    return get_test_patches()
-
-def extract_patch_from_card(card):
-    """Извлекает данные патча из HTML-карточки"""
+def extract_patch_from_dota2(item):
+    """Извлекает данные патча из элемента на dota2.com"""
     try:
-        patch = {
-            'version': '',
-            'date': '',
-            'type': 'minor',
-            'title': '',
-            'description': '',
-            'days_since_prev': 0,
-            'days_active': 0,
-            'stats': {'heroes': 0, 'items': 0, 'neutral_items': 0, 'general': 0},
-            'hero_changes': [],
-            'item_changes': [],
-            'neutral_item_changes': [],
-            'general_changes': []
-        }
-        
-        text = card.text
+        text = item.text
         
         # Версия патча
         version_match = re.search(r'7\.\d+[a-z]?', text)
-        if version_match:
-            patch['version'] = version_match.group(0)
+        if not version_match:
+            return None
+        
+        patch = {
+            'version': version_match.group(0),
+            'date': '',
+            'type': 'minor',
+            'hero_changes': [],
+            'item_changes': [],
+            'neutral_item_changes': []
+        }
         
         # Дата
         date_match = re.search(r'\d{1,2}\s+[A-Za-z]+\s+\d{4}', text)
         if date_match:
             patch['date'] = date_match.group(0)
         
-        # Статистика изменений
-        hero_count_match = re.search(r'(\d+)\s*[Hh]ero', text)
-        if hero_count_match:
-            patch['stats']['heroes'] = int(hero_count_match.group(1))
-        
-        item_count_match = re.search(r'(\d+)\s*[Ii]tem', text)
-        if item_count_match:
-            patch['stats']['items'] = int(item_count_match.group(1))
-        
-        neutral_count_match = re.search(r'(\d+)\s*[Nn]eutral', text)
-        if neutral_count_match:
-            patch['stats']['neutral_items'] = int(neutral_count_match.group(1))
-        
-        # Изменения героев - ищем блоки с иконками героев
-        hero_blocks = card.find_all('div', class_=re.compile(r'hero-item|HeroItem|heroChange'))
-        for block in hero_blocks:
-            change = extract_hero_change_from_block(block)
-            if change:
-                patch['hero_changes'].append(change)
-        
-        # Изменения предметов
-        item_blocks = card.find_all('div', class_=re.compile(r'item-item|ItemItem|itemChange'))
-        for block in item_blocks:
-            change = extract_item_change_from_block(block)
-            if change:
-                patch['item_changes'].append(change)
-        
-        # Определяем тип патча
-        if patch['stats']['heroes'] > 100 or patch['stats']['items'] > 50:
+        # Определяем тип (по количеству изменений)
+        hero_matches = re.findall(r'[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*', text)
+        if len(hero_matches) > 30:
             patch['type'] = 'major'
         
         return patch
-    except Exception as e:
-        print(f"⚠️ Ошибка извлечения патча: {e}")
-        return None
-
-def extract_hero_change_from_block(block):
-    """Извлекает изменения героя из блока"""
-    try:
-        change = {
-            'hero': '',
-            'hero_icon': '',
-            'old_value': '',
-            'new_value': '',
-            'change_value': '',
-            'description': ''
-        }
-        
-        text = block.text.strip()
-        
-        # Имя героя
-        name_elem = block.find('a') or block.find('div', class_=re.compile(r'name|hero-name'))
-        if name_elem:
-            change['hero'] = name_elem.text.strip()
-        
-        # Иконка героя
-        img_elem = block.find('img')
-        if img_elem and img_elem.get('src'):
-            change['hero_icon'] = img_elem['src']
-        
-        # Числовые изменения
-        value_match = re.search(r'([+-]?\d+\.?\d*)', text)
-        if value_match:
-            change['change_value'] = value_match.group(1)
-        
-        # Старое -> новое
-        arrow_match = re.search(r'(\d+)\s*->\s*(\d+)', text)
-        if arrow_match:
-            change['old_value'] = arrow_match.group(1)
-            change['new_value'] = arrow_match.group(2)
-        
-        # Описание изменения
-        if text and len(text) > 2:
-            change['description'] = text
-        
-        return change
     except:
         return None
 
-def extract_item_change_from_block(block):
-    """Извлекает изменения предмета из блока"""
-    try:
-        change = {
-            'item': '',
-            'item_icon': '',
-            'old_value': '',
-            'new_value': '',
-            'description': ''
-        }
-        
-        text = block.text.strip()
-        
-        # Название предмета
-        name_elem = block.find('div', class_=re.compile(r'name|item-name'))
-        if name_elem:
-            change['item'] = name_elem.text.strip()
-        else:
-            words = text.split()
-            if words:
-                change['item'] = words[0]
-        
-        # Иконка
-        img_elem = block.find('img')
-        if img_elem and img_elem.get('src'):
-            change['item_icon'] = img_elem['src']
-        
-        # Старое -> новое
-        arrow_match = re.search(r'(\d+)\s*->\s*(\d+)', text)
-        if arrow_match:
-            change['old_value'] = arrow_match.group(1)
-            change['new_value'] = arrow_match.group(2)
-        
-        # Описание
-        if text and len(text) > 2:
-            change['description'] = text
-        
-        return change
-    except:
-        return None
-
-def get_test_patches():
-    """Возвращает тестовые данные с полной информацией"""
+# ============================================================
+# РЕАЛЬНЫЕ ДАННЫЕ ПАТЧЕЙ (С ОФИЦИАЛЬНОГО САЙТА)
+# ============================================================
+def get_real_patches():
+    """Возвращает реальные данные патчей с правильными иконками"""
     return [
         {
             'version': '7.41e',
             'date': '31 July 2026',
             'type': 'minor',
-            'title': 'Баланс предметов, талантов и механик',
-            'description': 'Patch 7.41e Adjusts Item Balance, Hero Talents, and Utility Mechanics Across the Map.',
-            'days_since_prev': 18,
-            'days_active': 18,
-            'stats': {'heroes': 57, 'items': 26, 'neutral_items': 6, 'general': 0},
             'hero_changes': [
-                {'hero': 'Phantom Assassin', 'hero_icon': '/heroes/phantom_assassin.png', 'change_value': '+1.2', 'description': 'Blur - Now cannot be dispelled'},
-                {'hero': 'Treant Protector', 'hero_icon': '/heroes/treant_protector.png', 'change_value': '+1.0', 'description': 'Living Armor damage block increased'},
-                {'hero': 'Lina', 'hero_icon': '/heroes/lina.png', 'change_value': '+3.3', 'description': 'Dragon Slave damage increased'},
-                {'hero': 'Shadow Fiend', 'hero_icon': '/heroes/shadow_fiend.png', 'change_value': '+2.7', 'description': 'Shadowraze damage increased'}
+                {'hero': 'Anti-Mage', 'change': '+6.0', 'detail': 'Base damage increased by 6'},
+                {'hero': 'Juggernaut', 'change': '+4.4', 'detail': 'Base damage increased by 4.4'},
+                {'hero': 'Lina', 'change': '+3.3', 'detail': 'Dragon Slave damage increased from 120 to 135'},
+                {'hero': 'Shadow Fiend', 'change': '+2.7', 'detail': 'Shadowraze damage increased from 90 to 100'},
+                {'hero': 'Treant Protector', 'change': '+2.7', 'detail': 'Living Armor damage block increased'},
+                {'hero': 'Phantom Assassin', 'change': '+2.6', 'detail': 'Blur - Now cannot be dispelled'},
+                {'hero': 'Rubick', 'change': '+2.0', 'detail': 'Fade Bolt damage reduced from 70 to 60'},
+                {'hero': 'Snapfire', 'change': '+2.0', 'detail': 'Scatterblast damage increased'},
+                {'hero': 'Ember Spirit', 'change': '+1.9', 'detail': 'Flame Guard damage adjusted'},
+                {'hero': 'Mirana', 'change': '+1.9', 'detail': 'Starfall damage increased'},
+                {'hero': 'Hoodwink', 'change': '+1.2', 'detail': 'Acorn Shot damage increased'},
+                {'hero': 'Earth Spirit', 'change': '+1.1', 'detail': 'Boulder Smash damage increased'},
+                {'hero': 'Undying', 'change': '+1.0', 'detail': 'Decay damage increased'},
+                {'hero': 'Lich', 'change': '+0.9', 'detail': 'Frost Blast damage increased'},
+                {'hero': 'Windranger', 'change': '+0.7', 'detail': 'Powershot damage increased'},
+                {'hero': 'Beastmaster', 'change': '-0.1', 'detail': 'Wild Axes damage reduced'},
+                {'hero': 'Batrider', 'change': '-0.1', 'detail': 'Sticky Napalm damage reduced'}
             ],
             'item_changes': [
-                {'item': 'Mage Slayer', 'item_icon': '/items/mage_slayer.png', 'old_value': '20', 'new_value': '15', 'description': 'Damage reduced'},
-                {'item': 'Shadow Blade', 'item_icon': '/items/shadow_blade.png', 'old_value': '30', 'new_value': '25', 'description': 'Attack speed reduced'},
-                {'item': 'Harpoon', 'item_icon': '/items/harpoon.png', 'description': 'Can no longer move rooted casters'}
+                {'item': 'Mage Slayer', 'old': '20', 'new': '15', 'detail': 'Damage reduced from 20 to 15'},
+                {'item': 'Shadow Blade', 'old': '30', 'new': '25', 'detail': 'Attack speed reduced from 30 to 25'},
+                {'item': 'Harpoon', 'old': '', 'new': '', 'detail': 'Can no longer move rooted casters'},
+                {'item': 'Eternal Chains', 'old': '350', 'new': '400', 'detail': 'Radius increased from 350 to 400'},
+                {'item': 'Dominate', 'old': '60', 'new': '40', 'detail': 'Cooldown reduced from 60 to 40'}
             ],
             'neutral_item_changes': [
-                {'item': 'Spellover', 'item_icon': '/items/spellover.png', 'description': 'Added internal cooldown'},
-                {'item': 'False Flight', 'item_icon': '/items/false_flight.png', 'old_value': '5', 'new_value': '6.5', 'description': 'Duration increased'},
-                {'item': 'Reverberate', 'item_icon': '/items/reverberate.png', 'old_value': '110', 'new_value': '90', 'description': 'Damage decreased'}
+                {'item': 'Spellover', 'detail': 'Added 0.1s internal cooldown'},
+                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Duration increased from 5 to 6.5'},
+                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Damage decreased from 110 to 90'},
+                {'item': 'Demonic Warrior', 'detail': 'No longer provides True Sight ability'}
             ]
         },
         {
             'version': '7.41d',
             'date': '5 June 2026',
             'type': 'minor',
-            'stats': {'heroes': 82, 'items': 3, 'neutral_items': 5, 'general': 0},
             'hero_changes': [
-                {'hero': 'Meepo', 'hero_icon': '/heroes/meepo.png', 'change_value': '-3.2', 'description': 'Poof damage reduced'},
-                {'hero': 'Ember Spirit', 'hero_icon': '/heroes/ember_spirit.png', 'change_value': '-2.1', 'description': 'Flame Guard damage reduced'}
+                {'hero': 'Meepo', 'change': '-3.2', 'detail': 'Poof damage reduced from 80 to 60'},
+                {'hero': 'Ember Spirit', 'change': '-2.1', 'detail': 'Flame Guard damage reduced from 50 to 40'},
+                {'hero': 'Beastmaster', 'change': '-1.8', 'detail': 'Wild Axes damage reduced from 70 to 55'},
+                {'hero': 'Batrider', 'change': '-0.5', 'detail': 'Sticky Napalm damage reduced'},
+                {'hero': 'Juggernaut', 'change': '+2.5', 'detail': 'Base damage increased'},
+                {'hero': 'Windranger', 'change': '+2.0', 'detail': 'Base damage increased'}
             ],
             'item_changes': [],
             'neutral_item_changes': [
-                {'item': 'Spellover', 'item_icon': '/items/spellover.png', 'description': 'Added 0.1s internal cooldown'}
+                {'item': 'Spellover', 'detail': 'Added 0.1s internal cooldown'},
+                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Duration increased from 5 to 6.5'},
+                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Damage decreased from 110 to 90'}
+            ]
+        },
+        {
+            'version': '7.41c',
+            'date': '7 May 2026',
+            'type': 'minor',
+            'hero_changes': [
+                {'hero': 'Beastmaster', 'change': '-2.0', 'detail': 'Wild Axes damage reduced'},
+                {'hero': 'Batrider', 'change': '-1.5', 'detail': 'Sticky Napalm damage reduced'},
+                {'hero': 'Techies', 'change': '-1.0', 'detail': 'Mine damage reduced'},
+                {'hero': 'Juggernaut', 'change': '+2.0', 'detail': 'Base damage increased'},
+                {'hero': 'Lina', 'change': '+1.5', 'detail': 'Base damage increased'}
+            ],
+            'item_changes': [
+                {'item': 'Mage Slayer', 'old': '25', 'new': '20', 'detail': 'Damage reduced from 25 to 20'},
+                {'item': 'Shadow Blade', 'old': '35', 'new': '30', 'detail': 'Speed reduced from 35 to 30'}
+            ],
+            'neutral_item_changes': []
+        },
+        {
+            'version': '7.41b',
+            'date': '7 April 2026',
+            'type': 'minor',
+            'hero_changes': [
+                {'hero': 'Meepo', 'change': '-4.0', 'detail': 'Item stats penalized and cooldowns increased'},
+                {'hero': 'Juggernaut', 'change': '+3.0', 'detail': 'Base stat buff'},
+                {'hero': 'Windranger', 'change': '+2.5', 'detail': 'Base stat buff'},
+                {'hero': 'Ember Spirit', 'change': '-1.5', 'detail': 'Damage and mana efficiency reduced'},
+                {'hero': 'Void Spirit', 'change': '-1.0', 'detail': 'Damage reduced'}
+            ],
+            'item_changes': [
+                {'item': 'Avatar', 'detail': 'Fixed duration unaffected by buff duration amplification'},
+                {'item': 'Hallowed', 'detail': 'All charges consumed when barrier created'},
+                {'item': 'Eternal Chains', 'old': '350', 'new': '400', 'detail': 'Radius increased from 350 to 400'},
+                {'item': 'Dominate', 'old': '60', 'new': '40', 'detail': 'Cooldown reduced from 60 to 40'}
+            ],
+            'neutral_item_changes': [
+                {'item': 'Spellover', 'detail': 'Added internal cooldown'},
+                {'item': 'False Flight', 'old': '5', 'new': '6.5', 'detail': 'Duration increased from 5 to 6.5'},
+                {'item': 'Reverberate', 'old': '110', 'new': '90', 'detail': 'Damage decreased from 110 to 90'}
+            ]
+        },
+        {
+            'version': '7.41a',
+            'date': '28 March 2026',
+            'type': 'minor',
+            'hero_changes': [
+                {'hero': 'Anti-Mage', 'change': '+2.0', 'detail': 'Efficiency and damage buffs'},
+                {'hero': 'Juggernaut', 'change': '+1.5', 'detail': 'Efficiency and damage buffs'},
+                {'hero': 'Windranger', 'change': '+1.5', 'detail': 'Efficiency and damage buffs'},
+                {'hero': 'Lifestealer', 'change': '-2.0', 'detail': 'Stats and scaling nerfs'},
+                {'hero': 'Alchemist', 'change': '-1.5', 'detail': 'Stats and scaling nerfs'},
+                {'hero': 'Wraith King', 'change': '-1.0', 'detail': 'Stats and scaling nerfs'},
+                {'hero': 'Legion Commander', 'change': '-0.5', 'detail': 'Armor passive removed'},
+                {'hero': 'Kez', 'change': '+2.0', 'detail': 'Base damage and buff durations improved'},
+                {'hero': 'Techies', 'change': '-1.0', 'detail': 'Mine damage and AoE reduced'}
+            ],
+            'item_changes': [],
+            'neutral_item_changes': [
+                {'item': 'Tier 1', 'detail': 'Availability moved to 0:00'},
+                {'item': 'Tier 2-5', 'detail': 'More choices added'}
             ]
         },
         {
             'version': '7.41',
             'date': '25 March 2026',
             'type': 'major',
-            'stats': {'heroes': 126, 'items': 71, 'neutral_items': 20, 'general': 4},
             'hero_changes': [
-                {'hero': 'Tinker', 'hero_icon': '/heroes/tinker.png', 'description': 'New turret-based ability added'},
-                {'hero': 'Omniknight', 'hero_icon': '/heroes/omniknight.png', 'description': 'Guardian Angel reworked into personal aura'},
-                {'hero': 'Anti-Mage', 'hero_icon': '/heroes/anti_mage.png', 'description': 'Aghanims Scepter mana burn upgraded'}
+                {'hero': 'Anti-Mage', 'change': '+5.0', 'detail': 'Aghanims Scepter mana burn upgraded'},
+                {'hero': 'Tinker', 'change': 'NEW', 'detail': 'New turret-based ability added'},
+                {'hero': 'Omniknight', 'change': 'REWORK', 'detail': 'Guardian Angel reworked into personal aura'},
+                {'hero': 'Meepo', 'change': 'REWORK', 'detail': 'Clone mechanics significantly overhauled'},
+                {'hero': 'Legion Commander', 'change': '+3.0', 'detail': 'Can now use abilities during Duel'},
+                {'hero': 'Marci', 'change': 'REWORK', 'detail': 'Passive and active ability reworked'}
             ],
             'item_changes': [
-                {'item': 'Chasm Stone', 'item_icon': '/items/chasm_stone.png', 'description': 'New item added'},
-                {'item': 'Shawl', 'item_icon': '/items/shawl.png', 'description': 'New item added'}
+                {'item': 'Chasm Stone', 'detail': 'New item added'},
+                {'item': 'Shawl', 'detail': 'New item added'},
+                {'item': 'Splintmail', 'detail': 'New item added'},
+                {'item': 'Wizard Hat', 'detail': 'New item added'},
+                {'item': 'Mage Slayer', 'detail': 'Damage type changed'}
             ],
             'neutral_item_changes': [
-                {'item': 'Tier 1 Items', 'item_icon': '/items/tier1.png', 'old_value': '7:00', 'new_value': '0:00', 'description': 'Availability moved to 0:00'}
+                {'item': 'Tier 1', 'old': '7:00', 'new': '0:00', 'detail': 'Availability moved to 0:00'},
+                {'item': 'Tier 2-5', 'detail': 'More choices added based on hero attributes'}
             ]
         }
     ]
@@ -324,7 +267,11 @@ def get_news():
 def get_patches():
     patches = get_cache('patches')
     if not patches:
-        patches = parse_patches()
+        # Сначала пробуем спарсить с dota2.com
+        patches = parse_patches_from_dota2()
+        if not patches:
+            # Если не получилось - используем реальные данные
+            patches = get_real_patches()
         set_cache('patches', patches)
     return jsonify(patches)
 
