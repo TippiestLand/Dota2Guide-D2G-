@@ -1,24 +1,10 @@
 services:
-  # Python (Flask) сервер
   - type: web
     name: dota2-guide
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: PATCHES_API_URL
-        value: http://localhost:5001
       - key: PORT
         value: 8000
-    plan: free
-
-  # Node.js сервер для патчей
-  - type: web
-    name: dota2-patches
-    runtime: node
-    buildCommand: npm install
-    startCommand: node patches-server.js
-    envVars:
-      - key: PORT
-        value: 5001
     plan: free
