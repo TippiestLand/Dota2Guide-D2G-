@@ -1,9 +1,6 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* ============================================================
+   ROOT — ПЕРЕМЕННЫЕ
+   ============================================================ */
 :root {
     --gold: #f0b90b;
     --gold-glow: #f0b90b80;
@@ -14,6 +11,15 @@
     --agility: #5ae55a;
     --intelligence: #5a5ae5;
     --universal: #f0b90b;
+}
+
+/* ============================================================
+   RESET — СБРОС
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 html {
@@ -29,7 +35,9 @@ body {
     cursor: none;
 }
 
-/* ===== ФОН ===== */
+/* ============================================================
+   BACKGROUND — ФОН
+   ============================================================ */
 .stars {
     position: fixed;
     top: 0;
@@ -123,17 +131,14 @@ body {
     opacity: 0.2;
     background: radial-gradient(ellipse at 50% 50%, rgba(229, 90, 90, 0.15) 0%, transparent 70%);
 }
-
 .attribute-glow.agility {
     opacity: 0.2;
     background: radial-gradient(ellipse at 50% 50%, rgba(90, 229, 90, 0.15) 0%, transparent 70%);
 }
-
 .attribute-glow.intelligence {
     opacity: 0.2;
     background: radial-gradient(ellipse at 50% 50%, rgba(90, 90, 229, 0.15) 0%, transparent 70%);
 }
-
 .attribute-glow.universal {
     opacity: 0.2;
     background: radial-gradient(ellipse at 30% 40%, rgba(229, 90, 90, 0.15) 0%, transparent 40%),
@@ -141,7 +146,9 @@ body {
         radial-gradient(ellipse at 50% 70%, rgba(90, 90, 229, 0.15) 0%, transparent 40%);
 }
 
-/* ===== ШАПКА ===== */
+/* ============================================================
+   HEADER — ШАПКА
+   ============================================================ */
 header {
     position: fixed;
     top: 0;
@@ -187,7 +194,8 @@ nav a {
     font-size: 0.95rem;
 }
 
-nav a:hover, nav a.active {
+nav a:hover,
+nav a.active {
     color: var(--gold);
     text-shadow: 0 0 15px var(--gold-glow);
 }
@@ -204,11 +212,14 @@ nav a::after {
     box-shadow: 0 0 10px var(--gold-glow);
 }
 
-nav a:hover::after, nav a.active::after {
+nav a:hover::after,
+nav a.active::after {
     width: 100%;
 }
 
-/* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+/* ============================================================
+   MAIN — ОСНОВНОЙ КОНТЕНТ
+   ============================================================ */
 main {
     margin-top: 80px;
     position: relative;
@@ -229,7 +240,9 @@ main {
     100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== ГЛАВНАЯ ===== */
+/* ============================================================
+   HERO — ГЛАВНАЯ
+   ============================================================ */
 .hero {
     min-height: 80vh;
     display: flex;
@@ -317,7 +330,9 @@ main {
     transform: translateY(-3px);
 }
 
-/* ===== СЕКЦИИ ===== */
+/* ============================================================
+   SECTIONS — СЕКЦИИ
+   ============================================================ */
 section {
     padding: 60px 5%;
     max-width: 1400px;
@@ -342,6 +357,9 @@ section {
     text-shadow: 0 0 30px var(--gold-glow);
 }
 
+/* ============================================================
+   GRID — КАРТОЧКИ
+   ============================================================ */
 .grid-3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -408,7 +426,9 @@ section {
     border: 1px solid rgba(240, 185, 11, 0.2);
 }
 
-/* ===== ГЕРОИ ===== */
+/* ============================================================
+   HEROES — ГЕРОИ (СТРАНИЦА)
+   ============================================================ */
 .hero-controls {
     display: flex;
     flex-wrap: wrap;
@@ -572,15 +592,12 @@ section {
 .hero-item.strength:hover {
     box-shadow: 0 0 40px rgba(229, 90, 90, 0.25);
 }
-
 .hero-item.agility:hover {
     box-shadow: 0 0 40px rgba(90, 229, 90, 0.25);
 }
-
 .hero-item.intelligence:hover {
     box-shadow: 0 0 40px rgba(90, 90, 229, 0.25);
 }
-
 .hero-item.universal:hover {
     box-shadow: 0 0 40px rgba(240, 185, 11, 0.25);
 }
@@ -598,7 +615,6 @@ section {
     transform: scale(0.9);
     animation: heroAppear 0.4s forwards;
 }
-
 .hero-item:nth-child(1) { animation-delay: 0.02s; }
 .hero-item:nth-child(2) { animation-delay: 0.04s; }
 .hero-item:nth-child(3) { animation-delay: 0.06s; }
@@ -635,7 +651,9 @@ section {
     100% { opacity: 1; transform: scale(1); }
 }
 
-/* ===== ПРЕДМЕТЫ ===== */
+/* ============================================================
+   ITEMS — ПРЕДМЕТЫ
+   ============================================================ */
 .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -676,7 +694,9 @@ section {
     margin-bottom: 10px;
 }
 
-/* ===== ГАЙДЫ ===== */
+/* ============================================================
+   GUIDES — ГАЙДЫ
+   ============================================================ */
 .guides-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -711,50 +731,9 @@ section {
     margin-bottom: 15px;
 }
 
-/* ===== ВКЛАДКИ НОВОСТЕЙ / ПАТЧЕЙ ===== */
-.news-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin: 20px 0 30px;
-}
-
-.tab-btn {
-    padding: 12px 32px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.03);
-    color: #8888a0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: none;
-    transition: all 0.3s;
-    font-family: 'Inter', sans-serif;
-}
-
-.tab-btn:hover {
-    color: #fff;
-    border-color: rgba(240, 185, 11, 0.3);
-    background: rgba(240, 185, 11, 0.05);
-}
-
-.tab-btn.active {
-    background: rgba(240, 185, 11, 0.15);
-    border-color: var(--gold);
-    color: var(--gold);
-    box-shadow: 0 0 30px rgba(240, 185, 11, 0.05);
-}
-
-.tab-content {
-    display: none;
-    animation: fadePage 0.4s;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* ===== НОВОСТИ ===== */
+/* ============================================================
+   NEWS — НОВОСТИ
+   ============================================================ */
 .news-feed {
     display: flex;
     flex-direction: column;
@@ -931,275 +910,9 @@ section {
     text-shadow: 0 0 20px rgba(240, 185, 11, 0.3);
 }
 
-/* ===== ПАТЧИ ===== */
-.patches-feed {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 15px;
-}
-
-.patch-card {
-    background: rgba(20, 20, 30, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
-    padding: 28px 32px;
-    transition: all 0.3s;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.patch-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(240, 185, 11, 0.15);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-}
-
-.patch-title-main {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-}
-
-.patch-date {
-    font-size: 0.85rem;
-    color: #8888a0;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.patch-section-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 24px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.patch-section-title .patch-count {
-    color: var(--gold);
-    font-weight: 400;
-    margin-left: 6px;
-}
-
-.patch-changes-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.patch-change-item {
-    font-size: 0.9rem;
-    color: #b0b0c0;
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    border-left: 2px solid rgba(240, 185, 11, 0.15);
-    line-height: 1.6;
-}
-
-/* ===== ПАТЧИ — БЛОКИ ===== */
-.patch-items-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 16px;
-}
-
-.patch-item-block {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    border-left: 2px solid rgba(100, 200, 255, 0.1);
-    font-size: 0.9rem;
-    transition: background 0.2s;
-    cursor: default;
-    overflow: hidden;
-    min-height: 48px;
-}
-
-.patch-item-block:hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.patch-item-block .patch-item-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-
-.patch-item-block .patch-item-name {
-    color: #fff;
-    font-weight: 500;
-    white-space: nowrap;
-    flex-shrink: 0;
-    font-size: 0.9rem;
-}
-
-.patch-item-block .patch-item-values {
-    color: #4ecdc4;
-    font-weight: 600;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
-.patch-heroes-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 16px;
-}
-
-.patch-hero-block {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    border-left: 2px solid rgba(240, 185, 11, 0.1);
-    font-size: 0.9rem;
-    transition: background 0.2s;
-    cursor: default;
-    overflow: hidden;
-    min-height: 52px;
-}
-
-.patch-hero-block:hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.patch-hero-block .patch-hero-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 8px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.patch-hero-block .patch-hero-name {
-    color: #fff;
-    font-weight: 500;
-    white-space: nowrap;
-    flex-shrink: 0;
-    font-size: 0.95rem;
-}
-
-/* ===== УБИРАЕМ ТЕКСТ ИЗМЕНЕНИЙ У ГЕРОЕВ ===== */
-.patch-hero-block .patch-hero-change-text {
-    display: none;
-}
-
-.patch-hero-block {
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.patch-hero-block:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(240, 185, 11, 0.2);
-}
-
-/* ===== ТУЛТИПЫ ===== */
-.patch-tooltip {
-    position: fixed;
-    background: rgba(10, 10, 18, 0.95);
-    backdrop-filter: blur(12px);
-    color: #fff;
-    padding: 12px 18px;
-    border-radius: 10px;
-    border: 1px solid rgba(240, 185, 11, 0.2);
-    font-size: 0.85rem;
-    max-width: 340px;
-    pointer-events: none;
-    z-index: 9999;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
-    line-height: 1.6;
-}
-
-.patch-tooltip strong {
-    color: var(--gold);
-    display: block;
-    margin-bottom: 4px;
-}
-
-.patch-tooltip img {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    margin-bottom: 6px;
-    display: block;
-}
-
-/* ===== ТУЛТИПЫ ДЛЯ ГЕРОЕВ (С ИКОНКАМИ) ===== */
-.patch-tooltip.hero-tooltip {
-    max-width: 420px;
-    min-width: 280px;
-    padding: 14px 18px;
-    background: rgba(10, 10, 18, 0.97);
-    border: 1px solid rgba(240, 185, 11, 0.2);
-    border-radius: 12px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(12px);
-}
-
-.patch-tooltip.hero-tooltip strong {
-    font-size: 1rem;
-    color: var(--gold);
-    display: block;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.tooltip-change-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 6px 0;
-    font-size: 0.85rem;
-    color: #c8c8d0;
-    line-height: 1.5;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.tooltip-change-item:last-child {
-    border-bottom: none;
-}
-
-.tooltip-change-item .tooltip-icon {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-    border-radius: 4px;
-    object-fit: cover;
-    margin-top: 1px;
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.tooltip-change-item span {
-    flex: 1;
-    min-width: 0;
-    word-break: break-word;
-}
-
-/* ===== ПОДВАЛ ===== */
+/* ============================================================
+   FOOTER — ПОДВАЛ
+   ============================================================ */
 footer {
     position: relative;
     z-index: 5;
@@ -1215,7 +928,9 @@ footer .gold {
     color: var(--gold);
 }
 
-/* ===== СКРОЛЛ АНИМАЦИЯ ===== */
+/* ============================================================
+   SCROLL — СКРОЛЛ АНИМАЦИЯ
+   ============================================================ */
 .scroll-fade {
     opacity: 0;
     transform: translateY(60px);
@@ -1227,7 +942,9 @@ footer .gold {
     transform: translateY(0);
 }
 
-/* ===== СКРОЛЛБАР ===== */
+/* ============================================================
+   SCROLLBAR — СКРОЛЛБАР
+   ============================================================ */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -1253,7 +970,9 @@ footer .gold {
     scrollbar-color: #f0b90b rgba(10, 10, 15, 0.8);
 }
 
-/* ===== КАСТОМНЫЙ КУРСОР ===== */
+/* ============================================================
+   CURSOR — КАСТОМНЫЙ КУРСОР
+   ============================================================ */
 .custom-cursor {
     position: fixed;
     pointer-events: none;
@@ -1335,7 +1054,9 @@ a, button, input, textarea, select,
     a, button, input, textarea, select { cursor: default !important; }
 }
 
-/* ===== ЧАСТИЦЫ ===== */
+/* ============================================================
+   PARTICLES — ЧАСТИЦЫ
+   ============================================================ */
 .particles {
     position: fixed;
     top: 0;
@@ -1363,7 +1084,9 @@ a, button, input, textarea, select,
     100% { transform: translateY(-10vh) scale(1); opacity: 0; }
 }
 
-/* ===== ЛИНИИ ===== */
+/* ============================================================
+   LINES — ЛИНИИ ПОД ЗАГОЛОВКАМИ
+   ============================================================ */
 h1, h2 {
     position: relative;
 }
@@ -1386,7 +1109,9 @@ h1::before, h2::before {
     50% { opacity: 1; width: 120px; }
 }
 
-/* ===== МОДАЛЬНОЕ ОКНО ГЕРОЯ ===== */
+/* ============================================================
+   MODAL — МОДАЛЬНОЕ ОКНО ГЕРОЯ
+   ============================================================ */
 .hero-modal {
     display: none;
     position: fixed;
@@ -1520,19 +1245,16 @@ h1::before, h2::before {
     border-color: rgba(229, 90, 90, 0.25);
     background: rgba(229, 90, 90, 0.08);
 }
-
 .hero-modal-attribute.agility {
     color: #5ae55a;
     border-color: rgba(90, 229, 90, 0.25);
     background: rgba(90, 229, 90, 0.08);
 }
-
 .hero-modal-attribute.intelligence {
     color: #5a5ae5;
     border-color: rgba(90, 90, 229, 0.25);
     background: rgba(90, 90, 229, 0.08);
 }
-
 .hero-modal-attribute.universal {
     color: #f0b90b;
     border-color: rgba(240, 185, 11, 0.25);
@@ -1815,7 +1537,347 @@ h1::before, h2::before {
     font-weight: 600;
 }
 
-/* ===== АДАПТИВ ===== */
+/* ============================================================
+   TABS — ВКЛАДКИ НОВОСТЕЙ / ПАТЧЕЙ
+   ============================================================ */
+.news-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0 30px;
+}
+
+.tab-btn {
+    padding: 12px 32px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #8888a0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: none;
+    transition: all 0.3s;
+    font-family: 'Inter', sans-serif;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    border-color: rgba(240, 185, 11, 0.3);
+    background: rgba(240, 185, 11, 0.05);
+}
+
+.tab-btn.active {
+    background: rgba(240, 185, 11, 0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 30px rgba(240, 185, 11, 0.05);
+}
+
+.tab-content {
+    display: none;
+    animation: fadePage 0.4s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ============================================================
+   PATCHES — ПАТЧИ (ОСНОВНЫЕ СТИЛИ)
+   ============================================================ */
+.patches-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.patch-card {
+    background: rgba(20, 20, 30, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 28px 32px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.patch-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(240, 185, 11, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.patch-title-main {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.patch-date {
+    font-size: 0.85rem;
+    color: #8888a0;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.patch-section-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.patch-section-title .patch-count {
+    color: var(--gold);
+    font-weight: 400;
+    margin-left: 6px;
+}
+
+.patch-changes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.patch-change-item {
+    font-size: 0.9rem;
+    color: #b0b0c0;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border-left: 2px solid rgba(240, 185, 11, 0.15);
+    line-height: 1.6;
+}
+
+/* ============================================================
+   PATCHES — ITEMS (ПРЕДМЕТЫ)
+   ============================================================ */
+.patch-items-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+}
+
+.patch-item-block {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    border-left: 2px solid rgba(100, 200, 255, 0.1);
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    cursor: default;
+    overflow: hidden;
+    min-height: 44px;
+    width: 100%;
+}
+
+.patch-item-block:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.patch-item-block .patch-item-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 4px;
+    object-fit: cover;
+    object-position: center center;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+.patch-item-block .patch-item-name {
+    color: #fff;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+.patch-item-block .patch-item-values {
+    color: #4ecdc4;
+    font-weight: 600;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   PATCHES — HEROES (ГЕРОИ)
+   ============================================================ */
+.patch-heroes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+}
+
+.patch-hero-block {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    border-left: 2px solid rgba(240, 185, 11, 0.1);
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    cursor: default;
+    overflow: hidden;
+    min-height: 48px;
+    width: 100%;
+}
+
+.patch-hero-block:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* ===== ИКОНКИ ГЕРОЕВ (ПРЯМОУГОЛЬНЫЕ, ВО ВЕСЬ РОСТ) ===== */
+.patch-hero-block .patch-hero-icon {
+    width: 36px;
+    height: 48px;
+    min-width: 36px;
+    min-height: 48px;
+    border-radius: 4px;
+    object-fit: contain;
+    object-position: center center;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    display: block;
+}
+
+.patch-hero-block .patch-hero-name {
+    color: #fff;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+/* ============================================================
+   PATCHES — TOOLTIP (ВСПЛЫВАЮЩИЕ ПОДСКАЗКИ)
+   ============================================================ */
+.patch-tooltip {
+    position: fixed;
+    background: rgba(10, 10, 18, 0.95);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(240, 185, 11, 0.2);
+    font-size: 0.85rem;
+    max-width: 340px;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+    line-height: 1.6;
+}
+
+.patch-tooltip strong {
+    color: var(--gold);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.patch-tooltip img {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ===== ТУЛТИПЫ ДЛЯ ГЕРОЕВ (С ИКОНКАМИ) ===== */
+.patch-tooltip.hero-tooltip {
+    max-width: 420px;
+    min-width: 280px;
+    padding: 14px 18px;
+    background: rgba(10, 10, 18, 0.97);
+    border: 1px solid rgba(240, 185, 11, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(12px);
+}
+
+.patch-tooltip.hero-tooltip strong {
+    font-size: 1rem;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tooltip-change-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    color: #c8c8d0;
+    line-height: 1.5;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.tooltip-change-item:last-child {
+    border-bottom: none;
+}
+
+.tooltip-change-item .tooltip-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-top: 1px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.tooltip-change-item span {
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+}
+
+/* ============================================================
+   PATCHES — УБИРАЕМ ТЕКСТ ИЗМЕНЕНИЙ У ГЕРОЕВ
+   ============================================================ */
+.patch-hero-block .patch-hero-change-text {
+    display: none;
+}
+
+.patch-hero-block {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.patch-hero-block:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(240, 185, 11, 0.2);
+}
+
+/* ============================================================
+   ADAPTIVE — АДАПТИВ
+   ============================================================ */
 @media (max-width: 768px) {
     header {
         flex-wrap: wrap;
@@ -1902,7 +1964,9 @@ h1::before, h2::before {
         font-size: 1.05rem;
     }
 
-    .news-preview, .news-content ul li, .news-content p {
+    .news-preview,
+    .news-content ul li,
+    .news-content p {
         font-size: 0.88rem;
     }
 
@@ -1954,6 +2018,7 @@ h1::before, h2::before {
         cursor: default !important;
     }
 
+    /* Patches Adaptive */
     .patch-card {
         padding: 18px 16px;
     }
@@ -1962,33 +2027,35 @@ h1::before, h2::before {
         font-size: 1.2rem;
     }
 
-    .patch-items-grid, .patch-heroes-grid {
+    .patch-items-grid,
+    .patch-heroes-grid {
         grid-template-columns: 1fr;
         gap: 4px;
     }
 
-    .patch-item-block, .patch-hero-block {
+    .patch-item-block,
+    .patch-hero-block {
         padding: 4px 10px;
         font-size: 0.75rem;
         min-height: 40px;
-    }
-
-    .patch-hero-block .patch-hero-icon {
-        width: 44px;
-        height: 44px;
-    }
-
-    .patch-item-block .patch-item-icon {
-        width: 26px;
-        height: 26px;
     }
 
     .patch-item-block .patch-item-name {
         max-width: 100px;
     }
 
-    .patch-hero-block .patch-hero-name {
-        max-width: 100px;
+    .patch-hero-block .patch-hero-icon {
+        width: 30px;
+        height: 40px;
+        min-width: 30px;
+        min-height: 40px;
+    }
+
+    .patch-item-block .patch-item-icon {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        min-height: 28px;
     }
 }
 
@@ -2020,7 +2087,9 @@ h1::before, h2::before {
         font-size: 0.95rem;
     }
 
-    .news-preview, .news-content ul li, .news-content p {
+    .news-preview,
+    .news-content ul li,
+    .news-content p {
         font-size: 0.82rem;
     }
 
@@ -2054,10 +2123,12 @@ h1::before, h2::before {
         grid-template-columns: 1fr;
     }
 
-    .hero-modal-attribute-item .attr-value, .hero-modal-stat-item-value {
+    .hero-modal-attribute-item .attr-value,
+    .hero-modal-stat-item-value {
         font-size: 0.85rem;
     }
 
+    /* Patches Adaptive */
     .patch-card {
         padding: 14px 12px;
         border-radius: 12px;
@@ -2071,17 +2142,41 @@ h1::before, h2::before {
         max-width: 70px;
     }
 
-    .patch-hero-block .patch-hero-name {
-        max-width: 70px;
+    .patch-hero-block .patch-hero-icon {
+        width: 24px;
+        height: 32px;
+        min-width: 24px;
+        min-height: 32px;
     }
 
-    .patch-hero-block .patch-hero-icon {
-        width: 36px;
-        height: 36px;
+    .patch-hero-block {
+        min-height: 36px;
+        padding: 3px 8px;
+        gap: 6px;
+    }
+
+    .patch-hero-block .patch-hero-name {
+        font-size: 0.75rem;
     }
 
     .patch-item-block .patch-item-icon {
         width: 22px;
         height: 22px;
+        min-width: 22px;
+        min-height: 22px;
+    }
+
+    .patch-item-block {
+        min-height: 32px;
+        padding: 3px 8px;
+        gap: 6px;
+    }
+
+    .patch-item-block .patch-item-name {
+        font-size: 0.75rem;
+    }
+
+    .patch-item-block .patch-item-values {
+        font-size: 0.7rem;
     }
 }
