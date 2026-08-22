@@ -7,8 +7,9 @@
     var ITEM_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/';
     var ABILITY_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/';
 
-    // Карта соответствия имен героев для иконок
+    // ===== РАСШИРЕННЫЙ МАППИНГ ГЕРОЕВ =====
     var HERO_ICON_MAP = {
+        // Стандартные исключения
         'Ancient Apparition': 'ancient_apparition',
         'Anti-Mage': 'antimage',
         'Arc Warden': 'arc_warden',
@@ -57,9 +58,23 @@
         'Void Spirit': 'void_spirit',
         'Winter Wyvern': 'winter_wyvern',
         'Witch Doctor': 'witch_doctor',
-        'Wraith King': 'skeleton_king'
+        'Wraith King': 'skeleton_king',
+        // НОВЫЕ ДОБАВЛЕНИЯ
+        'Zeus': 'zuus',
+        'Underlord': 'abyssal_underlord',
+        'Necrophos': 'necrolyte',
+        'Magnus': 'magnataur',
+        'Doom': 'doom_bringer',
+        'Clockwerk': 'rattletrap',
+        'Timbersaw': 'shredder',
+        'Io': 'wisp',
+        'Windranger': 'windrunner',
+        'Nature\'s Prophet': 'furion',
+        'Lina': 'lina',
+        'Keeper of the Light': 'keeper_of_the_light'
     };
 
+    // ===== РАСШИРЕННЫЙ МАППИНГ ПРЕДМЕТОВ =====
     var ITEM_ICON_MAP = {
         "Shiva's Guard": 'shivas_guard',
         "Heaven's Halberd": 'heavens_halberd',
@@ -67,7 +82,19 @@
         "Forager's Kit": 'foragers_kit',
         "Conjurer's Catalyst": 'conjurers_catalyst',
         "Enchanter's Bauble": 'enchanters_bauble',
-        "Urn of Shadows": 'urn_of_shadows'
+        "Urn of Shadows": 'urn_of_shadows',
+        // НОВЫЕ ДОБАВЛЕНИЯ
+        'Eye of Skadi': 'eye_of_skadi',
+        'Gleipnir': 'gleipnir',
+        'Divine Rapier': 'divine_rapier',
+        'Feverish': 'feverish',
+        'Greedy': 'greedy',
+        'Mage Slayer': 'mage_slayer',
+        'Shadow Blade': 'shadow_blade',
+        'Harpoon': 'harpoon',
+        'Eternal Chains': 'eternal_chains',
+        'Dominate': 'dominate',
+        'Spirit Vessel': 'spirit_vessel'
     };
 
     function getHeroIconName(name) {
@@ -175,7 +202,7 @@
                 html += '    </div>';
             }
 
-            // Изменения героев (только имя, текст в тултипе)
+            // Изменения героев
             if (patch.hero_changes && patch.hero_changes.length > 0) {
                 html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ ГЕРОЕВ <span class="patch-count">' + patch.hero_changes.length + '</span></div>';
                 html += '    <div class="patch-heroes-grid">';
@@ -184,9 +211,8 @@
                     var iconName = getHeroIconName(hero.hero);
                     var iconUrl = ICON_BASE + iconName + '.png';
 
-                    // Собираем все изменения героя
                     var changesText = hero.changes ? hero.changes.join('; ') : '';
-                    
+
                     html += '        <div class="patch-hero-block" data-hero="' + escapeHtml(hero.hero) + '" data-detail="' + escapeHtml(changesText) + '">';
                     html += '            <img src="' + iconUrl + '" alt="' + escapeHtml(hero.hero) + '" class="patch-hero-icon" onerror="this.style.display=\'none\'">';
                     html += '            <span class="patch-hero-name">' + escapeHtml(hero.hero) + '</span>';
@@ -203,49 +229,44 @@
     }
 
     function addTooltips() {
-        // Tooltips для героев (с иконками способностей и талантов)
+        // Tooltips для героев
         var heroBlocks = document.querySelectorAll('.patch-hero-block');
         for (var h = 0; h < heroBlocks.length; h++) {
             (function(el) {
                 el.addEventListener('mouseenter', function(e) {
                     var detail = this.dataset.detail;
                     var hero = this.dataset.hero;
-                    
+
                     if (detail) {
                         var tooltip = document.createElement('div');
                         tooltip.className = 'patch-tooltip hero-tooltip';
-                        
-                        // Парсим изменения на отдельные пункты
+
                         var changes = detail.split('; ');
                         var content = '<strong>' + escapeHtml(hero) + '</strong>';
-                        
+
                         for (var i = 0; i < changes.length; i++) {
                             var change = changes[i].trim();
                             if (!change) continue;
-                            
-                            // Проверяем, является ли изменение талантом
+
                             var isTalent = change.toLowerCase().includes('талант') || change.toLowerCase().includes('talent');
-                            
-                            // Ищем иконку способности
                             var abilityIcon = getAbilityIconName(change);
                             var iconUrl = '';
                             var iconHtml = '';
-                            
+
                             if (isTalent) {
-                                // Для талантов используем иконку древа
                                 iconUrl = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/talent_tree.png';
                                 iconHtml = '<img src="' + iconUrl + '" alt="талант" class="tooltip-icon" onerror="this.style.display=\'none\'">';
                             } else if (abilityIcon) {
                                 iconUrl = ABILITY_ICON_BASE + abilityIcon + '.png';
                                 iconHtml = '<img src="' + iconUrl + '" alt="способность" class="tooltip-icon" onerror="this.style.display=\'none\'">';
                             }
-                            
+
                             content += '<div class="tooltip-change-item">';
                             content += iconHtml;
                             content += '<span>' + escapeHtml(change) + '</span>';
                             content += '</div>';
                         }
-                        
+
                         tooltip.innerHTML = content;
                         tooltip.style.position = 'fixed';
                         tooltip.style.left = (e.clientX + 15) + 'px';
@@ -304,7 +325,7 @@
     function positionTooltip(tooltip, e) {
         var left = e.clientX + 15;
         var top = e.clientY - 15;
-        if (left + 400 > window.innerWidth) left = e.clientX - 400;
+        if (left + 420 > window.innerWidth) left = e.clientX - 420;
         if (left < 10) left = 10;
         if (top + 300 > window.innerHeight) top = e.clientY - 300;
         if (top < 10) top = 10;
