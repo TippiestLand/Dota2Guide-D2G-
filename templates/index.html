@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dota 2 Guide — Путь Героя</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <body>
 
@@ -27,11 +27,11 @@
     </header>
 
     <main id="app">
-        <!-- ===== СТРАНИЦА: ГЛАВНАЯ ===== -->
+        <!-- ===== ГЛАВНАЯ ===== -->
         <section class="page active" id="page-home">
             <div class="hero">
                 <div class="hero-content">
-                    <h1>Стань <br><span class="highlight">Легендой</span> Dota 2</h1>
+                    <h1>Стань <br /><span class="highlight">Легендой</span> Dota 2</h1>
                     <p>Пошаговое руководство для новичков: от выбора героя до победы над древним. Изучай предметы, стратегии и становись сильнее с каждым матчем.</p>
                     <div class="btn-group">
                         <a href="#" data-page="guides" class="btn btn-primary">Начать обучение</a>
@@ -64,26 +64,26 @@
             </section>
         </section>
 
-        <!-- ===== СТРАНИЦА: ГЕРОИ ===== -->
+        <!-- ===== ГЕРОИ ===== -->
         <section class="page" id="page-heroes">
             <div class="heroes-header">
                 <h2 class="section-title"><span>Выберите</span> героя</h2>
             </div>
             <div class="hero-controls">
                 <div class="hero-search">
-                    <input type="text" id="heroSearch" placeholder="Поиск героя...">
+                    <input type="text" id="heroSearch" placeholder="Поиск героя..." />
                 </div>
                 <div class="hero-filters">
-                    <button class="filter-btn" data-filter="strength"><img src="{{ url_for('static', filename='assets/icons/Strength_attribute_symbol.png') }}" alt="Сила" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="agility"><img src="{{ url_for('static', filename='assets/icons/Agility_attribute_symbol.png') }}" alt="Ловкость" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="intelligence"><img src="{{ url_for('static', filename='assets/icons/Intelligence_attribute_symbol.png') }}" alt="Интеллект" class="filter-icon"></button>
-                    <button class="filter-btn" data-filter="universal"><img src="{{ url_for('static', filename='assets/icons/Dota2_Universal_icon_solid_allmode.png') }}" alt="Универсальный" class="filter-icon"></button>
+                    <button class="filter-btn" data-filter="strength"><img src="{{ url_for('static', filename='assets/icons/Strength_attribute_symbol.png') }}" alt="Сила" class="filter-icon" /></button>
+                    <button class="filter-btn" data-filter="agility"><img src="{{ url_for('static', filename='assets/icons/Agility_attribute_symbol.png') }}" alt="Ловкость" class="filter-icon" /></button>
+                    <button class="filter-btn" data-filter="intelligence"><img src="{{ url_for('static', filename='assets/icons/Intelligence_attribute_symbol.png') }}" alt="Интеллект" class="filter-icon" /></button>
+                    <button class="filter-btn" data-filter="universal"><img src="{{ url_for('static', filename='assets/icons/Dota2_Universal_icon_solid_allmode.png') }}" alt="Универсальный" class="filter-icon" /></button>
                 </div>
             </div>
             <div class="hero-grid" id="heroList"></div>
         </section>
 
-        <!-- ===== СТРАНИЦА: ПРЕДМЕТЫ ===== -->
+        <!-- ===== ПРЕДМЕТЫ ===== -->
         <section class="page" id="page-items">
             <h2 class="section-title"><span>Все</span> предметы</h2>
             <div class="items-grid">
@@ -98,15 +98,15 @@
             </div>
         </section>
 
-        <!-- ===== СТРАНИЦА: НОВОСТИ ===== -->
+        <!-- ===== НОВОСТИ + ПАТЧИ ===== -->
         <section class="page" id="page-news">
             <h2 class="section-title"><span>Новости</span> и <span>Патчи</span> Dota 2</h2>
-            
+
             <div class="news-tabs">
-                <button class="tab-btn active" data-tab="news">Новости</button>
-                <button class="tab-btn" data-tab="patches">Патчи</button>
+                <button class="tab-btn active" data-tab="news">📰 Новости</button>
+                <button class="tab-btn" data-tab="patches">🔄 Патчи</button>
             </div>
-            
+
             <div class="tab-content active" id="tab-news">
                 <div class="news-feed" id="newsFeed">
                     <div class="news-loading">
@@ -115,7 +115,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="tab-content" id="tab-patches">
                 <div class="patches-feed" id="patchesFeed">
                     <div class="news-loading">
@@ -126,7 +126,7 @@
             </div>
         </section>
 
-        <!-- ===== СТРАНИЦА: ГАЙДЫ ===== -->
+        <!-- ===== ГАЙДЫ ===== -->
         <section class="page" id="page-guides">
             <h2 class="section-title"><span>Гайды</span> для новичков</h2>
             <div class="guides-grid">
@@ -142,7 +142,7 @@
 
     <footer>
         <p>DOTA GUIDE — твой путь к мастерству. <span class="gold">Сделано с любовью</span> для новичков.</p>
-        <p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p>
+        <p style="margin-top:8px;font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p>
     </footer>
 
     <!-- ===== МОДАЛЬНОЕ ОКНО ГЕРОЯ ===== -->
