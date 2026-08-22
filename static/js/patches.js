@@ -5,7 +5,9 @@
 
     var ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/';
     var ITEM_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/';
+    var ABILITY_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/';
 
+    // Карта соответствия имен героев для иконок
     var HERO_ICON_MAP = {
         'Ancient Apparition': 'ancient_apparition',
         'Anti-Mage': 'antimage',
@@ -71,26 +73,26 @@
     function getHeroIconName(name) {
         if (!name) return 'unknown';
         if (HERO_ICON_MAP[name]) return HERO_ICON_MAP[name];
-        return name.toLowerCase()
-            .replace(/\s+/g, '_')
-            .replace(/'/g, '')
-            .replace(/[^a-z0-9_]/g, '');
+        return name.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '').replace(/[^a-z0-9_]/g, '');
     }
 
     function getItemIconName(name) {
         if (!name) return 'unknown';
         if (ITEM_ICON_MAP[name]) return ITEM_ICON_MAP[name];
-        return name.toLowerCase()
-            .replace(/\s+/g, '_')
-            .replace(/'/g, '')
-            .replace(/[^a-z0-9_]/g, '');
+        return name.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '').replace(/[^a-z0-9_]/g, '');
+    }
+
+    function getAbilityIconName(changeText) {
+        var abilityMatch = changeText.match(/^([A-Z][a-zA-Z\s']+?)(?::|,|\.|\s+—|\s+–)/);
+        if (abilityMatch) {
+            var ability = abilityMatch[1].trim();
+            return ability.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '').replace(/[^a-z0-9_]/g, '');
+        }
+        return null;
     }
 
     function fetchPatches() {
-        if (!patchesFeed) {
-            console.warn('Элемент #patchesFeed не найден');
-            return;
-        }
+        if (!patchesFeed) return;
 
         patchesFeed.innerHTML = '<div class="news-loading"><div class="loader"></div><p>Загрузка патчей...</p></div>';
 
@@ -108,7 +110,7 @@
             })
             .catch(function(error) {
                 console.error('Ошибка загрузки патчей:', error);
-                patchesFeed.innerHTML = '<div class="news-empty"><p>Не удалось загрузить патчи</p><button onclick="fetchPatches()" class="btn btn-secondary" style="margin-top:15px;padding:8px 24px;font-size:.8rem;">Обновить</button></div>';
+                patchesFeed.innerHTML = '<div class="news-empty"><p>Не удалось загрузить патчи</p></div>';
             });
     }
 
@@ -173,7 +175,7 @@
                 html += '    </div>';
             }
 
-            // Изменения героев
+            // Изменения героев (только имя, текст в тултипе)
             if (patch.hero_changes && patch.hero_changes.length > 0) {
                 html += '    <div class="patch-section-title">ИЗМЕНЕНИЯ ГЕРОЕВ <span class="patch-count">' + patch.hero_changes.length + '</span></div>';
                 html += '    <div class="patch-heroes-grid">';
@@ -182,13 +184,12 @@
                     var iconName = getHeroIconName(hero.hero);
                     var iconUrl = ICON_BASE + iconName + '.png';
 
+                    // Собираем все изменения героя
                     var changesText = hero.changes ? hero.changes.join('; ') : '';
-                    var shortChange = changesText.length > 60 ? changesText.substring(0, 60) + '...' : changesText;
-
+                    
                     html += '        <div class="patch-hero-block" data-hero="' + escapeHtml(hero.hero) + '" data-detail="' + escapeHtml(changesText) + '">';
                     html += '            <img src="' + iconUrl + '" alt="' + escapeHtml(hero.hero) + '" class="patch-hero-icon" onerror="this.style.display=\'none\'">';
                     html += '            <span class="patch-hero-name">' + escapeHtml(hero.hero) + '</span>';
-                    html += '            <span class="patch-hero-change-text">' + escapeHtml(shortChange) + '</span>';
                     html += '        </div>';
                 }
                 html += '    </div>';
@@ -202,16 +203,50 @@
     }
 
     function addTooltips() {
+        // Tooltips для героев (с иконками способностей и талантов)
         var heroBlocks = document.querySelectorAll('.patch-hero-block');
         for (var h = 0; h < heroBlocks.length; h++) {
             (function(el) {
                 el.addEventListener('mouseenter', function(e) {
                     var detail = this.dataset.detail;
                     var hero = this.dataset.hero;
-                    if (detail && detail.length > 60) {
+                    
+                    if (detail) {
                         var tooltip = document.createElement('div');
-                        tooltip.className = 'patch-tooltip';
-                        tooltip.innerHTML = '<strong>' + escapeHtml(hero) + '</strong><span>' + escapeHtml(detail) + '</span>';
+                        tooltip.className = 'patch-tooltip hero-tooltip';
+                        
+                        // Парсим изменения на отдельные пункты
+                        var changes = detail.split('; ');
+                        var content = '<strong>' + escapeHtml(hero) + '</strong>';
+                        
+                        for (var i = 0; i < changes.length; i++) {
+                            var change = changes[i].trim();
+                            if (!change) continue;
+                            
+                            // Проверяем, является ли изменение талантом
+                            var isTalent = change.toLowerCase().includes('талант') || change.toLowerCase().includes('talent');
+                            
+                            // Ищем иконку способности
+                            var abilityIcon = getAbilityIconName(change);
+                            var iconUrl = '';
+                            var iconHtml = '';
+                            
+                            if (isTalent) {
+                                // Для талантов используем иконку древа
+                                iconUrl = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/talent_tree.png';
+                                iconHtml = '<img src="' + iconUrl + '" alt="талант" class="tooltip-icon" onerror="this.style.display=\'none\'">';
+                            } else if (abilityIcon) {
+                                iconUrl = ABILITY_ICON_BASE + abilityIcon + '.png';
+                                iconHtml = '<img src="' + iconUrl + '" alt="способность" class="tooltip-icon" onerror="this.style.display=\'none\'">';
+                            }
+                            
+                            content += '<div class="tooltip-change-item">';
+                            content += iconHtml;
+                            content += '<span>' + escapeHtml(change) + '</span>';
+                            content += '</div>';
+                        }
+                        
+                        tooltip.innerHTML = content;
                         tooltip.style.position = 'fixed';
                         tooltip.style.left = (e.clientX + 15) + 'px';
                         tooltip.style.top = (e.clientY - 15) + 'px';
@@ -220,10 +255,12 @@
                         positionTooltip(tooltip, e);
                     }
                 });
+
                 el.addEventListener('mousemove', function(e) {
                     var tooltip = document.getElementById('patch-tooltip-hero');
                     if (tooltip) positionTooltip(tooltip, e);
                 });
+
                 el.addEventListener('mouseleave', function() {
                     var tooltip = document.getElementById('patch-tooltip-hero');
                     if (tooltip) tooltip.remove();
@@ -231,6 +268,7 @@
             })(heroBlocks[h]);
         }
 
+        // Tooltips для предметов
         var itemBlocks = document.querySelectorAll('.patch-item-block');
         for (var it = 0; it < itemBlocks.length; it++) {
             (function(el) {
@@ -249,10 +287,12 @@
                         positionTooltip(tooltip, e);
                     }
                 });
+
                 el.addEventListener('mousemove', function(e) {
                     var tooltip = document.getElementById('patch-tooltip-item');
                     if (tooltip) positionTooltip(tooltip, e);
                 });
+
                 el.addEventListener('mouseleave', function() {
                     var tooltip = document.getElementById('patch-tooltip-item');
                     if (tooltip) tooltip.remove();
@@ -264,9 +304,9 @@
     function positionTooltip(tooltip, e) {
         var left = e.clientX + 15;
         var top = e.clientY - 15;
-        if (left + 360 > window.innerWidth) left = e.clientX - 360;
+        if (left + 400 > window.innerWidth) left = e.clientX - 400;
         if (left < 10) left = 10;
-        if (top + 120 > window.innerHeight) top = e.clientY - 120;
+        if (top + 300 > window.innerHeight) top = e.clientY - 300;
         if (top < 10) top = 10;
         tooltip.style.left = left + 'px';
         tooltip.style.top = top + 'px';
