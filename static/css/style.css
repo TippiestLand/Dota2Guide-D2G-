@@ -11,6 +11,8 @@
     --agility: #5ae55a;
     --intelligence: #5a5ae5;
     --universal: #f0b90b;
+    --green: #4ecdc4;
+    --red: #ff6b6b;
 }
 
 /* ============================================================
@@ -1583,7 +1585,7 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   PATCHES — ПАТЧИ (ОСНОВНЫЕ СТИЛИ)
+   PATCHES — ОСНОВНЫЕ СТИЛИ
    ============================================================ */
 .patches-feed {
     display: flex;
@@ -1644,6 +1646,9 @@ h1::before, h2::before {
     margin-left: 6px;
 }
 
+/* ============================================================
+   PATCHES — ОБЩИЕ ИЗМЕНЕНИЯ
+   ============================================================ */
 .patch-changes-list {
     display: flex;
     flex-direction: column;
@@ -1661,7 +1666,7 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   PATCHES — ITEMS (ПРЕДМЕТЫ)
+   PATCHES — ПРЕДМЕТЫ (СО СТРЕЛКАМИ)
    ============================================================ */
 .patch-items-grid {
     display: grid;
@@ -1711,17 +1716,32 @@ h1::before, h2::before {
     font-size: 0.9rem;
 }
 
-.patch-item-block .patch-item-values {
-    color: #4ecdc4;
-    font-weight: 600;
-    font-size: 0.8rem;
-    white-space: nowrap;
+/* Стрелки изменений для предметов */
+.patch-item-block .patch-item-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     margin-left: auto;
     flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.patch-item-block .patch-item-arrow .arrow-up {
+    color: var(--green);
+}
+
+.patch-item-block .patch-item-arrow .arrow-down {
+    color: var(--red);
+}
+
+.patch-item-block .patch-item-arrow .arrow-count {
+    font-size: 0.7rem;
+    opacity: 0.8;
 }
 
 /* ============================================================
-   PATCHES — HEROES (ГЕРОИ)
+   PATCHES — ГЕРОИ (СО СТРЕЛКАМИ)
    ============================================================ */
 .patch-heroes-grid {
     display: grid;
@@ -1750,18 +1770,27 @@ h1::before, h2::before {
     background: rgba(255, 255, 255, 0.04);
 }
 
-/* ===== ИКОНКИ ГЕРОЕВ (ПРЯМОУГОЛЬНЫЕ, ВО ВЕСЬ РОСТ) ===== */
-.patch-hero-block .patch-hero-icon {
-    width: 36px;
-    height: 48px;
-    min-width: 36px;
-    min-height: 48px;
+/* Прямоугольная ячейка под иконку */
+.patch-hero-block .patch-hero-icon-wrap {
+    width: 40px;
+    height: 52px;
+    min-width: 40px;
+    min-height: 52px;
     border-radius: 4px;
-    object-fit: contain;
-    object-position: center center;
-    flex-shrink: 0;
+    overflow: hidden;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.04);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.patch-hero-block .patch-hero-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
     display: block;
 }
 
@@ -1771,6 +1800,30 @@ h1::before, h2::before {
     white-space: nowrap;
     flex-shrink: 0;
     font-size: 0.9rem;
+}
+
+/* Стрелки изменений для героев */
+.patch-hero-block .patch-hero-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.patch-hero-block .patch-hero-arrow .arrow-up {
+    color: var(--green);
+}
+
+.patch-hero-block .patch-hero-arrow .arrow-down {
+    color: var(--red);
+}
+
+.patch-hero-block .patch-hero-arrow .arrow-count {
+    font-size: 0.7rem;
+    opacity: 0.8;
 }
 
 /* ============================================================
@@ -2044,11 +2097,11 @@ h1::before, h2::before {
         max-width: 100px;
     }
 
-    .patch-hero-block .patch-hero-icon {
-        width: 30px;
-        height: 40px;
-        min-width: 30px;
-        min-height: 40px;
+    .patch-hero-block .patch-hero-icon-wrap {
+        width: 32px;
+        height: 42px;
+        min-width: 32px;
+        min-height: 42px;
     }
 
     .patch-item-block .patch-item-icon {
@@ -2056,6 +2109,11 @@ h1::before, h2::before {
         height: 28px;
         min-width: 28px;
         min-height: 28px;
+    }
+
+    .patch-hero-block .patch-hero-arrow,
+    .patch-item-block .patch-item-arrow {
+        font-size: 0.7rem;
     }
 }
 
@@ -2142,11 +2200,11 @@ h1::before, h2::before {
         max-width: 70px;
     }
 
-    .patch-hero-block .patch-hero-icon {
-        width: 24px;
-        height: 32px;
-        min-width: 24px;
-        min-height: 32px;
+    .patch-hero-block .patch-hero-icon-wrap {
+        width: 26px;
+        height: 34px;
+        min-width: 26px;
+        min-height: 34px;
     }
 
     .patch-hero-block {
@@ -2176,7 +2234,8 @@ h1::before, h2::before {
         font-size: 0.75rem;
     }
 
-    .patch-item-block .patch-item-values {
-        font-size: 0.7rem;
+    .patch-hero-block .patch-hero-arrow,
+    .patch-item-block .patch-item-arrow {
+        font-size: 0.6rem;
     }
 }
