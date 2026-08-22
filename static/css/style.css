@@ -1,15 +1,9 @@
-/* ============================================================
-   БАЗОВЫЙ СБРОС
-   ============================================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* ============================================================
-   ПЕРЕМЕННЫЕ
-   ============================================================ */
 :root {
     --gold: #f0b90b;
     --gold-glow: #f0b90b80;
@@ -39,9 +33,7 @@ body {
     cursor: none;
 }
 
-/* ============================================================
-   ФОНОВЫЕ ЭФФЕКТЫ
-   ============================================================ */
+/* ===== ФОН ===== */
 .stars {
     position: fixed;
     top: 0;
@@ -59,8 +51,7 @@ body {
     width: 2px;
     height: 2px;
     background: transparent;
-    box-shadow:
-        20px 30px #fff, 120px 80px #fff, 250px 150px #fff, 400px 70px #fff,
+    box-shadow: 20px 30px #fff, 120px 80px #fff, 250px 150px #fff, 400px 70px #fff,
         550px 200px #fff, 700px 100px #fff, 900px 250px #fff, 1100px 60px #fff,
         1300px 180px #fff, 1500px 90px #fff, 100px 400px #fff, 300px 500px #fff,
         600px 600px #fff, 800px 450px #fff, 1000px 700px #fff, 1200px 550px #fff,
@@ -79,10 +70,10 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(ellipse at 30% 40%, rgba(100, 50, 150, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 60%, rgba(200, 100, 50, 0.08) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
+    background: radial-gradient(ellipse at 30% 40%, rgba(100, 50, 150, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(200, 100, 50, 0.08) 0%, transparent 50%);
     animation: nebulaMove 30s infinite linear;
 }
 
@@ -115,7 +106,8 @@ body {
 }
 
 @keyframes orbFloat {
-    0%, 100% { transform: translate(0, 0) scale(1); }
+    0%,
+    100% { transform: translate(0, 0) scale(1); }
     33% { transform: translate(100px, -50px) scale(1.1); }
     66% { transform: translate(-50px, 100px) scale(0.9); }
 }
@@ -155,9 +147,7 @@ body {
         radial-gradient(ellipse at 50% 70%, var(--intelligence-glow) 0%, transparent 40%);
 }
 
-/* ============================================================
-   ШАПКА
-   ============================================================ */
+/* ===== ШАПКА ===== */
 header {
     position: fixed;
     top: 0;
@@ -203,7 +193,8 @@ nav a {
     font-size: 0.95rem;
 }
 
-nav a:hover {
+nav a:hover,
+nav a.active {
     color: var(--gold);
     text-shadow: 0 0 15px var(--gold-glow);
 }
@@ -225,13 +216,7 @@ nav a.active::after {
     width: 100%;
 }
 
-nav a.active {
-    color: var(--gold);
-}
-
-/* ============================================================
-   ОСНОВНОЙ КОНТЕНТ
-   ============================================================ */
+/* ===== ОСНОВНОЙ КОНТЕНТ ===== */
 main {
     margin-top: 80px;
     position: relative;
@@ -252,9 +237,7 @@ main {
     100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================================
-   ГЕРОЙ (ГЛАВНАЯ)
-   ============================================================ */
+/* ===== ГЛАВНАЯ ===== */
 .hero {
     min-height: 80vh;
     display: flex;
@@ -342,9 +325,7 @@ main {
     transform: translateY(-3px);
 }
 
-/* ============================================================
-   СЕКЦИИ
-   ============================================================ */
+/* ===== СЕКЦИИ ===== */
 section {
     padding: 60px 5%;
     max-width: 1400px;
@@ -369,16 +350,7 @@ section {
     text-shadow: 0 0 30px var(--gold-glow);
 }
 
-.heroes-subtitle {
-    text-align: center;
-    color: #8888a0;
-    font-size: 0.95rem;
-    margin-bottom: 40px;
-}
-
-/* ============================================================
-   КАРТОЧКИ
-   ============================================================ */
+/* ===== КАРТОЧКИ ===== */
 .grid-3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -388,7 +360,6 @@ section {
 .glass-card {
     background: var(--card-bg);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(240, 185, 11, 0.1);
     border-radius: 24px;
     padding: 35px 25px;
@@ -414,25 +385,6 @@ section {
     transform: translateY(-12px) scale(1.01);
     border-color: var(--gold);
     box-shadow: 0 20px 60px rgba(240, 185, 11, 0.15), 0 0 40px rgba(240, 185, 11, 0.05);
-}
-
-.glass-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                rgba(240, 185, 11, 0.05) 0%,
-                transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.glass-card:hover::before {
-    opacity: 1;
 }
 
 .glass-card .icon {
@@ -465,9 +417,7 @@ section {
     border: 1px solid rgba(240, 185, 11, 0.2);
 }
 
-/* ============================================================
-   ГЕРОИ (СТРАНИЦА)
-   ============================================================ */
+/* ===== ГЕРОИ ===== */
 .hero-controls {
     display: flex;
     flex-wrap: wrap;
@@ -552,18 +502,12 @@ section {
     animation: filterIconPulse 1s ease infinite;
 }
 
-.filter-btn:hover .filter-icon {
-    filter: grayscale(0.5) brightness(0.8);
-}
-
 @keyframes filterIconPulse {
-    0%, 100% { transform: scale(1); }
+    0%,
+    100% { transform: scale(1); }
     50% { transform: scale(1.1); }
 }
 
-/* ============================================================
-   СЕТКА ГЕРОЕВ
-   ============================================================ */
 .hero-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -578,7 +522,7 @@ section {
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     perspective: 800px;
 }
 
@@ -636,26 +580,6 @@ section {
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
-.hero-item::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at var(--shine-x, 50%) var(--shine-y, 50%),
-                rgba(255, 255, 255, 0.1) 0%,
-                transparent 60%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.hero-item:hover::after {
-    opacity: 1;
-}
-
 .hero-item.strength:hover {
     box-shadow: 0 0 40px rgba(229, 90, 90, 0.25), inset 0 0 40px rgba(229, 90, 90, 0.05);
 }
@@ -670,14 +594,6 @@ section {
 
 .hero-item.universal:hover {
     box-shadow: 0 0 40px rgba(240, 185, 11, 0.25), inset 0 0 40px rgba(240, 185, 11, 0.05);
-}
-
-.hero-link {
-    display: block;
-    text-decoration: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 10;
 }
 
 .no-heroes {
@@ -730,9 +646,7 @@ section {
     100% { opacity: 1; transform: scale(1); }
 }
 
-/* ============================================================
-   ПРЕДМЕТЫ
-   ============================================================ */
+/* ===== ПРЕДМЕТЫ ===== */
 .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -773,9 +687,7 @@ section {
     margin-bottom: 10px;
 }
 
-/* ============================================================
-   ГАЙДЫ
-   ============================================================ */
+/* ===== ГАЙДЫ ===== */
 .guides-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -810,9 +722,7 @@ section {
     margin-bottom: 15px;
 }
 
-/* ============================================================
-   НОВОСТИ
-   ============================================================ */
+/* ===== НОВОСТИ ===== */
 .news-feed {
     display: flex;
     flex-direction: column;
@@ -852,7 +762,6 @@ section {
 .news-card-vk {
     background: rgba(20, 20, 30, 0.7);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     padding: 24px 28px;
@@ -942,12 +851,6 @@ section {
     line-height: 1.8;
 }
 
-.news-content br {
-    display: block;
-    content: '';
-    margin: 4px 0;
-}
-
 .news-toggle-btn {
     background: none;
     border: none;
@@ -996,9 +899,7 @@ section {
     text-shadow: 0 0 20px rgba(240, 185, 11, 0.3);
 }
 
-/* ============================================================
-   ПОДВАЛ
-   ============================================================ */
+/* ===== ПОДВАЛ ===== */
 footer {
     position: relative;
     z-index: 5;
@@ -1014,9 +915,7 @@ footer .gold {
     color: var(--gold);
 }
 
-/* ============================================================
-   АНИМАЦИЯ ПРИ СКРОЛЛЕ
-   ============================================================ */
+/* ===== СКРОЛЛ АНИМАЦИЯ ===== */
 .scroll-fade {
     opacity: 0;
     transform: translateY(60px);
@@ -1028,9 +927,7 @@ footer .gold {
     transform: translateY(0);
 }
 
-/* ============================================================
-   СКРОЛЛБАР
-   ============================================================ */
+/* ===== СКРОЛЛБАР ===== */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -1044,7 +941,6 @@ footer .gold {
     background: linear-gradient(180deg, #f0b90b, #d49b0a);
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(240, 185, 11, 0.3);
-    transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -1057,9 +953,7 @@ footer .gold {
     scrollbar-color: #f0b90b rgba(10, 10, 15, 0.8);
 }
 
-/* ============================================================
-   КАСТОМНЫЙ КУРСОР
-   ============================================================ */
+/* ===== КАСТОМНЫЙ КУРСОР ===== */
 .custom-cursor {
     position: fixed;
     pointer-events: none;
@@ -1073,7 +967,6 @@ footer .gold {
     transition: width 0.25s ease, height 0.25s ease, background 0.25s ease, border-color 0.25s ease;
     box-shadow: 0 0 25px rgba(240, 185, 11, 0.2), inset 0 0 25px rgba(240, 185, 11, 0.05);
     backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
 }
 
 .custom-cursor::before {
@@ -1104,7 +997,8 @@ footer .gold {
 }
 
 @keyframes cursorPulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+    0%,
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
     50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
 }
 
@@ -1126,21 +1020,31 @@ footer .gold {
     animation-duration: 1s;
 }
 
-/* ============================================================
-   ОТКЛЮЧЕНИЕ СТАНДАРТНОГО КУРСОРА
-   ============================================================ */
 * {
     cursor: none !important;
 }
 
-a, button, input, textarea, select,
-.hero-item, .glass-card, .item-card, .guide-card, .news-card-vk,
-.filter-btn, .hero-modal-close, .btn, .news-toggle-btn,
-[style*="cursor"], [onclick] {
+a,
+button,
+input,
+textarea,
+select,
+.hero-item,
+.glass-card,
+.item-card,
+.guide-card,
+.news-card-vk,
+.filter-btn,
+.hero-modal-close,
+.btn,
+.news-toggle-btn,
+[style*="cursor"],
+[onclick] {
     cursor: none !important;
 }
 
-input, textarea {
+input,
+textarea {
     cursor: none !important;
 }
 
@@ -1160,14 +1064,16 @@ button {
     * {
         cursor: default !important;
     }
-    a, button, input, textarea, select {
+    a,
+    button,
+    input,
+    textarea,
+    select {
         cursor: default !important;
     }
 }
 
-/* ============================================================
-   ЧАСТИЦЫ
-   ============================================================ */
+/* ===== ЧАСТИЦЫ ===== */
 .particles {
     position: fixed;
     top: 0;
@@ -1205,14 +1111,14 @@ button {
     }
 }
 
-/* ============================================================
-   ЛИНИИ ПОД ЗАГОЛОВКАМИ
-   ============================================================ */
-h1, h2 {
+/* ===== ЛИНИИ ПОД ЗАГОЛОВКАМИ ===== */
+h1,
+h2 {
     position: relative;
 }
 
-h1::before, h2::before {
+h1::before,
+h2::before {
     content: '';
     position: absolute;
     top: -20px;
@@ -1226,13 +1132,12 @@ h1::before, h2::before {
 }
 
 @keyframes line-glow {
-    0%, 100% { opacity: 0.3; width: 60px; }
+    0%,
+    100% { opacity: 0.3; width: 60px; }
     50% { opacity: 1; width: 120px; }
 }
 
-/* ============================================================
-   МОДАЛЬНОЕ ОКНО ГЕРОЯ
-   ============================================================ */
+/* ===== МОДАЛЬНОЕ ОКНО ГЕРОЯ ===== */
 .hero-modal {
     display: none;
     position: fixed;
@@ -1242,7 +1147,6 @@ h1::before, h2::before {
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     z-index: 10000;
     justify-content: center;
     align-items: center;
@@ -1320,7 +1224,6 @@ h1::before, h2::before {
     margin: 0 auto 20px;
 }
 
-/* ===== ВЕРХНЯЯ ЧАСТЬ ===== */
 .hero-modal-header {
     display: flex;
     align-items: center;
@@ -1369,16 +1272,19 @@ h1::before, h2::before {
     border-color: rgba(229, 90, 90, 0.25);
     background: rgba(229, 90, 90, 0.08);
 }
+
 .hero-modal-attribute.agility {
     color: #5ae55a;
     border-color: rgba(90, 229, 90, 0.25);
     background: rgba(90, 229, 90, 0.08);
 }
+
 .hero-modal-attribute.intelligence {
     color: #5a5ae5;
     border-color: rgba(90, 90, 229, 0.25);
     background: rgba(90, 90, 229, 0.08);
 }
+
 .hero-modal-attribute.universal {
     color: #f0b90b;
     border-color: rgba(240, 185, 11, 0.25);
@@ -1397,7 +1303,6 @@ h1::before, h2::before {
     color: var(--gold);
 }
 
-/* ===== ОПИСАНИЕ ===== */
 .hero-modal-description {
     color: #b0b0c0;
     font-size: 0.92rem;
@@ -1415,7 +1320,6 @@ h1::before, h2::before {
     font-weight: 600;
 }
 
-/* ===== ТЕГИ ===== */
 .hero-modal-tags {
     display: flex;
     gap: 12px;
@@ -1437,11 +1341,6 @@ h1::before, h2::before {
     letter-spacing: 0.5px;
 }
 
-.hero-modal-tag .tag-icon {
-    font-size: 0.8rem;
-}
-
-/* ===== СТАТИСТИКА ===== */
 .hero-modal-stats {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -1493,7 +1392,6 @@ h1::before, h2::before {
     margin-top: 1px;
 }
 
-/* ===== АТРИБУТЫ ===== */
 .hero-modal-attributes {
     display: flex;
     justify-content: center;
@@ -1544,7 +1442,6 @@ h1::before, h2::before {
     font-weight: 400;
 }
 
-/* ===== СПОСОБНОСТИ ===== */
 .hero-modal-abilities-title {
     font-family: 'Orbitron', sans-serif;
     font-size: 1rem;
@@ -1610,7 +1507,6 @@ h1::before, h2::before {
     text-overflow: ellipsis;
 }
 
-/* ===== ВСПЛЫВАЮЩАЯ ПОДСКАЗКА ===== */
 .hero-modal-ability-tooltip {
     display: none;
     position: absolute;
@@ -1671,9 +1567,7 @@ h1::before, h2::before {
     font-weight: 600;
 }
 
-/* ============================================================
-   ВКЛАДКИ НОВОСТЕЙ / ПАТЧЕЙ
-   ============================================================ */
+/* ===== ВКЛАДКИ НОВОСТЕЙ / ПАТЧЕЙ ===== */
 .news-tabs {
     display: flex;
     justify-content: center;
@@ -1716,9 +1610,7 @@ h1::before, h2::before {
     display: block;
 }
 
-/* ============================================================
-   ПАТЧИ (НОВЫЙ ДИЗАЙН)
-   ============================================================ */
+/* ===== ПАТЧИ ===== */
 .patches-feed {
     display: flex;
     flex-direction: column;
@@ -1778,7 +1670,6 @@ h1::before, h2::before {
     margin-left: 6px;
 }
 
-/* Общие изменения */
 .patch-changes-list {
     display: flex;
     flex-direction: column;
@@ -1795,7 +1686,6 @@ h1::before, h2::before {
     line-height: 1.6;
 }
 
-/* Герои */
 .patch-hero-changes {
     display: flex;
     flex-wrap: wrap;
@@ -1844,7 +1734,6 @@ h1::before, h2::before {
     text-overflow: ellipsis;
 }
 
-/* Предметы */
 .patch-item-changes {
     display: flex;
     flex-direction: column;
@@ -1888,13 +1777,6 @@ h1::before, h2::before {
     white-space: nowrap;
 }
 
-.patch-item-desc {
-    color: #8888a0;
-    font-size: 0.8rem;
-    margin-left: 4px;
-}
-
-/* Всплывающие подсказки */
 .patch-tooltip {
     position: fixed;
     background: rgba(10, 10, 18, 0.95);
@@ -1909,7 +1791,7 @@ h1::before, h2::before {
     z-index: 9999;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
     line-height: 1.6;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s;
 }
 
 .patch-tooltip strong {
@@ -1918,9 +1800,15 @@ h1::before, h2::before {
     margin-bottom: 4px;
 }
 
-/* ============================================================
-   АДАПТИВ
-   ============================================================ */
+.patch-tooltip img {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ===== АДАПТИВ ===== */
 @media (max-width: 768px) {
     header {
         flex-wrap: wrap;
@@ -2063,11 +1951,11 @@ h1::before, h2::before {
     .custom-cursor {
         display: none !important;
     }
+
     body {
         cursor: default !important;
     }
 
-    /* Патчи адаптив */
     .patch-card {
         padding: 18px 16px;
     }
@@ -2177,7 +2065,6 @@ h1::before, h2::before {
         font-size: 0.85rem;
     }
 
-    /* Патчи адаптив */
     .patch-card {
         padding: 14px 12px;
         border-radius: 12px;

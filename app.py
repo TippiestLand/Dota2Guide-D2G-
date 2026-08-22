@@ -34,10 +34,9 @@ def set_cache(key, value):
     CACHE_TIME[key] = time.time()
 
 # ============================================================
-# ДАННЫЕ ПАТЧА 7.41e (из твоего файла)
+# ДАННЫЕ ПАТЧА 7.41e
 # ============================================================
 def get_patch_741e():
-    """Возвращает структурированные данные патча 7.41e"""
     return {
         'version': '7.41e',
         'date': '31 July 2026',
@@ -175,7 +174,6 @@ def get_news():
 
 @app.route('/api/patches', methods=['GET'])
 def get_patches():
-    """Возвращает список патчей"""
     patches = get_cache('patches')
     if not patches:
         patch_741e = get_patch_741e()

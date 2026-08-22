@@ -6,6 +6,102 @@
     // Базовые URL для иконок
     var ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/';
     var ITEM_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/';
+    var ABILITY_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/';
+
+    // Карта соответствия имен героев для иконок
+    var HERO_ICON_MAP = {
+        'Ancient Apparition': 'ancient_apparition',
+        'Anti-Mage': 'antimage',
+        'Arc Warden': 'arc_warden',
+        'Bounty Hunter': 'bounty_hunter',
+        'Centaur Warrunner': 'centaur',
+        'Chaos Knight': 'chaos_knight',
+        'Crystal Maiden': 'crystal_maiden',
+        'Dark Seer': 'dark_seer',
+        'Dark Willow': 'dark_willow',
+        'Dawnbreaker': 'dawnbreaker',
+        'Death Prophet': 'death_prophet',
+        'Dragon Knight': 'dragon_knight',
+        'Drow Ranger': 'drow_ranger',
+        'Earth Spirit': 'earth_spirit',
+        'Elder Titan': 'elder_titan',
+        'Ember Spirit': 'ember_spirit',
+        'Faceless Void': 'faceless_void',
+        'Grimstroke': 'grimstroke',
+        'Gyrocopter': 'gyrocopter',
+        'Hoodwink': 'hoodwink',
+        'Juggernaut': 'juggernaut',
+        'Keeper of the Light': 'keeper_of_the_light',
+        'Legion Commander': 'legion_commander',
+        'Lifestealer': 'life_stealer',
+        'Lone Druid': 'lone_druid',
+        'Monkey King': 'monkey_king',
+        'Naga Siren': 'naga_siren',
+        "Nature's Prophet": 'furion',
+        'Night Stalker': 'night_stalker',
+        'Ogre Magi': 'ogre_magi',
+        'Omniknight': 'omniknight',
+        'Outworld Destroyer': 'obsidian_destroyer',
+        'Phantom Assassin': 'phantom_assassin',
+        'Phantom Lancer': 'phantom_lancer',
+        'Primal Beast': 'primal_beast',
+        'Queen of Pain': 'queenofpain',
+        'Shadow Fiend': 'nevermore',
+        'Shadow Shaman': 'shadow_shaman',
+        'Skywrath Mage': 'skywrath_mage',
+        'Spirit Breaker': 'spirit_breaker',
+        'Storm Spirit': 'storm_spirit',
+        'Templar Assassin': 'templar_assassin',
+        'Treant Protector': 'treant',
+        'Troll Warlord': 'troll_warlord',
+        'Vengeful Spirit': 'vengefulspirit',
+        'Void Spirit': 'void_spirit',
+        'Winter Wyvern': 'winter_wyvern',
+        'Witch Doctor': 'witch_doctor',
+        'Wraith King': 'skeleton_king'
+    };
+
+    // Карта соответствия имен предметов для иконок
+    var ITEM_ICON_MAP = {
+        "Shiva's Guard": 'shivas_guard',
+        "Heaven's Halberd": 'heavens_halberd',
+        "Crella's Crozier": 'crellas_crozier',
+        "Forager's Kit": 'foragers_kit',
+        "Conjurer's Catalyst": 'conjurers_catalyst',
+        "Enchanter's Bauble": 'enchanters_bauble',
+        "Urn of Shadows": 'urn_of_shadows'
+    };
+
+    function getHeroIconName(heroName) {
+        if (!heroName) return 'unknown';
+        if (HERO_ICON_MAP[heroName]) return HERO_ICON_MAP[heroName];
+        return heroName.toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/'/g, '')
+            .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function getItemIconName(itemName) {
+        if (!itemName) return 'unknown';
+        if (ITEM_ICON_MAP[itemName]) return ITEM_ICON_MAP[itemName];
+        return itemName.toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/'/g, '')
+            .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function getAbilityIconName(changeText) {
+        // Извлекаем название способности из текста изменения
+        var abilityMatch = changeText.match(/^([A-Z][a-zA-Z\s]+?)(?::|,|\.|\s+—|\s+–)/);
+        if (abilityMatch) {
+            var ability = abilityMatch[1].trim();
+            return ability.toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/'/g, '')
+                .replace(/[^a-z0-9_]/g, '');
+        }
+        return null;
+    }
 
     function fetchPatches() {
         if (!patchesFeed) {
@@ -58,7 +154,6 @@
             
             html += '<div class="patch-card" data-id="' + (patch.id || i) + '">';
             
-            // Заголовок
             html += '    <div class="patch-title-main">ЧТО ИЗМЕНИЛОСЬ В ' + escapeHtml(patch.version) + '</div>';
             html += '    <div class="patch-date">' + escapeHtml(patch.date) + ' | ' + (patch.type === 'major' ? 'МАЖОРНЫЙ' : 'МИНОРНЫЙ') + '</div>';
             
@@ -139,41 +234,45 @@
         }
 
         patchesFeed.innerHTML = html;
-
-        // Добавляем всплывающие подсказки
+        
+        // Добавляем всплывающие подсказки с картинками способностей
         addTooltips();
     }
 
-    function getHeroIconName(heroName) {
-        if (!heroName) return 'unknown';
-        return heroName.toLowerCase()
-            .replace(/\s+/g, '_')
-            .replace(/'/g, '')
-            .replace(/[^a-z0-9_]/g, '');
-    }
-
-    function getItemIconName(itemName) {
-        if (!itemName) return 'unknown';
-        return itemName.toLowerCase()
-            .replace(/\s+/g, '_')
-            .replace(/'/g, '')
-            .replace(/[^a-z0-9_]/g, '');
-    }
-
     function addTooltips() {
-        // Подсказки для героев
         var heroChanges = document.querySelectorAll('.patch-hero-change');
         for (var hc = 0; hc < heroChanges.length; hc++) {
             (function(el) {
                 el.addEventListener('mouseenter', function(e) {
                     var detail = this.dataset.detail;
                     var hero = this.dataset.hero;
-                    if (detail && detail.length > 30) {
+                    if (detail) {
                         var tooltip = document.createElement('div');
                         tooltip.className = 'patch-tooltip';
-                        tooltip.innerHTML = '<strong>' + escapeHtml(hero) + '</strong><span>' + escapeHtml(detail) + '</span>';
+                        
+                        var abilityIconHtml = '';
+                        var abilityName = getAbilityIconName(detail);
+                        if (abilityName) {
+                            var abilityIconUrl = ABILITY_ICON_BASE + abilityName + '.png';
+                            abilityIconHtml = '<img src="' + abilityIconUrl + '" alt="' + abilityName + '" style="width:32px;height:32px;border-radius:4px;margin-bottom:6px;display:block;" onerror="this.style.display=\'none\'">';
+                        }
+                        
+                        tooltip.innerHTML = abilityIconHtml + '<strong>' + escapeHtml(hero) + '</strong><span style="color:#b0b0c0;font-size:0.85rem;">' + escapeHtml(detail) + '</span>';
+                        tooltip.style.position = 'fixed';
                         tooltip.style.left = (e.clientX + 15) + 'px';
                         tooltip.style.top = (e.clientY - 15) + 'px';
+                        tooltip.style.background = 'rgba(10,10,18,0.95)';
+                        tooltip.style.color = '#fff';
+                        tooltip.style.padding = '12px 18px';
+                        tooltip.style.borderRadius = '10px';
+                        tooltip.style.border = '1px solid rgba(240,185,11,0.2)';
+                        tooltip.style.fontSize = '0.85rem';
+                        tooltip.style.maxWidth = '340px';
+                        tooltip.style.pointerEvents = 'none';
+                        tooltip.style.zIndex = '9999';
+                        tooltip.style.backdropFilter = 'blur(8px)';
+                        tooltip.style.boxShadow = '0 12px 40px rgba(0,0,0,0.8)';
+                        tooltip.style.lineHeight = '1.6';
                         tooltip.id = 'patch-tooltip-hero';
                         document.body.appendChild(tooltip);
                         positionTooltip(tooltip, e);
@@ -194,7 +293,6 @@
             })(heroChanges[hc]);
         }
 
-        // Подсказки для предметов
         var itemChanges = document.querySelectorAll('.patch-item-change');
         for (var ic = 0; ic < itemChanges.length; ic++) {
             (function(el) {
@@ -204,9 +302,22 @@
                     if (detail && detail.length > 30) {
                         var tooltip = document.createElement('div');
                         tooltip.className = 'patch-tooltip';
-                        tooltip.innerHTML = '<strong>' + escapeHtml(item) + '</strong><span>' + escapeHtml(detail) + '</span>';
+                        tooltip.innerHTML = '<strong>' + escapeHtml(item) + '</strong><span style="color:#b0b0c0;font-size:0.85rem;">' + escapeHtml(detail) + '</span>';
+                        tooltip.style.position = 'fixed';
                         tooltip.style.left = (e.clientX + 15) + 'px';
                         tooltip.style.top = (e.clientY - 15) + 'px';
+                        tooltip.style.background = 'rgba(10,10,18,0.95)';
+                        tooltip.style.color = '#fff';
+                        tooltip.style.padding = '10px 16px';
+                        tooltip.style.borderRadius = '10px';
+                        tooltip.style.border = '1px solid rgba(240,185,11,0.2)';
+                        tooltip.style.fontSize = '0.85rem';
+                        tooltip.style.maxWidth = '320px';
+                        tooltip.style.pointerEvents = 'none';
+                        tooltip.style.zIndex = '9999';
+                        tooltip.style.backdropFilter = 'blur(8px)';
+                        tooltip.style.boxShadow = '0 12px 40px rgba(0,0,0,0.8)';
+                        tooltip.style.lineHeight = '1.5';
                         tooltip.id = 'patch-tooltip-item';
                         document.body.appendChild(tooltip);
                         positionTooltip(tooltip, e);
@@ -232,19 +343,15 @@
         var left = e.clientX + 15;
         var top = e.clientY - 15;
         
-        // Проверяем выход за правый край
-        if (left + 340 > window.innerWidth) {
-            left = e.clientX - 340;
+        if (left + 360 > window.innerWidth) {
+            left = e.clientX - 360;
         }
-        // Проверяем выход за левый край
         if (left < 10) {
             left = 10;
         }
-        // Проверяем выход за нижний край
-        if (top + 100 > window.innerHeight) {
-            top = e.clientY - 100;
+        if (top + 120 > window.innerHeight) {
+            top = e.clientY - 120;
         }
-        // Проверяем выход за верхний край
         if (top < 10) {
             top = 10;
         }
