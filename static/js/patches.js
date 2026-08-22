@@ -9,69 +9,131 @@
 
     // ===== РАСШИРЕННЫЙ МАППИНГ ГЕРОЕВ =====
     var HERO_ICON_MAP = {
-        // Стандартные исключения
+        'Abaddon': 'abaddon',
+        'Alchemist': 'alchemist',
         'Ancient Apparition': 'ancient_apparition',
         'Anti-Mage': 'antimage',
         'Arc Warden': 'arc_warden',
+        'Axe': 'axe',
+        'Bane': 'bane',
+        'Batrider': 'batrider',
+        'Beastmaster': 'beastmaster',
+        'Bloodseeker': 'bloodseeker',
         'Bounty Hunter': 'bounty_hunter',
+        'Brewmaster': 'brewmaster',
+        'Bristleback': 'bristleback',
+        'Broodmother': 'broodmother',
         'Centaur Warrunner': 'centaur',
         'Chaos Knight': 'chaos_knight',
+        'Chen': 'chen',
+        'Clinkz': 'clinkz',
+        'Clockwerk': 'rattletrap',
         'Crystal Maiden': 'crystal_maiden',
         'Dark Seer': 'dark_seer',
         'Dark Willow': 'dark_willow',
         'Dawnbreaker': 'dawnbreaker',
+        'Dazzle': 'dazzle',
         'Death Prophet': 'death_prophet',
+        'Disruptor': 'disruptor',
+        'Doom': 'doom_bringer',
         'Dragon Knight': 'dragon_knight',
         'Drow Ranger': 'drow_ranger',
         'Earth Spirit': 'earth_spirit',
+        'Earthshaker': 'earthshaker',
         'Elder Titan': 'elder_titan',
         'Ember Spirit': 'ember_spirit',
+        'Enchantress': 'enchantress',
+        'Enigma': 'enigma',
         'Faceless Void': 'faceless_void',
         'Grimstroke': 'grimstroke',
         'Gyrocopter': 'gyrocopter',
         'Hoodwink': 'hoodwink',
+        'Huskar': 'huskar',
+        'Invoker': 'invoker',
+        'Io': 'wisp',
+        'Jakiro': 'jakiro',
         'Juggernaut': 'juggernaut',
         'Keeper of the Light': 'keeper_of_the_light',
+        'Kez': 'kez',
+        'Kunkka': 'kunkka',
         'Legion Commander': 'legion_commander',
+        'Leshrac': 'leshrac',
+        'Lich': 'lich',
         'Lifestealer': 'life_stealer',
+        'Lina': 'lina',
+        'Lion': 'lion',
         'Lone Druid': 'lone_druid',
+        'Luna': 'luna',
+        'Lycan': 'lycan',
+        'Magnus': 'magnataur',
+        'Marci': 'marci',
+        'Mars': 'mars',
+        'Medusa': 'medusa',
+        'Meepo': 'meepo',
+        'Mirana': 'mirana',
         'Monkey King': 'monkey_king',
-        'Naga Siren': 'naga_siren',
+        'Morphling': 'morphling',
+        'Muerta': 'muerta',
         "Nature's Prophet": 'furion',
+        'Necrophos': 'necrolyte',
         'Night Stalker': 'night_stalker',
+        'Nyx Assassin': 'nyx_assassin',
         'Ogre Magi': 'ogre_magi',
         'Omniknight': 'omniknight',
+        'Oracle': 'oracle',
         'Outworld Destroyer': 'obsidian_destroyer',
+        'Pangolier': 'pangolier',
         'Phantom Assassin': 'phantom_assassin',
         'Phantom Lancer': 'phantom_lancer',
+        'Phoenix': 'phoenix',
         'Primal Beast': 'primal_beast',
+        'Puck': 'puck',
+        'Pudge': 'pudge',
+        'Pugna': 'pugna',
         'Queen of Pain': 'queenofpain',
+        'Razor': 'razor',
+        'Riki': 'riki',
+        'Ringmaster': 'ringmaster',
+        'Rubick': 'rubick',
+        'Sand King': 'sand_king',
+        'Shadow Demon': 'shadow_demon',
         'Shadow Fiend': 'nevermore',
         'Shadow Shaman': 'shadow_shaman',
+        'Silencer': 'silencer',
         'Skywrath Mage': 'skywrath_mage',
+        'Slardar': 'slardar',
+        'Slark': 'slark',
+        'Snapfire': 'snapfire',
+        'Sniper': 'sniper',
+        'Spectre': 'spectre',
         'Spirit Breaker': 'spirit_breaker',
         'Storm Spirit': 'storm_spirit',
+        'Sven': 'sven',
+        'Techies': 'techies',
         'Templar Assassin': 'templar_assassin',
+        'Terrorblade': 'terrorblade',
+        'Tidehunter': 'tidehunter',
+        'Timbersaw': 'shredder',
+        'Tinker': 'tinker',
+        'Tiny': 'tiny',
         'Treant Protector': 'treant',
         'Troll Warlord': 'troll_warlord',
+        'Tusk': 'tusk',
+        'Underlord': 'abyssal_underlord',
+        'Undying': 'undying',
+        'Ursa': 'ursa',
         'Vengeful Spirit': 'vengefulspirit',
+        'Venomancer': 'venomancer',
+        'Viper': 'viper',
+        'Visage': 'visage',
         'Void Spirit': 'void_spirit',
+        'Warlock': 'warlock',
+        'Weaver': 'weaver',
+        'Windranger': 'windrunner',
         'Winter Wyvern': 'winter_wyvern',
         'Witch Doctor': 'witch_doctor',
         'Wraith King': 'skeleton_king',
-        // НОВЫЕ ДОБАВЛЕНИЯ
-        'Zeus': 'zuus',
-        'Underlord': 'abyssal_underlord',
-        'Necrophos': 'necrolyte',
-        'Magnus': 'magnataur',
-        'Doom': 'doom_bringer',
-        'Clockwerk': 'rattletrap',
-        'Timbersaw': 'shredder',
-        'Io': 'wisp',
-        'Windranger': 'windrunner',
-        'Nature\'s Prophet': 'furion',
-        'Lina': 'lina',
-        'Keeper of the Light': 'keeper_of_the_light'
+        'Zeus': 'zuus'
     };
 
     // ===== РАСШИРЕННЫЙ МАППИНГ ПРЕДМЕТОВ =====
@@ -83,7 +145,6 @@
         "Conjurer's Catalyst": 'conjurers_catalyst',
         "Enchanter's Bauble": 'enchanters_bauble',
         "Urn of Shadows": 'urn_of_shadows',
-        // НОВЫЕ ДОБАВЛЕНИЯ
         'Eye of Skadi': 'eye_of_skadi',
         'Gleipnir': 'gleipnir',
         'Divine Rapier': 'divine_rapier',
@@ -94,7 +155,24 @@
         'Harpoon': 'harpoon',
         'Eternal Chains': 'eternal_chains',
         'Dominate': 'dominate',
-        'Spirit Vessel': 'spirit_vessel'
+        'Spirit Vessel': 'spirit_vessel',
+        'Orb of Frost': 'orb_of_frost',
+        'Orb of Corrosion': 'orb_of_corrosion',
+        'Orb of Venom': 'orb_of_venom',
+        'Refresher Shard': 'refresher_shard',
+        'Smoke of Deceit': 'smoke_of_deceit',
+        'Veil of Discord': 'veil_of_discord',
+        'Essence Distiller': 'essence_distiller',
+        'Kaya and Sange': 'kaya_and_sange',
+        'Yasha and Kaya': 'yasha_and_kaya',
+        'Meteor Hammer': 'meteor_hammer',
+        'Hurricane Pike': 'hurricane_pike',
+        'Satanic': 'satanic',
+        'Abyssal Blade': 'abyssal_blade',
+        'Butterfly': 'butterfly',
+        'Chasm Stone': 'chasm_stone',
+        'Hand of Midas': 'hand_of_midas',
+        'Mask of Madness': 'mask_of_madness'
     };
 
     function getHeroIconName(name) {
@@ -119,9 +197,16 @@
     }
 
     function fetchPatches() {
-        if (!patchesFeed) return;
+        if (!patchesFeed) {
+            console.warn('Элемент #patchesFeed не найден');
+            return;
+        }
 
-        patchesFeed.innerHTML = '<div class="news-loading"><div class="loader"></div><p>Загрузка патчей...</p></div>';
+        patchesFeed.innerHTML = '' +
+            '<div class="news-loading">' +
+            '    <div class="loader"></div>' +
+            '    <p>Загрузка патчей...</p>' +
+            '</div>';
 
         fetch('/api/patches')
             .then(function(response) {
@@ -129,15 +214,27 @@
                 return response.json();
             })
             .then(function(data) {
+                console.log('Получены патчи:', data);
                 if (data && data.length > 0) {
                     renderPatches(data);
                 } else {
-                    patchesFeed.innerHTML = '<div class="news-empty"><p>Патчи не найдены</p></div>';
+                    patchesFeed.innerHTML = '' +
+                        '<div class="news-empty">' +
+                        '    <p>Патчи не найдены</p>' +
+                        '</div>';
                 }
             })
             .catch(function(error) {
                 console.error('Ошибка загрузки патчей:', error);
-                patchesFeed.innerHTML = '<div class="news-empty"><p>Не удалось загрузить патчи</p></div>';
+                patchesFeed.innerHTML = '' +
+                    '<div class="news-empty">' +
+                    '    <p>Не удалось загрузить патчи</p>' +
+                    '    <button onclick="fetchPatches()" ' +
+                    '            class="btn btn-secondary" ' +
+                    '            style="margin-top:15px; padding:8px 24px; font-size:0.8rem;">' +
+                    '        Обновить' +
+                    '    </button>' +
+                    '</div>';
             });
     }
 
@@ -149,6 +246,8 @@
             var patch = patches[i];
 
             html += '<div class="patch-card" data-id="' + (patch.id || i) + '">';
+
+            // Заголовок
             html += '    <div class="patch-title-main">ЧТО ИЗМЕНИЛОСЬ В ' + escapeHtml(patch.version) + '</div>';
             html += '    <div class="patch-date">' + escapeHtml(patch.date) + ' | ' + (patch.type === 'major' ? 'МАЖОРНЫЙ' : 'МИНОРНЫЙ') + '</div>';
 
