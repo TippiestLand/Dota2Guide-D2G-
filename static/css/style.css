@@ -1750,7 +1750,7 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   PATCHES — ГЕРОИ (БОЛЬШАЯ РАМКА ПОД 128×128)
+   PATCHES — ГЕРОИ (ШИРОКИЕ ЯЧЕЙКИ 96×80)
    ============================================================ */
 .patch-heroes-grid {
     display: grid;
@@ -1771,7 +1771,7 @@ h1::before, h2::before {
     transition: background 0.2s;
     cursor: default;
     overflow: hidden;
-    min-height: 80px;
+    min-height: 72px;
     width: 100%;
 }
 
@@ -1780,10 +1780,10 @@ h1::before, h2::before {
 }
 
 .patch-hero-block .patch-hero-icon-wrap {
-    width: 80px;
-    height: 104px;
-    min-width: 80px;
-    min-height: 104px;
+    width: 96px;
+    height: 80px;
+    min-width: 96px;
+    min-height: 80px;
     border-radius: 6px;
     overflow: hidden;
     background: rgba(0, 0, 0, 0.35);
@@ -2108,7 +2108,7 @@ h1::before, h2::before {
     .patch-hero-block {
         padding: 4px 10px;
         font-size: 0.75rem;
-        min-height: 64px;
+        min-height: 60px;
     }
 
     .patch-item-block .patch-item-name {
@@ -2116,10 +2116,10 @@ h1::before, h2::before {
     }
 
     .patch-hero-block .patch-hero-icon-wrap {
-        width: 64px;
-        height: 84px;
-        min-width: 64px;
-        min-height: 84px;
+        width: 76px;
+        height: 64px;
+        min-width: 76px;
+        min-height: 64px;
     }
 
     .patch-hero-block .patch-hero-icon {
@@ -2225,10 +2225,10 @@ h1::before, h2::before {
     }
 
     .patch-hero-block .patch-hero-icon-wrap {
-        width: 52px;
-        height: 68px;
-        min-width: 52px;
-        min-height: 68px;
+        width: 60px;
+        height: 52px;
+        min-width: 60px;
+        min-height: 52px;
     }
 
     .patch-hero-block .patch-hero-icon {
@@ -2238,7 +2238,7 @@ h1::before, h2::before {
     }
 
     .patch-hero-block {
-        min-height: 56px;
+        min-height: 48px;
         padding: 4px 10px;
         gap: 8px;
     }
