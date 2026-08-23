@@ -133,14 +133,17 @@ body {
     opacity: 0.2;
     background: radial-gradient(ellipse at 50% 50%, rgba(229, 90, 90, 0.15) 0%, transparent 70%);
 }
+
 .attribute-glow.agility {
     opacity: 0.2;
     background: radial-gradient(ellipse at 50% 50%, rgba(90, 229, 90, 0.15) 0%, transparent 70%);
 }
+
 .attribute-glow.intelligence {
     opacity: 0.2;
     background: radial-gradient(ellipse at 50% 50%, rgba(90, 90, 229, 0.15) 0%, transparent 70%);
 }
+
 .attribute-glow.universal {
     opacity: 0.2;
     background: radial-gradient(ellipse at 30% 40%, rgba(229, 90, 90, 0.15) 0%, transparent 40%),
@@ -594,12 +597,15 @@ section {
 .hero-item.strength:hover {
     box-shadow: 0 0 40px rgba(229, 90, 90, 0.25);
 }
+
 .hero-item.agility:hover {
     box-shadow: 0 0 40px rgba(90, 229, 90, 0.25);
 }
+
 .hero-item.intelligence:hover {
     box-shadow: 0 0 40px rgba(90, 90, 229, 0.25);
 }
+
 .hero-item.universal:hover {
     box-shadow: 0 0 40px rgba(240, 185, 11, 0.25);
 }
@@ -617,6 +623,7 @@ section {
     transform: scale(0.9);
     animation: heroAppear 0.4s forwards;
 }
+
 .hero-item:nth-child(1) { animation-delay: 0.02s; }
 .hero-item:nth-child(2) { animation-delay: 0.04s; }
 .hero-item:nth-child(3) { animation-delay: 0.06s; }
@@ -1247,16 +1254,19 @@ h1::before, h2::before {
     border-color: rgba(229, 90, 90, 0.25);
     background: rgba(229, 90, 90, 0.08);
 }
+
 .hero-modal-attribute.agility {
     color: #5ae55a;
     border-color: rgba(90, 229, 90, 0.25);
     background: rgba(90, 229, 90, 0.08);
 }
+
 .hero-modal-attribute.intelligence {
     color: #5a5ae5;
     border-color: rgba(90, 90, 229, 0.25);
     background: rgba(90, 90, 229, 0.08);
 }
+
 .hero-modal-attribute.universal {
     color: #f0b90b;
     border-color: rgba(240, 185, 11, 0.25);
@@ -1740,7 +1750,7 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   PATCHES — ГЕРОИ (СО СТРЕЛКАМИ И ПРЯМОУГОЛЬНЫМИ ЯЧЕЙКАМИ)
+   PATCHES — ГЕРОИ (С ДЛИННЫМИ ПРЯМОУГОЛЬНЫМИ РАМКАМИ)
    ============================================================ */
 .patch-heroes-grid {
     display: grid;
@@ -1752,8 +1762,8 @@ h1::before, h2::before {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 10px;
-    padding: 6px 12px;
+    gap: 12px;
+    padding: 6px 14px;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 6px;
     border-left: 2px solid rgba(240, 185, 11, 0.1);
@@ -1761,21 +1771,21 @@ h1::before, h2::before {
     transition: background 0.2s;
     cursor: default;
     overflow: hidden;
-    min-height: 48px;
+    min-height: 64px;
     width: 100%;
 }
 
 .patch-hero-block:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.06);
 }
 
-/* Прямоугольная ячейка с рамкой */
+/* ДЛИННАЯ ПРЯМОУГОЛЬНАЯ ЯЧЕЙКА С РАМКОЙ */
 .patch-hero-block .patch-hero-icon-wrap {
-    width: 44px;
-    height: 58px;
-    min-width: 44px;
-    min-height: 58px;
-    border-radius: 6px;
+    width: 48px;
+    height: 64px;
+    min-width: 48px;
+    min-height: 64px;
+    border-radius: 4px;
     overflow: hidden;
     background: rgba(0, 0, 0, 0.35);
     border: 2px solid rgba(255, 255, 255, 0.08);
@@ -1783,11 +1793,12 @@ h1::before, h2::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .patch-hero-block:hover .patch-hero-icon-wrap {
-    border-color: rgba(240, 185, 11, 0.25);
+    border-color: rgba(240, 185, 11, 0.3);
+    box-shadow: 0 0 20px rgba(240, 185, 11, 0.05);
 }
 
 .patch-hero-block .patch-hero-icon {
@@ -1803,7 +1814,7 @@ h1::before, h2::before {
     font-weight: 500;
     white-space: nowrap;
     flex-shrink: 0;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 .patch-hero-block .patch-hero-arrow {
@@ -1812,7 +1823,7 @@ h1::before, h2::before {
     gap: 4px;
     margin-left: auto;
     flex-shrink: 0;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
 }
 
@@ -1827,6 +1838,23 @@ h1::before, h2::before {
 .patch-hero-block .patch-hero-arrow .arrow-count {
     font-size: 0.7rem;
     opacity: 0.8;
+}
+
+/* ============================================================
+   PATCHES — УБИРАЕМ ТЕКСТ ИЗМЕНЕНИЙ У ГЕРОЕВ
+   ============================================================ */
+.patch-hero-block .patch-hero-change-text {
+    display: none;
+}
+
+.patch-hero-block {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.patch-hero-block:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(240, 185, 11, 0.2);
 }
 
 /* ============================================================
@@ -1912,23 +1940,6 @@ h1::before, h2::before {
     flex: 1;
     min-width: 0;
     word-break: break-word;
-}
-
-/* ============================================================
-   PATCHES — УБИРАЕМ ТЕКСТ ИЗМЕНЕНИЙ У ГЕРОЕВ
-   ============================================================ */
-.patch-hero-block .patch-hero-change-text {
-    display: none;
-}
-
-.patch-hero-block {
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.patch-hero-block:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(240, 185, 11, 0.2);
 }
 
 /* ============================================================
@@ -2093,7 +2104,7 @@ h1::before, h2::before {
     .patch-hero-block {
         padding: 4px 10px;
         font-size: 0.75rem;
-        min-height: 40px;
+        min-height: 52px;
     }
 
     .patch-item-block .patch-item-name {
@@ -2101,10 +2112,10 @@ h1::before, h2::before {
     }
 
     .patch-hero-block .patch-hero-icon-wrap {
-        width: 36px;
-        height: 48px;
-        min-width: 36px;
-        min-height: 48px;
+        width: 40px;
+        height: 54px;
+        min-width: 40px;
+        min-height: 54px;
     }
 
     .patch-item-block .patch-item-icon {
@@ -2204,14 +2215,14 @@ h1::before, h2::before {
     }
 
     .patch-hero-block .patch-hero-icon-wrap {
-        width: 30px;
-        height: 40px;
-        min-width: 30px;
-        min-height: 40px;
+        width: 34px;
+        height: 46px;
+        min-width: 34px;
+        min-height: 46px;
     }
 
     .patch-hero-block {
-        min-height: 36px;
+        min-height: 44px;
         padding: 3px 8px;
         gap: 6px;
     }
