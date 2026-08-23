@@ -1716,7 +1716,6 @@ h1::before, h2::before {
     font-size: 0.9rem;
 }
 
-/* Стрелки изменений для предметов */
 .patch-item-block .patch-item-arrow {
     display: inline-flex;
     align-items: center;
@@ -1741,7 +1740,7 @@ h1::before, h2::before {
 }
 
 /* ============================================================
-   PATCHES — ГЕРОИ (СО СТРЕЛКАМИ)
+   PATCHES — ГЕРОИ (СО СТРЕЛКАМИ И ПРЯМОУГОЛЬНЫМИ ЯЧЕЙКАМИ)
    ============================================================ */
 .patch-heroes-grid {
     display: grid;
@@ -1770,20 +1769,25 @@ h1::before, h2::before {
     background: rgba(255, 255, 255, 0.04);
 }
 
-/* Прямоугольная ячейка под иконку */
+/* Прямоугольная ячейка с рамкой */
 .patch-hero-block .patch-hero-icon-wrap {
-    width: 40px;
-    height: 52px;
-    min-width: 40px;
-    min-height: 52px;
-    border-radius: 4px;
+    width: 44px;
+    height: 58px;
+    min-width: 44px;
+    min-height: 58px;
+    border-radius: 6px;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: border-color 0.2s;
+}
+
+.patch-hero-block:hover .patch-hero-icon-wrap {
+    border-color: rgba(240, 185, 11, 0.25);
 }
 
 .patch-hero-block .patch-hero-icon {
@@ -1802,7 +1806,6 @@ h1::before, h2::before {
     font-size: 0.9rem;
 }
 
-/* Стрелки изменений для героев */
 .patch-hero-block .patch-hero-arrow {
     display: inline-flex;
     align-items: center;
@@ -2098,10 +2101,10 @@ h1::before, h2::before {
     }
 
     .patch-hero-block .patch-hero-icon-wrap {
-        width: 32px;
-        height: 42px;
-        min-width: 32px;
-        min-height: 42px;
+        width: 36px;
+        height: 48px;
+        min-width: 36px;
+        min-height: 48px;
     }
 
     .patch-item-block .patch-item-icon {
@@ -2201,10 +2204,10 @@ h1::before, h2::before {
     }
 
     .patch-hero-block .patch-hero-icon-wrap {
-        width: 26px;
-        height: 34px;
-        min-width: 26px;
-        min-height: 34px;
+        width: 30px;
+        height: 40px;
+        min-width: 30px;
+        min-height: 40px;
     }
 
     .patch-hero-block {

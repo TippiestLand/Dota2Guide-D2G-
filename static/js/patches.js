@@ -7,7 +7,7 @@
     var ITEM_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/';
     var ABILITY_ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/';
 
-    // ===== РАСШИРЕННЫЙ МАППИНГ ГЕРОЕВ =====
+    // ===== МАППИНГ ГЕРОЕВ =====
     var HERO_ICON_MAP = {
         'Ancient Apparition': 'ancient_apparition',
         'Anti-Mage': 'antimage',
@@ -67,12 +67,10 @@
         'Timbersaw': 'shredder',
         'Io': 'wisp',
         'Windranger': 'windrunner',
-        "Nature's Prophet": 'furion',
-        'Lina': 'lina',
-        'Keeper of the Light': 'keeper_of_the_light'
+        'Lina': 'lina'
     };
 
-    // ===== РАСШИРЕННЫЙ МАППИНГ ПРЕДМЕТОВ =====
+    // ===== МАППИНГ ПРЕДМЕТОВ =====
     var ITEM_ICON_MAP = {
         "Shiva's Guard": 'shivas_guard',
         "Heaven's Halberd": 'heavens_halberd',
@@ -113,6 +111,55 @@
             return ability.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '').replace(/[^a-z0-9_]/g, '');
         }
         return null;
+    }
+
+    // ===== ФУНКЦИЯ ПОДСЧЕТА СТРЕЛОК =====
+    function countArrows(text) {
+        var upCount = 0;
+        var downCount = 0;
+        if (!text) return { up: 0, down: 0 };
+        
+        var lower = text.toLowerCase();
+        
+        // Проверяем ключевые слова
+        if (lower.includes('увеличен') || lower.includes('увеличена') || 
+            lower.includes('усилен') || lower.includes('усилена') ||
+            lower.includes('повышен') || lower.includes('повышена') ||
+            lower.includes('больше') || lower.includes('выше')) {
+            upCount++;
+        }
+        if (lower.includes('уменьшен') || lower.includes('уменьшена') || 
+            lower.includes('ослаблен') || lower.includes('ослаблена') ||
+            lower.includes('понижен') || lower.includes('понижена') ||
+            lower.includes('меньше') || lower.includes('ниже')) {
+            downCount++;
+        }
+        
+        // Проверяем числовые изменения (старое → новое)
+        var matches = text.match(/(\d+)\s*→\s*(\d+)/g);
+        if (matches) {
+            for (var i = 0; i < matches.length; i++) {
+                var nums = matches[i].match(/(\d+)/g);
+                if (nums && nums.length >= 2) {
+                    if (parseInt(nums[0]) < parseInt(nums[1])) upCount++;
+                    if (parseInt(nums[0]) > parseInt(nums[1])) downCount++;
+                }
+            }
+        }
+        
+        // Проверяем изменения с "с ... до ..."
+        var fromMatches = text.match(/с\s+(\d+)\s+до\s+(\d+)/gi);
+        if (fromMatches) {
+            for (var j = 0; j < fromMatches.length; j++) {
+                var nums = fromMatches[j].match(/(\d+)/g);
+                if (nums && nums.length >= 2) {
+                    if (parseInt(nums[0]) < parseInt(nums[1])) upCount++;
+                    if (parseInt(nums[0]) > parseInt(nums[1])) downCount++;
+                }
+            }
+        }
+        
+        return { up: upCount, down: downCount };
     }
 
     function fetchPatches() {
@@ -168,15 +215,14 @@
                     var iconName = getItemIconName(change.item);
                     var iconUrl = ITEM_ICON_BASE + iconName + '.png';
 
-                    // Подсчет изменений вверх/вниз для предмета
-                    var upCount = 0;
-                    var downCount = 0;
-                    if (change.detail) {
-                        if (change.detail.includes('увеличен') || change.detail.includes('увеличена') || change.detail.includes('усилен') || change.detail.includes('усилена')) upCount++;
-                        if (change.detail.includes('уменьшен') || change.detail.includes('уменьшена') || change.detail.includes('ослаблен') || change.detail.includes('ослаблена')) downCount++;
+                    var detailText = change.detail || '';
+                    if (change.old && change.new) {
+                        detailText += ' ' + change.old + ' → ' + change.new;
                     }
-                    if (change.old && change.new && parseInt(change.old) < parseInt(change.new)) upCount++;
-                    if (change.old && change.new && parseInt(change.old) > parseInt(change.new)) downCount++;
+                    
+                    var counts = countArrows(detailText);
+                    var upCount = counts.up;
+                    var downCount = counts.down;
 
                     var arrowHtml = '';
                     if (upCount > 0 && downCount === 0) {
@@ -187,7 +233,7 @@
                         arrowHtml = '<span class="patch-item-arrow"><span class="arrow-up">↑</span><span class="arrow-count">' + upCount + '</span><span class="arrow-down">↓</span><span class="arrow-count">' + downCount + '</span></span>';
                     }
 
-                    html += '        <div class="patch-item-block" data-item="' + escapeHtml(change.item) + '" data-detail="' + escapeHtml(change.detail || '') + '">';
+                    html += '        <div class="patch-item-block" data-item="' + escapeHtml(change.item) + '" data-detail="' + escapeHtml(detailText) + '">';
                     html += '            <img src="' + iconUrl + '" alt="' + escapeHtml(change.item) + '" class="patch-item-icon" onerror="this.style.display=\'none\'">';
                     html += '            <span class="patch-item-name">' + escapeHtml(change.item) + '</span>';
                     html += arrowHtml;
@@ -205,15 +251,14 @@
                     var iconName = getItemIconName(change.item);
                     var iconUrl = ITEM_ICON_BASE + iconName + '.png';
 
-                    // Подсчет изменений для нейтральных предметов
-                    var upCount = 0;
-                    var downCount = 0;
-                    if (change.detail) {
-                        if (change.detail.includes('увеличен') || change.detail.includes('увеличена') || change.detail.includes('усилен') || change.detail.includes('усилена')) upCount++;
-                        if (change.detail.includes('уменьшен') || change.detail.includes('уменьшена') || change.detail.includes('ослаблен') || change.detail.includes('ослаблена')) downCount++;
+                    var detailText = change.detail || '';
+                    if (change.old && change.new) {
+                        detailText += ' ' + change.old + ' → ' + change.new;
                     }
-                    if (change.old && change.new && parseInt(change.old) < parseInt(change.new)) upCount++;
-                    if (change.old && change.new && parseInt(change.old) > parseInt(change.new)) downCount++;
+                    
+                    var counts = countArrows(detailText);
+                    var upCount = counts.up;
+                    var downCount = counts.down;
 
                     var arrowHtml = '';
                     if (upCount > 0 && downCount === 0) {
@@ -224,7 +269,7 @@
                         arrowHtml = '<span class="patch-item-arrow"><span class="arrow-up">↑</span><span class="arrow-count">' + upCount + '</span><span class="arrow-down">↓</span><span class="arrow-count">' + downCount + '</span></span>';
                     }
 
-                    html += '        <div class="patch-item-block" data-item="' + escapeHtml(change.item) + '" data-detail="' + escapeHtml(change.detail || '') + '">';
+                    html += '        <div class="patch-item-block" data-item="' + escapeHtml(change.item) + '" data-detail="' + escapeHtml(detailText) + '">';
                     html += '            <img src="' + iconUrl + '" alt="' + escapeHtml(change.item) + '" class="patch-item-icon" onerror="this.style.display=\'none\'">';
                     html += '            <span class="patch-item-name">' + escapeHtml(change.item) + '</span>';
                     html += arrowHtml;
@@ -243,21 +288,11 @@
                     var iconUrl = ICON_BASE + iconName + '.png';
 
                     var changesText = hero.changes ? hero.changes.join('; ') : '';
-
-                    // Подсчет изменений вверх/вниз для героя
-                    var upCount = 0;
-                    var downCount = 0;
-                    if (changesText) {
-                        var changes = changesText.split(';');
-                        for (var c = 0; c < changes.length; c++) {
-                            var text = changes[c].toLowerCase();
-                            if (text.includes('увеличен') || text.includes('увеличена') || text.includes('усилен') || text.includes('усилена')) upCount++;
-                            if (text.includes('уменьшен') || text.includes('уменьшена') || text.includes('ослаблен') || text.includes('ослаблена')) downCount++;
-                            var match = text.match(/(\d+)\s*→\s*(\d+)/);
-                            if (match && parseInt(match[1]) < parseInt(match[2])) upCount++;
-                            if (match && parseInt(match[1]) > parseInt(match[2])) downCount++;
-                        }
-                    }
+                    
+                    // Подсчет изменений для героя
+                    var counts = countArrows(changesText);
+                    var upCount = counts.up;
+                    var downCount = counts.down;
 
                     var arrowHtml = '';
                     if (upCount > 0 && downCount === 0) {
