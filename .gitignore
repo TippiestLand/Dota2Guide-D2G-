@@ -1,12 +1,57 @@
-.env
+# Создаем .gitignore в корне проекта
+echo "# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask
+instance/
+.webassets-cache
+.env
+.env.local
+.env.*.local
+
+# Database
 *.db
 *.sqlite
 *.sqlite3
-data/
-.venv/
-venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
 *.log
-*.pid
+logs/
+
+# Data (если есть конфиденциальные данные)
+data/news.json
+data/*.txt
+
+# Render
+render.yaml
+
+# Misc
+*.pyc
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/" > .gitignore
