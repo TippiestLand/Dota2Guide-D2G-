@@ -1,0 +1,15 @@
+{
+  "name": "dota2-guide-build",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm run obfuscate-js && npm run minify-css && npm run minify-html",
+    "obfuscate-js": "javascript-obfuscator static/js/script.js --output static/js/script.js && javascript-obfuscator static/js/news.js --output static/js/news.js && javascript-obfuscator static/js/patches.js --output static/js/patches.js",
+    "minify-css": "cleancss -o static/css/style.css static/css/style.css",
+    "minify-html": "html-minifier --collapse-whitespace --remove-comments -o templates/index.html templates/index.html"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.0",
+    "clean-css-cli": "^5.6.0",
+    "html-minifier": "^4.0.0"
+  }
+}
