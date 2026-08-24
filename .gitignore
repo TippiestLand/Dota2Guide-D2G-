@@ -1,5 +1,4 @@
-# Создаем .gitignore в корне проекта
-echo "# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -39,12 +38,9 @@ Thumbs.db
 *.log
 logs/
 
-# Data (если есть конфиденциальные данные)
+# Data
 data/news.json
 data/*.txt
-
-# Render
-render.yaml
 
 # Misc
 *.pyc
@@ -54,4 +50,11 @@ render.yaml
 htmlcov/
 dist/
 build/
-*.egg-info/" > .gitignore
+*.egg-info/
+
+# Source files (НЕ пушить!)
+src/
+
+# Node modules
+node_modules/
+package-lock.json
