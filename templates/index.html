@@ -1,13 +1,4 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Предметы — Dota 2 Guide</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        /* Специфичные стили для страницы предметов */
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Предметы — Dota 2 Guide</title><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"><style>/* Специфичные стили для страницы предметов */
         .items-header {
             text-align: center;
             margin-bottom: 40px;
@@ -362,68 +353,7 @@
             .item-tooltip .tooltip-title {
                 font-size: 0.85rem;
             }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="stars"></div>
-    <div class="nebula"></div>
-    <div class="glow-orb"></div>
-    <div class="glow-orb orb2"></div>
-
-    <header>
-        <div class="logo">DOTA<span>GUIDE</span></div>
-        <nav>
-            <a href="/" data-page="home">Главная</a>
-            <a href="/" data-page="heroes">Герои</a>
-            <a href="#" data-page="items" class="active">Предметы</a>
-            <a href="/" data-page="news">Новости</a>
-            <a href="/" data-page="guides">Гайды</a>
-        </nav>
-    </header>
-
-    <main style="margin-top: 80px; max-width: 1400px; padding: 0 5%; margin-left: auto; margin-right: auto;">
-        <div class="items-header">
-            <h1><span>Предметы</span> Dota 2</h1>
-            <p>Изучи все предметы игры: от расходников до артефактов. Наведи на предмет, чтобы узнать детали.</p>
-        </div>
-
-        <!-- Категории -->
-        <div class="category-tabs" id="categoryTabs">
-            <button class="category-tab active" data-category="all">Все</button>
-            <button class="category-tab" data-category="consumables">Расходники</button>
-            <button class="category-tab" data-category="attributes">Атрибуты</button>
-            <button class="category-tab" data-category="equipment">Снаряжение</button>
-            <button class="category-tab" data-category="misc">Разное</button>
-            <button class="category-tab" data-category="secret">Потайные</button>
-            <button class="category-tab" data-category="accessories">Аксессуары</button>
-            <button class="category-tab" data-category="support">Поддержка</button>
-            <button class="category-tab" data-category="magic">Магия</button>
-            <button class="category-tab" data-category="armor">Броня</button>
-            <button class="category-tab" data-category="weapons">Оружие</button>
-            <button class="category-tab" data-category="artifacts">Артефакты</button>
-            <button class="category-tab" data-category="neutral">Нейтральные</button>
-        </div>
-
-        <!-- Сетка предметов -->
-        <div class="items-grid-container">
-            <div class="items-grid active" id="itemsGrid">
-                <!-- Предметы будут загружены через JavaScript -->
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>DOTA GUIDE — твой путь к мастерству. <span class="gold">Сделано с любовью</span> для новичков.</p>
-        <p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p>
-    </footer>
-
-    <!-- Контейнер для тултипа -->
-    <div class="item-tooltip" id="itemTooltip" style="display: none;"></div>
-
-    <script>
-        (function() {
+        }</style></head><body><div class="stars"></div><div class="nebula"></div><div class="glow-orb"></div><div class="glow-orb orb2"></div><header><div class="logo">DOTA<span>GUIDE</span></div><nav><a href="/" data-page="home">Главная</a> <a href="/" data-page="heroes">Герои</a> <a href="#" data-page="items" class="active">Предметы</a> <a href="/" data-page="news">Новости</a> <a href="/" data-page="guides">Гайды</a></nav></header><main style="margin-top: 80px; max-width: 1400px; padding: 0 5%; margin-left: auto; margin-right: auto;"><div class="items-header"><h1><span>Предметы</span> Dota 2</h1><p>Изучи все предметы игры: от расходников до артефактов. Наведи на предмет, чтобы узнать детали.</p></div><div class="category-tabs" id="categoryTabs"><button class="category-tab active" data-category="all">Все</button> <button class="category-tab" data-category="consumables">Расходники</button> <button class="category-tab" data-category="attributes">Атрибуты</button> <button class="category-tab" data-category="equipment">Снаряжение</button> <button class="category-tab" data-category="misc">Разное</button> <button class="category-tab" data-category="secret">Потайные</button> <button class="category-tab" data-category="accessories">Аксессуары</button> <button class="category-tab" data-category="support">Поддержка</button> <button class="category-tab" data-category="magic">Магия</button> <button class="category-tab" data-category="armor">Броня</button> <button class="category-tab" data-category="weapons">Оружие</button> <button class="category-tab" data-category="artifacts">Артефакты</button> <button class="category-tab" data-category="neutral">Нейтральные</button></div><div class="items-grid-container"><div class="items-grid active" id="itemsGrid"></div></div></main><footer><p>DOTA GUIDE — твой путь к мастерству. <span class="gold">Сделано с любовью</span> для новичков.</p><p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p></footer><div class="item-tooltip" id="itemTooltip" style="display: none;"></div><script>(function() {
             'use strict';
 
             // ============================================================
@@ -743,9 +673,4 @@
                 console.log('✅ Страница предметов загружена, предметов:', allItems.length);
             });
 
-        })();
-    </script>
-
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</body>
-</html>
+        })();</script><script src="{{ url_for('static', filename='js/script.js') }}"></script></body></html>
