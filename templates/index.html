@@ -22,7 +22,7 @@
             margin: 10px auto 0;
         }
 
-        /* Категории предметов (табы) */
+        /* Категории предметов */
         .category-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -61,32 +61,29 @@
         }
 
         /* Сетка предметов */
-        .items-grid-container {
-            position: relative;
-        }
-
         .items-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-        }
-
-        .items-grid.active {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
             opacity: 1;
-            transform: translateY(0);
+            transition: opacity 0.4s ease;
         }
 
-        /* Карточка предмета */
+        .items-grid.fade-out {
+            opacity: 0;
+        }
+
+        .items-grid.fade-in {
+            opacity: 1;
+        }
+
+        /* Карточка предмета — без рамки, просто картинка */
         .item-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(8px);
-            border-radius: 16px;
-            padding: 20px 15px 18px;
+            background: rgba(20, 20, 30, 0.4);
+            border-radius: 12px;
+            padding: 15px 12px 14px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            border: none;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
@@ -111,6 +108,11 @@
         .item-card:nth-child(13) { animation-delay: 0.26s; }
         .item-card:nth-child(14) { animation-delay: 0.28s; }
         .item-card:nth-child(15) { animation-delay: 0.30s; }
+        .item-card:nth-child(16) { animation-delay: 0.32s; }
+        .item-card:nth-child(17) { animation-delay: 0.34s; }
+        .item-card:nth-child(18) { animation-delay: 0.36s; }
+        .item-card:nth-child(19) { animation-delay: 0.38s; }
+        .item-card:nth-child(20) { animation-delay: 0.40s; }
 
         @keyframes itemAppear {
             0% { opacity: 0; transform: scale(0.9); }
@@ -118,29 +120,28 @@
         }
 
         .item-card:hover {
-            transform: translateY(-10px) scale(1.03);
-            border-color: rgba(240, 185, 11, 0.25);
-            box-shadow: 0 20px 60px rgba(240, 185, 11, 0.1);
+            transform: translateY(-8px) scale(1.05);
+            background: rgba(30, 30, 45, 0.6);
+            box-shadow: 0 15px 40px rgba(240, 185, 11, 0.08);
             z-index: 5;
         }
 
+        /* Просто прямоугольная картинка без рамки */
         .item-card .item-icon-wrap {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 12px;
-            border-radius: 12px;
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
             overflow: hidden;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.06);
+            background: rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.4s;
+            margin-bottom: 8px;
         }
 
         .item-card:hover .item-icon-wrap {
-            border-color: rgba(240, 185, 11, 0.3);
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.05);
+            transform: scale(1.02);
         }
 
         .item-card .item-icon-wrap img {
@@ -148,180 +149,227 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.4s;
+            display: block;
         }
 
         .item-card:hover .item-icon-wrap img {
-            transform: scale(1.08);
+            transform: scale(1.05);
         }
 
         .item-card .item-name {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #fff;
-            margin-bottom: 4px;
-            line-height: 1.3;
+            line-height: 1.2;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .item-card .item-cost {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--gold);
             font-weight: 500;
         }
 
-        .item-card .item-badge {
+        /* Модальное окно для предметов */
+        .item-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: modalFadeIn 0.3s;
+            padding: 20px;
+        }
+
+        .item-modal.active {
+            display: flex;
+        }
+
+        @keyframes modalFadeIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .item-modal-content {
+            background: rgba(15, 15, 25, 0.95);
+            border: 1px solid rgba(240, 185, 11, 0.15);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
+        }
+
+        .item-modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .item-modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        .item-modal-content::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 4px;
+        }
+
+        .item-modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 2.2rem;
+            transition: all 0.3s;
+            z-index: 10;
+            padding: 0 8px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .item-modal-close:hover {
+            color: var(--gold);
+            transform: rotate(90deg);
+        }
+
+        .item-modal-body {
+            padding-top: 10px;
+        }
+
+        .item-modal-icon {
+            width: 100%;
+            max-height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .item-modal-icon img {
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .item-modal-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .item-modal-cost {
+            font-size: 1rem;
+            color: #8888a0;
+            margin-bottom: 16px;
+        }
+
+        .item-modal-cost span {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .item-modal-desc {
+            color: #b0b0c0;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid rgba(240, 185, 11, 0.15);
+        }
+
+        .item-modal-recipe {
+            margin-top: 12px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .item-modal-recipe-title {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .item-modal-recipe-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .item-modal-recipe-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 12px 4px 4px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.8rem;
+            color: #c8c8d0;
+        }
+
+        .item-modal-recipe-item img {
+            width: 32px;
+            height: 18px;
+            object-fit: cover;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .item-modal-badge {
             display: inline-block;
-            margin-top: 8px;
-            padding: 3px 12px;
+            padding: 4px 14px;
             border-radius: 20px;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             background: rgba(255, 255, 255, 0.05);
             color: #8888a0;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 12px;
         }
 
-        /* Тултип для предмета */
-        .item-tooltip {
-            position: fixed;
-            background: rgba(10, 10, 18, 0.97);
-            backdrop-filter: blur(16px);
-            color: #fff;
-            padding: 18px 22px;
-            border-radius: 14px;
-            border: 1px solid rgba(240, 185, 11, 0.2);
-            font-size: 0.85rem;
-            max-width: 320px;
-            min-width: 240px;
-            pointer-events: none;
-            z-index: 99999;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
-            line-height: 1.6;
-            transition: opacity 0.15s ease;
-        }
-
-        .item-tooltip .tooltip-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .item-tooltip .tooltip-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            overflow: hidden;
-            flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .item-tooltip .tooltip-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .item-tooltip .tooltip-title {
-            font-weight: 700;
-            font-size: 1.05rem;
-            color: var(--gold);
-        }
-
-        .item-tooltip .tooltip-cost {
-            font-size: 0.8rem;
-            color: #8888a0;
-        }
-
-        .item-tooltip .tooltip-cost span {
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .item-tooltip .tooltip-desc {
-            color: #b0b0c0;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
-        }
-
-        .item-tooltip .tooltip-recipe {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            font-size: 0.75rem;
-            color: #8888a0;
-        }
-
-        .item-tooltip .tooltip-recipe span {
-            color: #fff;
-        }
-
-        .item-tooltip .tooltip-recipe .recipe-item {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin: 2px 2px;
-            font-size: 0.7rem;
-            color: #c8c8d0;
+        .no-items {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+            font-size: 1.2rem;
         }
 
         /* Адаптив */
         @media (max-width: 768px) {
-            .items-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 14px;
-            }
-
-            .item-card .item-icon-wrap {
-                width: 64px;
-                height: 64px;
-            }
-
-            .item-card .item-name {
-                font-size: 0.8rem;
-            }
-
-            .category-tab {
-                padding: 8px 16px;
-                font-size: 0.75rem;
-            }
-
-            .item-tooltip {
-                max-width: 280px;
-                min-width: 200px;
-                padding: 14px 16px;
-            }
-
-            .item-tooltip .tooltip-icon {
-                width: 40px;
-                height: 40px;
-            }
-
-            .item-tooltip .tooltip-title {
-                font-size: 0.95rem;
-            }
-        }
-
-        @media (max-width: 480px) {
             .items-grid {
                 grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
                 gap: 10px;
             }
 
             .item-card {
-                padding: 14px 10px 12px;
-                border-radius: 12px;
-            }
-
-            .item-card .item-icon-wrap {
-                width: 52px;
-                height: 52px;
-                margin-bottom: 8px;
+                padding: 10px 8px;
                 border-radius: 8px;
             }
 
@@ -330,139 +378,259 @@
             }
 
             .item-card .item-cost {
-                font-size: 0.65rem;
+                font-size: 0.6rem;
             }
 
             .category-tab {
-                padding: 6px 12px;
-                font-size: 0.65rem;
+                padding: 6px 14px;
+                font-size: 0.7rem;
             }
 
-            .item-tooltip {
-                max-width: 240px;
-                min-width: 180px;
-                padding: 12px 14px;
-                font-size: 0.75rem;
+            .item-modal-content {
+                padding: 24px 18px;
+                max-height: 92vh;
             }
 
-            .item-tooltip .tooltip-icon {
-                width: 36px;
-                height: 36px;
+            .item-modal-name {
+                font-size: 1.4rem;
             }
 
-            .item-tooltip .tooltip-title {
+            .item-modal-icon {
+                max-height: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+                gap: 8px;
+            }
+
+            .item-card {
+                padding: 8px 6px;
+                border-radius: 6px;
+            }
+
+            .item-card .item-icon-wrap {
+                border-radius: 4px;
+            }
+
+            .item-card .item-name {
+                font-size: 0.6rem;
+            }
+
+            .item-card .item-cost {
+                font-size: 0.55rem;
+            }
+
+            .category-tab {
+                padding: 4px 10px;
+                font-size: 0.6rem;
+            }
+
+            .item-modal-content {
+                padding: 16px 12px;
+                border-radius: 16px;
+            }
+
+            .item-modal-name {
+                font-size: 1.1rem;
+            }
+
+            .item-modal-desc {
                 font-size: 0.85rem;
+                padding: 10px 12px;
             }
-        }</style></head><body><div class="stars"></div><div class="nebula"></div><div class="glow-orb"></div><div class="glow-orb orb2"></div><header><div class="logo">DOTA<span>GUIDE</span></div><nav><a href="/" data-page="home">Главная</a> <a href="/" data-page="heroes">Герои</a> <a href="#" data-page="items" class="active">Предметы</a> <a href="/" data-page="news">Новости</a> <a href="/" data-page="guides">Гайды</a></nav></header><main style="margin-top: 80px; max-width: 1400px; padding: 0 5%; margin-left: auto; margin-right: auto;"><div class="items-header"><h1><span>Предметы</span> Dota 2</h1><p>Изучи все предметы игры: от расходников до артефактов. Наведи на предмет, чтобы узнать детали.</p></div><div class="category-tabs" id="categoryTabs"><button class="category-tab active" data-category="all">Все</button> <button class="category-tab" data-category="consumables">Расходники</button> <button class="category-tab" data-category="attributes">Атрибуты</button> <button class="category-tab" data-category="equipment">Снаряжение</button> <button class="category-tab" data-category="misc">Разное</button> <button class="category-tab" data-category="secret">Потайные</button> <button class="category-tab" data-category="accessories">Аксессуары</button> <button class="category-tab" data-category="support">Поддержка</button> <button class="category-tab" data-category="magic">Магия</button> <button class="category-tab" data-category="armor">Броня</button> <button class="category-tab" data-category="weapons">Оружие</button> <button class="category-tab" data-category="artifacts">Артефакты</button> <button class="category-tab" data-category="neutral">Нейтральные</button></div><div class="items-grid-container"><div class="items-grid active" id="itemsGrid"></div></div></main><footer><p>DOTA GUIDE — твой путь к мастерству. <span class="gold">Сделано с любовью</span> для новичков.</p><p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p></footer><div class="item-tooltip" id="itemTooltip" style="display: none;"></div><script>(function() {
+
+            .item-modal-recipe-item {
+                font-size: 0.7rem;
+            }
+
+            .item-modal-recipe-item img {
+                width: 24px;
+                height: 14px;
+            }
+        }</style></head><body><div class="stars"></div><div class="nebula"></div><div class="glow-orb"></div><div class="glow-orb orb2"></div><header><div class="logo">DOTA<span>GUIDE</span></div><nav><a href="/" data-page="home">Главная</a> <a href="/" data-page="heroes">Герои</a> <a href="#" data-page="items" class="active">Предметы</a> <a href="/" data-page="news">Новости</a> <a href="/" data-page="guides">Гайды</a></nav></header><main style="margin-top: 80px; max-width: 1400px; padding: 0 5%; margin-left: auto; margin-right: auto;"><div class="items-header"><h1><span>Предметы</span> Dota 2</h1><p>Все предметы игры с иконками и детальным описанием. Нажми на предмет, чтобы узнать больше.</p></div><div class="category-tabs" id="categoryTabs"><button class="category-tab active" data-category="all">Все</button> <button class="category-tab" data-category="consumables">Расходники</button> <button class="category-tab" data-category="attributes">Атрибуты</button> <button class="category-tab" data-category="equipment">Снаряжение</button> <button class="category-tab" data-category="misc">Разное</button> <button class="category-tab" data-category="secret">Потайные</button> <button class="category-tab" data-category="accessories">Аксессуары</button> <button class="category-tab" data-category="support">Поддержка</button> <button class="category-tab" data-category="magic">Магия</button> <button class="category-tab" data-category="armor">Броня</button> <button class="category-tab" data-category="weapons">Оружие</button> <button class="category-tab" data-category="artifacts">Артефакты</button> <button class="category-tab" data-category="neutral">Нейтральные</button> <button class="category-tab" data-category="ancients">Древние</button></div><div class="items-grid" id="itemsGrid"></div></main><footer><p>DOTA GUIDE — твой путь к мастерству. <span class="gold">Сделано с любовью</span> для новичков.</p><p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p></footer><div class="item-modal" id="itemModal"><div class="item-modal-content"><button class="item-modal-close" id="itemModalClose">✕</button><div class="item-modal-body" id="itemModalBody"></div></div></div><script>(function() {
             'use strict';
 
             // ============================================================
-            // ДАННЫЕ ПРЕДМЕТОВ (из Dota 2 Fandom Wiki + собственные знания)
+            // ВСЕ ПРЕДМЕТЫ DOTA 2 (ПОЛНЫЙ СПИСОК)
             // ============================================================
             const ITEMS_DATA = {
                 // ===== РАСХОДНИКИ =====
                 'consumables': [
-                    { id: 'tango', name: 'Танго', cost: 90, icon: 'tango', desc: 'Восстанавливает 115 здоровья за 16 секунд. Можно использовать на союзника.', recipe: [] },
-                    { id: 'healing_salve', name: 'Целебная мазь', cost: 100, icon: 'healing_salve', desc: 'Восстанавливает 400 здоровья за 10 секунд.', recipe: [] },
-                    { id: 'clarity', name: 'Зелье ясности', cost: 50, icon: 'clarity', desc: 'Восстанавливает 150 маны за 30 секунд.', recipe: [] },
-                    { id: 'enchanted_mango', name: 'Зачарованное манго', cost: 70, icon: 'enchanted_mango', desc: 'Восстанавливает 110 маны мгновенно.', recipe: [] },
-                    { id: 'faerie_fire', name: 'Феерический огонёк', cost: 70, icon: 'faerie_fire', desc: '+2 урона. Восстанавливает 85 здоровья мгновенно.', recipe: [] },
-                    { id: 'smoke_of_deceit', name: 'Дым обмана', cost: 50, icon: 'smoke_of_deceit', desc: 'Делает вас и союзников невидимыми на 35 секунд.', recipe: [] },
-                    { id: 'dust_of_appearance', name: 'Пыль проявления', cost: 80, icon: 'dust', desc: 'Раскрывает невидимых врагов в радиусе 1050 на 12 секунд.', recipe: [] },
-                    { id: 'town_portal_scroll', name: 'Свиток телепортации', cost: 90, icon: 'town_portal_scroll', desc: 'Телепортирует к союзной постройке через 3 секунды.', recipe: [] },
+                    { id: 'tango', name: 'Танго', cost: 90, desc: 'Восстанавливает 115 здоровья за 16 секунд. Можно использовать на союзника.', recipe: [], category: 'Расходники' },
+                    { id: 'tango_single', name: 'Танго (одно)', cost: 30, desc: 'Восстанавливает 115 здоровья за 16 секунд.', recipe: [], category: 'Расходники' },
+                    { id: 'healing_salve', name: 'Целебная мазь', cost: 100, desc: 'Восстанавливает 400 здоровья за 10 секунд. При получении урона эффект прерывается.', recipe: [], category: 'Расходники' },
+                    { id: 'clarity', name: 'Зелье ясности', cost: 50, desc: 'Восстанавливает 150 маны за 30 секунд. При получении урона эффект прерывается.', recipe: [], category: 'Расходники' },
+                    { id: 'enchanted_mango', name: 'Зачарованное манго', cost: 70, desc: 'Восстанавливает 125 маны мгновенно. +0.6 восстановления здоровья.', recipe: [], category: 'Расходники' },
+                    { id: 'faerie_fire', name: 'Феерический огонёк', cost: 70, desc: '+2 урона. Восстанавливает 100 здоровья мгновенно.', recipe: [], category: 'Расходники' },
+                    { id: 'smoke_of_deceit', name: 'Дым обмана', cost: 50, desc: 'Делает вас и союзников в радиусе 1200 невидимыми на 35 секунд. При приближении к врагу эффект снимается.', recipe: [], category: 'Расходники' },
+                    { id: 'dust_of_appearance', name: 'Пыль проявления', cost: 80, desc: 'Раскрывает невидимых врагов в радиусе 1050 на 12 секунд. Замедляет их на 20%.', recipe: [], category: 'Расходники' },
+                    { id: 'town_portal_scroll', name: 'Свиток телепортации', cost: 90, desc: 'Телепортирует к союзной постройке через 3 секунды.', recipe: [], category: 'Расходники' },
+                    { id: 'animal_courier', name: 'Курьер', cost: 50, desc: 'Призывает курьера для доставки предметов.', recipe: [], category: 'Расходники' },
+                    { id: 'flying_courier', name: 'Летающий курьер', cost: 150, desc: 'Улучшает курьера, позволяя ему летать.', recipe: ['animal_courier'], category: 'Расходники' },
+                    { id: 'ward_observer', name: 'Сторожевой вард', cost: 0, desc: 'Даёт обзор в радиусе 1600 на 6 минут. Имеет 2 заряда.', recipe: [], category: 'Расходники' },
+                    { id: 'ward_sentry', name: 'Дозорный вард', cost: 50, desc: 'Раскрывает невидимость в радиусе 1000 на 4 минуты. Имеет 2 заряда.', recipe: [], category: 'Расходники' },
                 ],
                 // ===== АТРИБУТЫ =====
                 'attributes': [
-                    { id: 'gauntlets_of_strength', name: 'Наручи силы', cost: 140, icon: 'gauntlets', desc: '+3 к силе.', recipe: [] },
-                    { id: 'slippers_of_agility', name: 'Тапочки ловкости', cost: 140, icon: 'slippers', desc: '+3 к ловкости.', recipe: [] },
-                    { id: 'mantle_of_intelligence', name: 'Плащ интеллекта', cost: 140, icon: 'mantle', desc: '+3 к интеллекту.', recipe: [] },
-                    { id: 'circlet', name: 'Ободок', cost: 155, icon: 'circlet', desc: '+2 ко всем атрибутам.', recipe: [] },
-                    { id: 'band_of_elvenskin', name: 'Повязка эльфийской кожи', cost: 450, icon: 'band_of_elvenskin', desc: '+6 к ловкости.', recipe: [] },
-                    { id: 'robe_of_magi', name: 'Мантия мага', cost: 450, icon: 'robe', desc: '+6 к интеллекту.', recipe: [] },
-                    { id: 'belt_of_strength', name: 'Пояс силы', cost: 450, icon: 'belt_of_strength', desc: '+6 к силе.', recipe: [] },
-                    { id: 'ogre_axe', name: 'Топор огров', cost: 1000, icon: 'ogre_axe', desc: '+10 к силе.', recipe: [] },
-                    { id: 'blade_of_alacrity', name: 'Клинок проворства', cost: 1000, icon: 'blade_of_alacrity', desc: '+10 к ловкости.', recipe: [] },
-                    { id: 'staff_of_wizardry', name: 'Посох чародея', cost: 1000, icon: 'staff_of_wizardry', desc: '+10 к интеллекту.', recipe: [] },
-                    { id: 'point_booster', name: 'Усилитель характеристик', cost: 1200, icon: 'point_booster', desc: '+175 здоровья, +75 маны.', recipe: [] },
+                    { id: 'gauntlets', name: 'Наручи силы', cost: 140, desc: '+3 к силе.', recipe: [], category: 'Атрибуты' },
+                    { id: 'slippers', name: 'Тапочки ловкости', cost: 140, desc: '+3 к ловкости.', recipe: [], category: 'Атрибуты' },
+                    { id: 'mantle', name: 'Плащ интеллекта', cost: 140, desc: '+3 к интеллекту.', recipe: [], category: 'Атрибуты' },
+                    { id: 'circlet', name: 'Ободок', cost: 155, desc: '+2 ко всем атрибутам.', recipe: [], category: 'Атрибуты' },
+                    { id: 'band_of_elvenskin', name: 'Повязка эльфийской кожи', cost: 450, desc: '+6 к ловкости.', recipe: [], category: 'Атрибуты' },
+                    { id: 'robe_of_magi', name: 'Мантия мага', cost: 450, desc: '+6 к интеллекту.', recipe: [], category: 'Атрибуты' },
+                    { id: 'belt_of_strength', name: 'Пояс силы', cost: 450, desc: '+6 к силе.', recipe: [], category: 'Атрибуты' },
+                    { id: 'ogre_axe', name: 'Топор огров', cost: 1000, desc: '+10 к силе.', recipe: [], category: 'Атрибуты' },
+                    { id: 'blade_of_alacrity', name: 'Клинок проворства', cost: 1000, desc: '+10 к ловкости.', recipe: [], category: 'Атрибуты' },
+                    { id: 'staff_of_wizardry', name: 'Посох чародея', cost: 1000, desc: '+10 к интеллекту.', recipe: [], category: 'Атрибуты' },
+                    { id: 'point_booster', name: 'Усилитель характеристик', cost: 1200, desc: '+175 здоровья, +75 маны.', recipe: [], category: 'Атрибуты' },
+                    { id: 'vitality_booster', name: 'Усилитель жизненной силы', cost: 1100, desc: '+250 здоровья.', recipe: [], category: 'Атрибуты' },
+                    { id: 'energy_booster', name: 'Усилитель энергии', cost: 900, desc: '+250 маны.', recipe: [], category: 'Атрибуты' },
+                    { id: 'ring_of_health', name: 'Кольцо здоровья', cost: 850, desc: '+6.5 восстановления здоровья.', recipe: [], category: 'Атрибуты' },
+                    { id: 'ring_of_regen', name: 'Кольцо регенерации', cost: 175, desc: '+2 восстановления здоровья.', recipe: [], category: 'Атрибуты' },
+                    { id: 'void_stone', name: 'Камень бездны', cost: 825, desc: '+2.25 восстановления маны.', recipe: [], category: 'Атрибуты' },
+                    { id: 'sobi_mask', name: 'Маска Соби', cost: 325, desc: '+0.8 восстановления маны.', recipe: [], category: 'Атрибуты' },
+                    { id: 'sage_mask', name: 'Маска мудреца', cost: 175, desc: '+0.5 восстановления маны.', recipe: [], category: 'Атрибуты' },
+                    { id: 'mantle_of_intelligence', name: 'Плащ интеллекта', cost: 140, desc: '+3 к интеллекту.', recipe: [], category: 'Атрибуты' },
+                    { id: 'headdress', name: 'Головной убор', cost: 425, desc: '+2 ко всем атрибутам, +2 восстановления здоровья союзникам.', recipe: ['circlet', 'ring_of_regen'], category: 'Атрибуты' },
+                    { id: 'buckler', name: 'Небольшой щит', cost: 425, desc: '+2 ко всем атрибутам, +2 брони союзникам.', recipe: ['circlet', 'chainmail'], category: 'Атрибуты' },
                 ],
                 // ===== СНАРЯЖЕНИЕ =====
                 'equipment': [
-                    { id: 'boots_of_speed', name: 'Сапоги скорости', cost: 500, icon: 'boots_of_speed', desc: '+45 к скорости передвижения.', recipe: [] },
-                    { id: 'magic_wand', name: 'Волшебная палочка', cost: 450, icon: 'magic_wand', desc: 'Восстанавливает 15 здоровья и маны за заряд. До 20 зарядов.', recipe: ['magic_stick', 'iron_branch', 'iron_branch'] },
-                    { id: 'magic_stick', name: 'Волшебная палка', cost: 200, icon: 'magic_stick', desc: 'Восстанавливает 15 здоровья и маны за заряд. До 10 зарядов.', recipe: [] },
-                    { id: 'iron_branch', name: 'Железная ветвь', cost: 50, icon: 'iron_branch', desc: '+1 ко всем атрибутам. Можно посадить дерево.', recipe: [] },
-                    { id: 'quelling_blade', name: 'Лесорубный клинок', cost: 100, icon: 'quelling_blade', desc: '+12 урона крипам. Можно срубить дерево.', recipe: [] },
-                    { id: 'infused_raindrop', name: 'Насыщенная капля', cost: 225, icon: 'infused_raindrop', desc: 'Блокирует 120 магического урона. Восстанавливает 1.5 маны/сек.', recipe: [] },
+                    { id: 'boots_of_speed', name: 'Сапоги скорости', cost: 500, desc: '+45 к скорости передвижения.', recipe: [], category: 'Снаряжение' },
+                    { id: 'magic_wand', name: 'Волшебная палочка', cost: 450, desc: 'Восстанавливает 15 здоровья и маны за заряд. До 20 зарядов.', recipe: ['magic_stick', 'iron_branch', 'iron_branch'], category: 'Снаряжение' },
+                    { id: 'magic_stick', name: 'Волшебная палка', cost: 200, desc: 'Восстанавливает 15 здоровья и маны за заряд. До 10 зарядов.', recipe: ['iron_branch', 'iron_branch'], category: 'Снаряжение' },
+                    { id: 'iron_branch', name: 'Железная ветвь', cost: 50, desc: '+1 ко всем атрибутам. Можно посадить дерево.', recipe: [], category: 'Снаряжение' },
+                    { id: 'quelling_blade', name: 'Лесорубный клинок', cost: 100, desc: '+12 урона крипам. Можно срубить дерево.', recipe: [], category: 'Снаряжение' },
+                    { id: 'infused_raindrop', name: 'Насыщенная капля', cost: 225, desc: 'Блокирует 120 магического урона. Восстанавливает 1.5 маны/сек.', recipe: [], category: 'Снаряжение' },
+                    { id: 'bottle', name: 'Бутылка', cost: 650, desc: 'Хранит до 3 зарядов руны. Восстанавливает 80 здоровья и 40 маны за заряд.', recipe: [], category: 'Снаряжение' },
+                    { id: 'stout_shield', name: 'Крепкий щит', cost: 200, desc: 'Блокирует 16 урона от атак крипов.', recipe: [], category: 'Снаряжение' },
+                    { id: 'poor_mans_shield', name: 'Щит бедняка', cost: 500, desc: 'Блокирует 20 урона от атак героев и крипов.', recipe: ['stout_shield', 'slippers'], category: 'Снаряжение' },
                 ],
                 // ===== РАЗНОЕ =====
                 'misc': [
-                    { id: 'gem_of_true_sight', name: 'Самоцвет истинного зрения', cost: 900, icon: 'gem', desc: 'Раскрывает невидимость в радиусе 900.', recipe: [] },
-                    { id: 'observer_ward', name: 'Сторожевой вард', cost: 0, icon: 'observer_ward', desc: 'Даёт обзор в радиусе 1600 на 6 минут.', recipe: [] },
-                    { id: 'sentry_ward', name: 'Дозорный вард', cost: 50, icon: 'sentry_ward', desc: 'Раскрывает невидимость в радиусе 1000 на 4 минуты.', recipe: [] },
-                    { id: 'tome_of_knowledge', name: 'Фолиант знаний', cost: 150, icon: 'tome_of_knowledge', desc: 'Даёт опыт (175 + 20 за минуту).', recipe: [] },
+                    { id: 'gem', name: 'Самоцвет истинного зрения', cost: 900, desc: 'Раскрывает невидимость в радиусе 900. Выпадает при смерти.', recipe: [], category: 'Разное' },
+                    { id: 'tome_of_knowledge', name: 'Фолиант знаний', cost: 150, desc: 'Даёт опыт (175 + 20 за минуту).', recipe: [], category: 'Разное' },
+                    { id: 'blink_dagger', name: 'Кинжал-телепорт', cost: 2250, desc: 'Телепортирует на 1200 единиц в выбранном направлении.', recipe: [], category: 'Разное' },
+                    { id: 'shadow_amulet', name: 'Теневой амулет', cost: 1400, desc: 'Делает владельца невидимым на 6 секунд.', recipe: [], category: 'Разное' },
+                    { id: 'ghost_scepter', name: 'Скипетр призрака', cost: 1500, desc: 'Переводит владельца в астральную форму на 4 секунды.', recipe: [], category: 'Разное' },
                 ],
                 // ===== ПОТАЙНЫЕ =====
                 'secret': [
-                    { id: 'mystic_staff', name: 'Мистический посох', cost: 2700, icon: 'mystic_staff', desc: '+25 к интеллекту.', recipe: [] },
-                    { id: 'eaglesong', name: 'Песнь орла', cost: 2800, icon: 'eaglesong', desc: '+25 к ловкости.', recipe: [] },
-                    { id: 'reaver', name: 'Мститель', cost: 2800, icon: 'reaver', desc: '+25 к силе.', recipe: [] },
-                    { id: 'hyperstone', name: 'Гиперкамень', cost: 2000, icon: 'hyperstone', desc: '+55 к скорости атаки.', recipe: [] },
-                    { id: 'talisman_of_evasion', name: 'Талисман уклонения', cost: 1300, icon: 'talisman_of_evasion', desc: '+20% к уклонению.', recipe: [] },
+                    { id: 'mystic_staff', name: 'Мистический посох', cost: 2700, desc: '+25 к интеллекту.', recipe: [], category: 'Потайные' },
+                    { id: 'eaglesong', name: 'Песнь орла', cost: 2800, desc: '+25 к ловкости.', recipe: [], category: 'Потайные' },
+                    { id: 'reaver', name: 'Мститель', cost: 2800, desc: '+25 к силе.', recipe: [], category: 'Потайные' },
+                    { id: 'hyperstone', name: 'Гиперкамень', cost: 2000, desc: '+55 к скорости атаки.', recipe: [], category: 'Потайные' },
+                    { id: 'talisman_of_evasion', name: 'Талисман уклонения', cost: 1300, desc: '+20% к уклонению.', recipe: [], category: 'Потайные' },
+                    { id: 'platemail', name: 'Латный доспех', cost: 1400, desc: '+10 к броне.', recipe: [], category: 'Потайные' },
+                    { id: 'mithril_hammer', name: 'Мифриловый молот', cost: 1600, desc: '+24 к урону.', recipe: [], category: 'Потайные' },
+                    { id: 'demon_edge', name: 'Демонический клинок', cost: 2200, desc: '+46 к урону.', recipe: [], category: 'Потайные' },
+                    { id: 'claymore', name: 'Клеймор', cost: 1350, desc: '+21 к урону.', recipe: [], category: 'Потайные' },
+                    { id: 'broadsword', name: 'Палаш', cost: 1000, desc: '+15 к урону.', recipe: [], category: 'Потайные' },
+                    { id: 'chainmail', name: 'Кольчуга', cost: 550, desc: '+4 к броне.', recipe: [], category: 'Потайные' },
+                    { id: 'quarterstaff', name: 'Боевой посох', cost: 875, desc: '+10 к урону, +10 к скорости атаки.', recipe: [], category: 'Потайные' },
+                    { id: 'javelin', name: 'Дротик', cost: 1100, desc: '+15 к урону. 20% шанс нанести 40 дополнительного урона.', recipe: [], category: 'Потайные' },
+                    { id: 'oblivion_staff', name: 'Посох забвения', cost: 1650, desc: '+10 к урону, +10 к скорости атаки, +3 к восстановлению маны.', recipe: [], category: 'Потайные' },
+                    { id: 'perseverance', name: 'Настойчивость', cost: 1675, desc: '+5.5 восстановления здоровья, +2.25 восстановления маны.', recipe: ['ring_of_health', 'void_stone'], category: 'Потайные' },
                 ],
                 // ===== АКСЕССУАРЫ =====
                 'accessories': [
-                    { id: 'sange', name: 'Санг', cost: 2050, icon: 'sange', desc: '+16 к силе. Увеличивает замедление на 16%.', recipe: ['belt_of_strength', 'ogre_axe'] },
-                    { id: 'yasha', name: 'Яша', cost: 2050, icon: 'yasha', desc: '+16 к ловкости. +25 к скорости атаки.', recipe: ['band_of_elvenskin', 'blade_of_alacrity'] },
-                    { id: 'kaya', name: 'Кая', cost: 2050, icon: 'kaya', desc: '+16 к интеллекту. +10% к урону от заклинаний.', recipe: ['robe_of_magi', 'staff_of_wizardry'] },
-                    { id: 'sange_and_yasha', name: 'Санг и Яша', cost: 4100, icon: 'sange_and_yasha', desc: '+16 к силе и ловкости. +20 к скорости атаки.', recipe: ['sange', 'yasha'] },
-                    { id: 'yasha_and_kaya', name: 'Яша и Кая', cost: 4100, icon: 'yasha_and_kaya', desc: '+16 к ловкости и интеллекту. +20 к скорости атаки.', recipe: ['yasha', 'kaya'] },
-                    { id: 'kaya_and_sange', name: 'Кая и Санг', cost: 4100, icon: 'kaya_and_sange', desc: '+16 к силе и интеллекту. +10% к урону от заклинаний.', recipe: ['kaya', 'sange'] },
-                    { id: 'ultimate_orb', name: 'Изначальная сфера', cost: 2100, icon: 'ultimate_orb', desc: '+10 ко всем атрибутам.', recipe: [] },
+                    { id: 'sange', name: 'Санг', cost: 2050, desc: '+16 к силе. +16% к замедлению цели.', recipe: ['belt_of_strength', 'ogre_axe'], category: 'Аксессуары' },
+                    { id: 'yasha', name: 'Яша', cost: 2050, desc: '+16 к ловкости. +25 к скорости атаки, +8% к скорости передвижения.', recipe: ['band_of_elvenskin', 'blade_of_alacrity'], category: 'Аксессуары' },
+                    { id: 'kaya', name: 'Кая', cost: 2050, desc: '+16 к интеллекту. +10% к урону от заклинаний.', recipe: ['robe_of_magi', 'staff_of_wizardry'], category: 'Аксессуары' },
+                    { id: 'sange_and_yasha', name: 'Санг и Яша', cost: 4100, desc: '+16 к силе и ловкости. +20 к скорости атаки, +12% к скорости передвижения.', recipe: ['sange', 'yasha'], category: 'Аксессуары' },
+                    { id: 'yasha_and_kaya', name: 'Яша и Кая', cost: 4100, desc: '+16 к ловкости и интеллекту. +20 к скорости атаки, +8% к скорости передвижения.', recipe: ['yasha', 'kaya'], category: 'Аксессуары' },
+                    { id: 'kaya_and_sange', name: 'Кая и Санг', cost: 4100, desc: '+16 к силе и интеллекту. +10% к урону от заклинаний, +16% к замедлению.', recipe: ['kaya', 'sange'], category: 'Аксессуары' },
+                    { id: 'ultimate_orb', name: 'Изначальная сфера', cost: 2100, desc: '+10 ко всем атрибутам.', recipe: [], category: 'Аксессуары' },
+                    { id: 'orb_of_venom', name: 'Сфера яда', cost: 275, desc: 'Замедляет цель на 12% и наносит 3 урона в секунду.', recipe: [], category: 'Аксессуары' },
+                    { id: 'orb_of_corrosion', name: 'Сфера коррозии', cost: 875, desc: 'Замедляет цель на 15% и наносит 4 урона в секунду.', recipe: ['orb_of_venom', 'blight_stone'], category: 'Аксессуары' },
+                    { id: 'blight_stone', name: 'Камень порчи', cost: 300, desc: 'Уменьшает броню цели на 2 при атаке.', recipe: [], category: 'Аксессуары' },
                 ],
                 // ===== ПОДДЕРЖКА =====
                 'support': [
-                    { id: 'mekansm', name: 'Меканзм', cost: 1875, icon: 'mekansm', desc: 'Восстанавливает 250 здоровья союзникам в радиусе 1200.', recipe: ['headress', 'buckler'] },
-                    { id: 'arcane_boots', name: 'Таинственные сапоги', cost: 1450, icon: 'arcane_boots', desc: '+50 к скорости. Восстанавливает 160 маны союзникам.', recipe: ['boots_of_speed', 'energy_booster'] },
-                    { id: 'force_staff', name: 'Силовой посох', cost: 2225, icon: 'force_staff', desc: 'Толкает цель на 600 единиц в выбранном направлении.', recipe: ['staff_of_wizardry', 'ring_of_regen'] },
-                    { id: 'glimmer_cape', name: 'Мерцающий плащ', cost: 2150, icon: 'glimmer_cape', desc: 'Делает цель невидимой на 5 секунд.', recipe: ['shadow_amulet', 'cloak'] },
-                    { id: 'spirit_vessel', name: 'Сосуд духов', cost: 2900, icon: 'spirit_vessel', desc: 'Уменьшает регенерацию врага на 60% и наносит урон.', recipe: ['urn_of_shadows', 'vitality_booster'] },
+                    { id: 'mekansm', name: 'Меканзм', cost: 1875, desc: 'Восстанавливает 250 здоровья союзникам в радиусе 1200.', recipe: ['headdress', 'buckler'], category: 'Поддержка' },
+                    { id: 'arcane_boots', name: 'Таинственные сапоги', cost: 1450, desc: '+50 к скорости. Восстанавливает 160 маны союзникам в радиусе 1200.', recipe: ['boots_of_speed', 'energy_booster'], category: 'Поддержка' },
+                    { id: 'force_staff', name: 'Силовой посох', cost: 2225, desc: 'Толкает цель на 600 единиц в выбранном направлении.', recipe: ['staff_of_wizardry', 'ring_of_regen'], category: 'Поддержка' },
+                    { id: 'glimmer_cape', name: 'Мерцающий плащ', cost: 2150, desc: 'Делает цель невидимой на 5 секунд, даёт +45% сопротивления магии.', recipe: ['shadow_amulet', 'cloak'], category: 'Поддержка' },
+                    { id: 'spirit_vessel', name: 'Сосуд духов', cost: 2900, desc: 'Уменьшает регенерацию врага на 60% и наносит урон.', recipe: ['urn_of_shadows', 'vitality_booster'], category: 'Поддержка' },
+                    { id: 'urn_of_shadows', name: 'Урна теней', cost: 880, desc: 'Накапливает заряды за убийства. Лечит союзника или наносит урон врагу.', recipe: ['sobi_mask', 'circlet'], category: 'Поддержка' },
+                    { id: 'solar_crest', name: 'Солнечный гребень', cost: 2825, desc: 'Увеличивает броню и уклонение союзника или уменьшает броню врага.', recipe: ['medallion_of_courage', 'talisman_of_evasion'], category: 'Поддержка' },
+                    { id: 'medallion_of_courage', name: 'Медальон храбрости', cost: 1025, desc: 'Уменьшает броню цели на 5 или увеличивает на 5.', recipe: ['chainmail', 'sobi_mask'], category: 'Поддержка' },
+                    { id: 'pipe_of_insight', name: 'Трубка прозрения', cost: 3500, desc: 'Даёт щит от магии союзникам в радиусе 1200.', recipe: ['headdress', 'cloak'], category: 'Поддержка' },
+                    { id: 'cloak', name: 'Плащ', cost: 800, desc: '+20% сопротивления магии.', recipe: [], category: 'Поддержка' },
+                    { id: 'holy_locket', name: 'Священный медальон', cost: 2350, desc: '+15 ко всем атрибутам. Увеличивает эффективность лечения на 35%.', recipe: ['ring_of_health', 'point_booster', 'circlet'], category: 'Поддержка' },
                 ],
                 // ===== МАГИЯ =====
                 'magic': [
-                    { id: 'dagon', name: 'Дагон', cost: 2850, icon: 'dagon', desc: 'Наносит 400 магического урона цели.', recipe: ['staff_of_wizardry', 'null_talisman'] },
-                    { id: 'cyclone', name: 'Циклон', cost: 2750, icon: 'cyclone', desc: 'Поднимает цель в воздух на 2.5 секунды.', recipe: ['staff_of_wizardry', 'mithril_hammer'] },
-                    { id: 'orchid', name: 'Орхидея', cost: 3475, icon: 'orchid', desc: 'Затыкает цель на 5 секунд и увеличивает урон.', recipe: ['oblivion_staff', 'staff_of_wizardry'] },
-                    { id: 'sheepstick', name: 'Гекс', cost: 5675, icon: 'sheepstick', desc: 'Превращает цель в животное на 3.5 секунды.', recipe: ['mystic_staff', 'ultimate_orb', 'void_stone'] },
+                    { id: 'dagon', name: 'Дагон', cost: 2850, desc: 'Наносит 400 магического урона цели. Можно улучшать до 5 уровня.', recipe: ['staff_of_wizardry', 'null_talisman'], category: 'Магия' },
+                    { id: 'null_talisman', name: 'Талисман пустоты', cost: 505, desc: '+3 к интеллекту. +6 урона.', recipe: ['mantle_of_intelligence', 'circlet'], category: 'Магия' },
+                    { id: 'cyclone', name: 'Циклон', cost: 2750, desc: 'Поднимает цель в воздух на 2.5 секунды. Делает неуязвимой.', recipe: ['staff_of_wizardry', 'mithril_hammer'], category: 'Магия' },
+                    { id: 'orchid', name: 'Орхидея', cost: 3475, desc: 'Затыкает цель на 5 секунд и увеличивает получаемый урон на 30%.', recipe: ['oblivion_staff', 'staff_of_wizardry'], category: 'Магия' },
+                    { id: 'sheepstick', name: 'Гекс', cost: 5675, desc: 'Превращает цель в животное на 3.5 секунды.', recipe: ['mystic_staff', 'ultimate_orb', 'void_stone'], category: 'Магия' },
+                    { id: 'scythe_of_vyse', name: 'Коса Вайса', cost: 5675, desc: 'Превращает цель в животное на 3.5 секунды.', recipe: ['mystic_staff', 'ultimate_orb', 'void_stone'], category: 'Магия' },
+                    { id: 'veil_of_discord', name: 'Покров раздора', cost: 2275, desc: 'Уменьшает сопротивление магии врагов в области.', recipe: ['robe_of_magi', 'chainmail', 'sobi_mask'], category: 'Магия' },
+                    { id: 'witchbane', name: 'Ведьмин клинок', cost: 0, desc: 'Нейтральный предмет. Снимает дебаффы с союзника.', recipe: [], category: 'Магия' },
+                    { id: 'ethereal_blade', name: 'Эфирный клинок', cost: 4500, desc: 'Переводит цель в астральную форму и наносит урон.', recipe: ['ghost_scepter', 'eaglesong', 'staff_of_wizardry'], category: 'Магия' },
                 ],
                 // ===== БРОНЯ =====
                 'armor': [
-                    { id: 'shivas_guard', name: 'Защита Шивы', cost: 4850, icon: 'shivas_guard', desc: '+30 к броне. Активация наносит 200 урона и замедляет.', recipe: ['mystic_staff', 'platemail'] },
-                    { id: 'assault_cuirass', name: 'Штурмовая кираса', cost: 5125, icon: 'assault_cuirass', desc: '+15 к броне. Увеличивает броню и скорость атаки союзникам.', recipe: ['platemail', 'hyperstone'] },
-                    { id: 'crimson_guard', name: 'Багровый страж', cost: 3775, icon: 'crimson_guard', desc: 'Блокирует 75 урона союзникам в радиусе 1200.', recipe: ['vanguard', 'buckler'] },
-                    { id: 'guardian_greaves', name: 'Страж-гетры', cost: 4650, icon: 'guardian_greaves', desc: 'Лечит 300 здоровья и маны. Снимает дебаффы.', recipe: ['arcane_boots', 'mekansm'] },
+                    { id: 'shivas_guard', name: 'Защита Шивы', cost: 4850, desc: '+30 к броне. Активация наносит 200 урона и замедляет на 40%.', recipe: ['mystic_staff', 'platemail'], category: 'Броня' },
+                    { id: 'assault_cuirass', name: 'Штурмовая кираса', cost: 5125, desc: '+15 к броне. Увеличивает броню на 5 и скорость атаки на 30 союзникам.', recipe: ['platemail', 'hyperstone'], category: 'Броня' },
+                    { id: 'crimson_guard', name: 'Багровый страж', cost: 3775, desc: 'Блокирует 75 урона союзникам в радиусе 1200.', recipe: ['vanguard', 'buckler'], category: 'Броня' },
+                    { id: 'guardian_greaves', name: 'Страж-гетры', cost: 4650, desc: 'Лечит 300 здоровья и маны. Снимает дебаффы.', recipe: ['arcane_boots', 'mekansm'], category: 'Броня' },
+                    { id: 'vanguard', name: 'Авангард', cost: 1700, desc: 'Блокирует 70 урона от атак.', recipe: ['stout_shield', 'vitality_booster'], category: 'Броня' },
+                    { id: 'blade_mail', name: 'Блэйд мейл', cost: 2100, desc: 'Возвращает 100% урона обратно атакующему.', recipe: ['broadsword', 'chainmail'], category: 'Броня' },
+                    { id: 'crimson_guard', name: 'Багровый страж', cost: 3775, desc: 'Блокирует 75 урона союзникам в радиусе 1200.', recipe: ['vanguard', 'buckler'], category: 'Броня' },
+                    { id: 'lotus_orb', name: 'Сфера лотоса', cost: 4000, desc: 'Снимает дебаффы и возвращает заклинания врагу.', recipe: ['perseverance', 'platemail'], category: 'Броня' },
                 ],
                 // ===== ОРУЖИЕ =====
                 'weapons': [
-                    { id: 'battlefury', name: 'Ярость битвы', cost: 4350, icon: 'battlefury', desc: '+55 урона. Наносит 70% урона по области при атаке.', recipe: ['claymore', 'broadsword', 'quarterstaff'] },
-                    { id: 'desolator', name: 'Дезинтегратор', cost: 3500, icon: 'desolator', desc: '+50 урона. Уменьшает броню цели на 6.', recipe: ['mithril_hammer', 'recipe'] },
-                    { id: 'daedalus', name: 'Дедал', cost: 5050, icon: 'daedalus', desc: '+75 урона. 30% шанс нанести 225% урона.', recipe: ['crystalys', 'demon_edge'] },
-                    { id: 'monkey_king_bar', name: 'Посох Короля-обезьяны', cost: 4700, icon: 'monkey_king_bar', desc: '+52 урона. Каждый удар наносит 70 дополнительного урона.', recipe: ['mithril_hammer', 'javelin', 'demon_edge'] },
+                    { id: 'battlefury', name: 'Ярость битвы', cost: 4350, desc: '+55 урона. Наносит 70% урона по области при атаке.', recipe: ['claymore', 'broadsword', 'quarterstaff'], category: 'Оружие' },
+                    { id: 'desolator', name: 'Дезинтегратор', cost: 3500, desc: '+50 урона. Уменьшает броню цели на 6.', recipe: ['mithril_hammer', 'blight_stone'], category: 'Оружие' },
+                    { id: 'daedalus', name: 'Дедал', cost: 5050, desc: '+75 урона. 30% шанс нанести 225% урона.', recipe: ['crystalys', 'demon_edge'], category: 'Оружие' },
+                    { id: 'monkey_king_bar', name: 'Посох Короля-обезьяны', cost: 4700, desc: '+52 урона. Каждый удар наносит 70 дополнительного урона.', recipe: ['mithril_hammer', 'javelin', 'demon_edge'], category: 'Оружие' },
+                    { id: 'crystalys', name: 'Кристаллис', cost: 1900, desc: '+35 урона. 20% шанс нанести 160% урона.', recipe: ['broadsword', 'blade_of_alacrity'], category: 'Оружие' },
+                    { id: 'skull_basher', name: 'Крушитель черепов', cost: 2900, desc: '+25 урона. 25% шанс оглушить цель на 1.5 секунды.', recipe: ['mithril_hammer', 'ogre_axe'], category: 'Оружие' },
+                    { id: 'abyssal_blade', name: 'Клинок бездны', cost: 4900, desc: '+30 к силе. Активация оглушает цель на 2 секунды.', recipe: ['skull_basher', 'vitality_booster'], category: 'Оружие' },
+                    { id: 'armlet_of_mordiggian', name: 'Нарукавник Мордиггиана', cost: 2500, desc: '+15 к силе, +10 урона, +25 к скорости атаки. Можно активировать.', recipe: ['belt_of_strength', 'ogre_axe', 'gloves_of_haste'], category: 'Оружие' },
+                    { id: 'echo_sabre', name: 'Эхо-сабля', cost: 2500, desc: '+15 к урону, +10 к скорости атаки. Каждая атака наносит 2 удара.', recipe: ['broadsword', 'quarterstaff'], category: 'Оружие' },
                 ],
                 // ===== АРТЕФАКТЫ =====
                 'artifacts': [
-                    { id: 'aghanims_scepter', name: 'Скипетр Аганима', cost: 4200, icon: 'aghanims_scepter', desc: 'Улучшает ультимейт способность героя.', recipe: ['point_booster', 'ogre_axe', 'blade_of_alacrity', 'staff_of_wizardry'] },
-                    { id: 'aghanims_shard', name: 'Осколок Аганима', cost: 1400, icon: 'aghanims_shard', desc: 'Улучшает одну из способностей героя.', recipe: [] },
-                    { id: 'black_king_bar', name: 'Чёрная королевская булава', cost: 4050, icon: 'black_king_bar', desc: 'Даёт неуязвимость к магии на 6-9 секунд.', recipe: ['ogre_axe', 'mithril_hammer'] },
-                    { id: 'refresher_orb', name: 'Освежающая сфера', cost: 5000, icon: 'refresher_orb', desc: 'Сбрасывает перезарядку всех способностей.', recipe: ['perseverance', 'recipe'] },
+                    { id: 'aghanims_scepter', name: 'Скипетр Аганима', cost: 4200, desc: 'Улучшает ультимейт способность героя.', recipe: ['point_booster', 'ogre_axe', 'blade_of_alacrity', 'staff_of_wizardry'], category: 'Артефакты' },
+                    { id: 'aghanims_shard', name: 'Осколок Аганима', cost: 1400, desc: 'Улучшает одну из способностей героя.', recipe: [], category: 'Артефакты' },
+                    { id: 'black_king_bar', name: 'Чёрная королевская булава', cost: 4050, desc: 'Даёт неуязвимость к магии на 6-9 секунд.', recipe: ['ogre_axe', 'mithril_hammer'], category: 'Артефакты' },
+                    { id: 'refresher_orb', name: 'Освежающая сфера', cost: 5000, desc: 'Сбрасывает перезарядку всех способностей.', recipe: ['perseverance', 'perseverance'], category: 'Артефакты' },
+                    { id: 'heart_of_tarrasque', name: 'Сердце Тарраски', cost: 5000, desc: '+45 к силе. Восстанавливает 6% здоровья в секунду.', recipe: ['reaver', 'vitality_booster'], category: 'Артефакты' },
+                    { id: 'butterfly', name: 'Бабочка', cost: 4975, desc: '+30 к ловкости, +30 урона, +35% уклонения.', recipe: ['eaglesong', 'talisman_of_evasion', 'quarterstaff'], category: 'Артефакты' },
+                    { id: 'divine_rapier', name: 'Божественная рапира', cost: 5600, desc: '+330 урона. Выпадает при смерти.', recipe: ['demon_edge', 'demon_edge', 'demon_edge'], category: 'Артефакты' },
+                    { id: 'eye_of_skadi', name: 'Око Скади', cost: 5300, desc: '+25 ко всем атрибутам. Замедляет цель на 25%.', recipe: ['ultimate_orb', 'ultimate_orb', 'point_booster'], category: 'Артефакты' },
+                    { id: 'manta_style', name: 'Стиль манты', cost: 4600, desc: '+16 к ловкости, +10 к силе. Создаёт 2 иллюзии.', recipe: ['yasha', 'ultimate_orb', 'recipe'], category: 'Артефакты' },
+                    { id: 'linkens_sphere', name: 'Сфера Линкена', cost: 4600, desc: '+15 ко всем атрибутам. Блокирует одно заклинание каждые 12 секунд.', recipe: ['perseverance', 'ultimate_orb'], category: 'Артефакты' },
                 ],
-                // ===== НЕЙТРАЛЬНЫЕ (из патча 7.41e) =====
+                // ===== НЕЙТРАЛЬНЫЕ =====
                 'neutral': [
-                    { id: 'foragers_kit', name: 'Набор собирателя', cost: 0, icon: 'foragers_kit', desc: 'Тир 1. Ускоряет сбор урожая.', recipe: [] },
-                    { id: 'conjurers_catalyst', name: 'Катализатор иллюзиониста', cost: 0, icon: 'conjurers_catalyst', desc: 'Тир 2. Увеличивает урон иллюзий.', recipe: [] },
-                    { id: 'enchanters_bauble', name: 'Безделушка чародея', cost: 0, icon: 'enchanters_bauble', desc: 'Тир 2. Усиливает эффекты чар.', recipe: [] },
-                    { id: 'witchbane', name: 'Ведьмин клинок', cost: 0, icon: 'witchbane', desc: 'Тир 3. Снимает дебаффы с союзника.', recipe: [] },
-                    { id: 'greedy', name: 'Жадный', cost: 0, icon: 'greedy', desc: 'Тир 3. Даёт золото в минуту.', recipe: [] },
-                    { id: 'feverish', name: 'Лихорадочный', cost: 0, icon: 'feverish', desc: 'Тир 3. Увеличивает скорость атаки.', recipe: [] },
+                    { id: 'keens_scope', name: 'Прицел Кина', cost: 0, desc: 'Тир 1. +10 к скорости атаки, +200 к дальности.', recipe: [], category: 'Нейтральные' },
+                    { id: 'arcanists_armor', name: 'Доспех чародея', cost: 0, desc: 'Тир 1. +3 к броне, +1.5 восстановления маны.', recipe: [], category: 'Нейтральные' },
+                    { id: 'chipped_vest', name: 'Щербатый жилет', cost: 0, desc: 'Тир 1. Возвращает 20 урона атакующему.', recipe: [], category: 'Нейтральные' },
+                    { id: 'foragers_kit', name: 'Набор собирателя', cost: 0, desc: 'Тир 1. Ускоряет сбор урожая на 20%.', recipe: [], category: 'Нейтральные' },
+                    { id: 'conjurers_catalyst', name: 'Катализатор иллюзиониста', cost: 0, desc: 'Тир 2. +15% к урону иллюзий.', recipe: [], category: 'Нейтральные' },
+                    { id: 'enchanters_bauble', name: 'Безделушка чародея', cost: 0, desc: 'Тир 2. +10% к длительности чар.', recipe: [], category: 'Нейтральные' },
+                    { id: 'greedy', name: 'Жадный', cost: 0, desc: 'Тир 3. Даёт +65/90 золота в минуту.', recipe: [], category: 'Нейтральные' },
+                    { id: 'feverish', name: 'Лихорадочный', cost: 0, desc: 'Тир 3. Уменьшает максимальную ману на 20%, ускоряет атаку.', recipe: [], category: 'Нейтральные' },
+                    { id: 'witchbane', name: 'Ведьмин клинок', cost: 0, desc: 'Тир 3. Снимает дебаффы с союзника.', recipe: [], category: 'Нейтральные' },
+                    { id: 'tumbler_toy', name: 'Игрушка-кувыркалка', cost: 0, desc: 'Тир 3. Отбрасывает владельца на 350 единиц.', recipe: [], category: 'Нейтральные' },
+                    { id: 'vampire_fangs', name: 'Вампирские клыки', cost: 0, desc: 'Тир 3. +8% к вампиризму, +15% к вампиризму от заклинаний.', recipe: [], category: 'Нейтральные' },
+                    { id: 'paladin_sword', name: 'Меч паладина', cost: 0, desc: 'Тир 4. +20% к лечению.', recipe: [], category: 'Нейтральные' },
+                ],
+                // ===== ДРЕВНИЕ =====
+                'ancients': [
+                    { id: 'gem_of_true_sight', name: 'Самоцвет истинного зрения', cost: 900, desc: 'Раскрывает невидимость в радиусе 900. Выпадает при смерти.', recipe: [], category: 'Древние' },
+                    { id: 'aegis_of_the_immortal', name: 'Эгида бессмертного', cost: 0, desc: 'Воскрешает владельца через 5 секунд после смерти.', recipe: [], category: 'Древние' },
+                    { id: 'cheese', name: 'Сыр', cost: 0, desc: 'Восстанавливает 2500 здоровья и 1500 маны мгновенно.', recipe: [], category: 'Древние' },
+                    { id: 'refresher_shard', name: 'Освежающий осколок', cost: 0, desc: 'Сбрасывает перезарядку всех способностей (одноразово).', recipe: [], category: 'Древние' },
                 ]
             };
 
@@ -476,13 +644,14 @@
                 return div.innerHTML;
             }
 
-            function getItemIconName(item) {
-                if (!item) return 'default';
-                return item.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '').replace(/[^a-z0-9_]/g, '');
+            function getItemIconName(itemId) {
+                if (!itemId) return 'default';
+                return itemId.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '').replace(/[^a-z0-9_]/g, '');
             }
 
             function getItemIconUrl(itemId) {
-                return `https://cdn.steamstatic.com/apps/dota2/images/items/${itemId}_lg.png`;
+                const iconName = getItemIconName(itemId);
+                return `https://cdn.steamstatic.com/apps/dota2/images/items/${iconName}_lg.png`;
             }
 
             function formatCost(cost) {
@@ -490,16 +659,13 @@
                 return cost + ' 💰';
             }
 
-            // ============================================================
-            // ПОЛУЧЕНИЕ ВСЕХ ПРЕДМЕТОВ С КАТЕГОРИЯМИ
-            // ============================================================
             function getAllItems() {
                 const all = [];
-                for (const [category, items] of Object.entries(ITEMS_DATA)) {
+                for (const [categoryKey, items] of Object.entries(ITEMS_DATA)) {
                     for (const item of items) {
                         all.push({
                             ...item,
-                            category: category,
+                            categoryKey: categoryKey,
                             iconName: getItemIconName(item.id)
                         });
                     }
@@ -513,135 +679,156 @@
             // РЕНДЕР ПРЕДМЕТОВ
             // ============================================================
             const grid = document.getElementById('itemsGrid');
-            const tooltip = document.getElementById('itemTooltip');
-            let tooltipTimeout = null;
+            const modal = document.getElementById('itemModal');
+            const modalBody = document.getElementById('itemModalBody');
+            const modalClose = document.getElementById('itemModalClose');
 
             function renderItems(category = 'all') {
                 let filtered;
                 if (category === 'all') {
                     filtered = allItems;
                 } else {
-                    filtered = allItems.filter(item => item.category === category);
+                    filtered = allItems.filter(item => item.categoryKey === category);
                 }
 
                 if (filtered.length === 0) {
-                    grid.innerHTML = '<div class="no-heroes"><p>Предметы в этой категории не найдены</p></div>';
-                    grid.classList.add('active');
+                    grid.innerHTML = '<div class="no-items"><p>Предметы в этой категории не найдены</p></div>';
+                    grid.classList.remove('fade-out');
                     return;
                 }
 
-                let html = '';
-                for (const item of filtered) {
-                    const iconUrl = getItemIconUrl(item.iconName);
-                    const costText = formatCost(item.cost);
-                    const categoryLabel = item.category.charAt(0).toUpperCase() + item.category.slice(1);
+                // Анимация исчезновения
+                grid.classList.add('fade-out');
 
-                    html += `
-                        <div class="item-card" 
-                             data-item-id="${escapeHtml(item.id)}"
-                             data-item-name="${escapeHtml(item.name)}"
-                             data-item-cost="${escapeHtml(item.cost)}"
-                             data-item-desc="${escapeHtml(item.desc)}"
-                             data-item-icon="${escapeHtml(item.iconName)}"
-                             data-item-recipe="${escapeHtml(JSON.stringify(item.recipe || []))}"
-                             data-item-category="${escapeHtml(categoryLabel)}">
-                            <div class="item-icon-wrap">
-                                <img src="${iconUrl}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:1.5rem;color:#666;\\'>?</span>'">
+                setTimeout(() => {
+                    let html = '';
+                    for (const item of filtered) {
+                        const iconUrl = getItemIconUrl(item.id);
+                        const costText = formatCost(item.cost);
+
+                        html += `
+                            <div class="item-card" 
+                                 data-item-id="${escapeHtml(item.id)}"
+                                 data-item-name="${escapeHtml(item.name)}"
+                                 data-item-cost="${escapeHtml(item.cost)}"
+                                 data-item-desc="${escapeHtml(item.desc)}"
+                                 data-item-icon="${escapeHtml(item.iconName)}"
+                                 data-item-recipe="${escapeHtml(JSON.stringify(item.recipe || []))}"
+                                 data-item-category="${escapeHtml(item.category || '')}">
+                                <div class="item-icon-wrap">
+                                    <img src="${iconUrl}" alt="${escapeHtml(item.name)}" loading="lazy" 
+                                         onerror="this.parentElement.innerHTML='<span style=\\'font-size:1.5rem;color:#666;\\'>?</span>'">
+                                </div>
+                                <div class="item-name">${escapeHtml(item.name)}</div>
+                                <div class="item-cost">${costText}</div>
                             </div>
-                            <div class="item-name">${escapeHtml(item.name)}</div>
-                            <div class="item-cost">${costText}</div>
-                            <span class="item-badge">${categoryLabel}</span>
+                        `;
+                    }
+
+                    grid.innerHTML = html;
+                    grid.classList.remove('fade-out');
+                    grid.classList.add('fade-in');
+
+                    // Добавляем обработчики клика для модального окна
+                    addClickHandlers();
+
+                    setTimeout(() => {
+                        grid.classList.remove('fade-in');
+                    }, 400);
+                }, 300);
+            }
+
+            // ============================================================
+            // МОДАЛЬНОЕ ОКНО
+            // ============================================================
+            function openItemModal(itemId) {
+                const item = allItems.find(i => i.id === itemId);
+                if (!item) {
+                    modalBody.innerHTML = '<p style="color:#ff6b6b;text-align:center;padding:20px;">Предмет не найден</p>';
+                    modal.classList.add('active');
+                    return;
+                }
+
+                const iconUrl = getItemIconUrl(item.id);
+                const costText = formatCost(item.cost);
+
+                let recipeHtml = '';
+                if (item.recipe && item.recipe.length > 0) {
+                    let recipeItemsHtml = '';
+                    for (const recipeItemId of item.recipe) {
+                        const recipeItem = allItems.find(i => i.id === recipeItemId);
+                        const recipeIconUrl = recipeItem ? getItemIconUrl(recipeItem.id) : '';
+                        const recipeName = recipeItem ? recipeItem.name : recipeItemId;
+                        recipeItemsHtml += `
+                            <div class="item-modal-recipe-item">
+                                <img src="${recipeIconUrl}" alt="${escapeHtml(recipeName)}" 
+                                     onerror="this.style.display='none'">
+                                ${escapeHtml(recipeName)}
+                            </div>
+                        `;
+                    }
+                    recipeHtml = `
+                        <div class="item-modal-recipe">
+                            <div class="item-modal-recipe-title">🔨 Состав</div>
+                            <div class="item-modal-recipe-items">${recipeItemsHtml}</div>
                         </div>
                     `;
                 }
 
-                grid.innerHTML = html;
-                grid.classList.add('active');
+                modalBody.innerHTML = `
+                    <div class="item-modal-icon">
+                        <img src="${iconUrl}" alt="${escapeHtml(item.name)}" 
+                             onerror="this.parentElement.innerHTML='<div style=\\'text-align:center;padding:40px;color:#666;font-size:3rem;\\'>?</div>'">
+                    </div>
+                    <div class="item-modal-name">${escapeHtml(item.name)}</div>
+                    <div class="item-modal-cost">💰 <span>${costText}</span></div>
+                    <div class="item-modal-desc">${escapeHtml(item.desc)}</div>
+                    ${recipeHtml}
+                    <span class="item-modal-badge">${escapeHtml(item.category || '')}</span>
+                `;
 
-                // Добавляем обработчики для тултипов
-                addTooltipHandlers();
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
             }
 
+            function closeItemModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // Закрытие по клику вне контента
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeItemModal();
+                }
+            });
+
+            // Закрытие по кнопке
+            modalClose.addEventListener('click', closeItemModal);
+
+            // Закрытие по Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    closeItemModal();
+                }
+            });
+
             // ============================================================
-            // ТУЛТИПЫ
+            // ОБРАБОТЧИКИ КЛИКОВ ДЛЯ КАРТОЧЕК
             // ============================================================
-            function addTooltipHandlers() {
+            function addClickHandlers() {
                 const cards = document.querySelectorAll('.item-card');
-
                 for (const card of cards) {
-                    card.addEventListener('mouseenter', function(e) {
-                        const name = this.dataset.itemName || 'Неизвестный предмет';
-                        const cost = parseInt(this.dataset.itemCost) || 0;
-                        const desc = this.dataset.itemDesc || '';
-                        const iconName = this.dataset.itemIcon || 'default';
-                        const recipeRaw = this.dataset.itemRecipe || '[]';
-                        const category = this.dataset.itemCategory || '';
-
-                        let recipe = [];
-                        try {
-                            recipe = JSON.parse(recipeRaw);
-                        } catch (e) {
-                            recipe = [];
-                        }
-
-                        const iconUrl = getItemIconUrl(iconName);
-                        const costText = cost > 0 ? cost + ' 💰' : 'Добывается';
-
-                        let recipeHtml = '';
-                        if (recipe && recipe.length > 0) {
-                            const recipeItems = recipe.map(r => `<span class="recipe-item">${escapeHtml(r)}</span>`).join(' ');
-                            recipeHtml = `<div class="tooltip-recipe">🔨 Крафт: ${recipeItems}</div>`;
-                        }
-
-                        tooltip.innerHTML = `
-                            <div class="tooltip-header">
-                                <div class="tooltip-icon">
-                                    <img src="${iconUrl}" alt="${escapeHtml(name)}" onerror="this.style.display='none'">
-                                </div>
-                                <div>
-                                    <div class="tooltip-title">${escapeHtml(name)}</div>
-                                    <div class="tooltip-cost">💰 <span>${costText}</span></div>
-                                </div>
-                            </div>
-                            <div class="tooltip-desc">${escapeHtml(desc)}</div>
-                            ${recipeHtml}
-                            <div style="font-size:0.6rem;color:#666;margin-top:4px;">${escapeHtml(category)}</div>
-                        `;
-
-                        tooltip.style.display = 'block';
-                        positionTooltip(e);
-                    });
-
-                    card.addEventListener('mousemove', function(e) {
-                        if (tooltip.style.display === 'block') {
-                            positionTooltip(e);
-                        }
-                    });
-
-                    card.addEventListener('mouseleave', function() {
-                        tooltip.style.display = 'none';
-                    });
+                    card.removeEventListener('click', cardClickHandler);
+                    card.addEventListener('click', cardClickHandler);
                 }
             }
 
-            function positionTooltip(e) {
-                let left = e.clientX + 18;
-                let top = e.clientY - 10;
-
-                const tooltipWidth = 320;
-                const tooltipHeight = 300;
-
-                if (left + tooltipWidth > window.innerWidth) {
-                    left = e.clientX - tooltipWidth - 18;
+            function cardClickHandler() {
+                const id = this.dataset.itemId;
+                if (id) {
+                    openItemModal(id);
                 }
-                if (left < 10) left = 10;
-                if (top + tooltipHeight > window.innerHeight) {
-                    top = window.innerHeight - tooltipHeight - 10;
-                }
-                if (top < 10) top = 10;
-
-                tooltip.style.left = left + 'px';
-                tooltip.style.top = top + 'px';
             }
 
             // ============================================================
@@ -651,17 +838,13 @@
 
             for (const tab of tabs) {
                 tab.addEventListener('click', function() {
-                    // Убираем активный класс у всех табов
                     for (const t of tabs) {
                         t.classList.remove('active');
                     }
                     this.classList.add('active');
 
                     const category = this.dataset.category;
-                    grid.classList.remove('active');
-                    setTimeout(() => {
-                        renderItems(category);
-                    }, 50);
+                    renderItems(category);
                 });
             }
 
