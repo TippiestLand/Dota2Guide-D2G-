@@ -1,1 +1,751 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dota 2 Guide — Путь Героя</title><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head><body><div class="stars"></div><div class="nebula"></div><div class="glow-orb"></div><div class="glow-orb orb2"></div><div class="attribute-glow" id="attributeGlow"></div><header><div class="logo">DOTA<span>GUIDE</span></div><nav><a href="#" data-page="home" class="active">Главная</a> <a href="#" data-page="heroes">Герои</a> <a href="#" data-page="items">Предметы</a> <a href="#" data-page="news">Новости</a> <a href="#" data-page="guides">Гайды</a></nav></header><main id="app"><section class="page active" id="page-home"><div class="hero"><div class="hero-content"><h1>Стань<br><span class="highlight">Легендой</span> Dota 2</h1><p>Пошаговое руководство для новичков: от выбора героя до победы над древним. Изучай предметы, стратегии и становись сильнее с каждым матчем.</p><div class="btn-group"><a href="#" data-page="guides" class="btn btn-primary">Начать обучение</a> <a href="#" data-page="heroes" class="btn btn-secondary">Все герои</a></div></div></div><section id="basics"><h2 class="section-title"><span>Азы</span> Dota 2</h2><div class="grid-3"><div class="glass-card scroll-fade"><span class="icon">🏛️</span><h3>Древнее</h3><p>Ваша главная цель — защитить своё Древнее и разрушить вражеское. Это командная игра 5x5.</p><span class="badge">Цель игры</span></div><div class="glass-card scroll-fade"><span class="icon">🔄</span><h3>Лейны</h3><p>Три линии: верхняя, средняя и нижняя. На каждой — свои герои и тактики. Не забывайте про лес.</p><span class="badge">Карта</span></div><div class="glass-card scroll-fade"><span class="icon">💰</span><h3>Золото и Опыт</h3><p>Убивайте крипов, героев и нейтралов, чтобы получать золото для предметов и опыт для уровней.</p><span class="badge">Экономика</span></div></div></section></section><section class="page" id="page-heroes"><div class="heroes-header"><h2 class="section-title"><span>Выберите</span> героя</h2></div><div class="hero-controls"><div class="hero-search"><input type="text" id="heroSearch" placeholder="Поиск героя..."></div><div class="hero-filters"><button class="filter-btn" data-filter="strength"><img src="{{ url_for('static', filename='assets/icons/Strength_attribute_symbol.png') }}" alt="Сила" class="filter-icon"></button> <button class="filter-btn" data-filter="agility"><img src="{{ url_for('static', filename='assets/icons/Agility_attribute_symbol.png') }}" alt="Ловкость" class="filter-icon"></button> <button class="filter-btn" data-filter="intelligence"><img src="{{ url_for('static', filename='assets/icons/Intelligence_attribute_symbol.png') }}" alt="Интеллект" class="filter-icon"></button> <button class="filter-btn" data-filter="universal"><img src="{{ url_for('static', filename='assets/icons/Dota2_Universal_icon_solid_allmode.png') }}" alt="Универсальный" class="filter-icon"></button></div></div><div class="hero-grid" id="heroList"></div></section><section class="page" id="page-items"><h2 class="section-title"><span>Все</span> предметы</h2><div class="items-grid"><div class="item-card"><div class="item-icon">👢</div><h3>Сапоги скорости</h3><p>+45 скорость передвижения</p><span class="badge">500 золота</span></div><div class="item-card"><div class="item-icon">⚡</div><h3>Молния</h3><p>+24 урона, +20 скорости атаки</p><span class="badge">2500 золота</span></div><div class="item-card"><div class="item-icon">🛡️</div><h3>Блэйд мейл</h3><p>Возвращает 100% урона</p><span class="badge">2100 золота</span></div><div class="item-card"><div class="item-icon">💧</div><h3>Волшебная палочка</h3><p>Восстанавливает здоровье и ману</p><span class="badge">450 золота</span></div><div class="item-card"><div class="item-icon">🌀</div><h3>Сияние</h3><p>60 магического урона в секунду</p><span class="badge">5150 золота</span></div><div class="item-card"><div class="item-icon">👁️</div><h3>Аганим</h3><p>Улучшает ультимейт способность</p><span class="badge">4200 золота</span></div><div class="item-card"><div class="item-icon">🔮</div><h3>Блинк</h3><p>Телепортация на 1200 единиц</p><span class="badge">2250 золота</span></div><div class="item-card"><div class="item-icon">🪄</div><h3>Гекс</h3><p>Превращает врага в зверька</p><span class="badge">5675 золота</span></div></div></section><section class="page" id="page-news"><h2 class="section-title"><span>Новости</span> и <span>Патчи</span> Dota 2</h2><div class="news-tabs"><button class="tab-btn active" data-tab="news">Новости</button> <button class="tab-btn" data-tab="patches">Патчи</button></div><div class="tab-content active" id="tab-news"><div class="news-feed" id="newsFeed"><div class="news-loading"><div class="loader"></div><p>Загрузка новостей...</p></div></div></div><div class="tab-content" id="tab-patches"><div class="patches-feed" id="patchesFeed"><div class="news-loading"><div class="loader"></div><p>Загрузка патчей...</p></div></div></div></section><section class="page" id="page-guides"><h2 class="section-title"><span>Гайды</span> для новичков</h2><div class="guides-grid"><div class="guide-card"><h3>Как выбрать героя</h3><p>Пошаговое руководство по выбору героя в зависимости от роли и стиля игры.</p><span class="badge">Начало</span></div><div class="guide-card"><h3>Основы фарма</h3><p>Как эффективно добивать крипов, контролировать лайн и набирать золото.</p><span class="badge">Экономика</span></div><div class="guide-card"><h3>Тактика командной игры</h3><p>Взаимодействие с командой, правильные позиции и принятие решений.</p><span class="badge">Тактика</span></div><div class="guide-card"><h3>Сборка предметов</h3><p>Как правильно собирать предметы под разных героев и противников.</p><span class="badge">Снаряжение</span></div><div class="guide-card"><h3>Контроль карты</h3><p>Расстановка вардов, контроль рун и важных точек на карте.</p><span class="badge">Карта</span></div><div class="guide-card"><h3>Улучшение механики</h3><p>Упражнения для улучшения реакции, кликов и комбинаций способностей.</p><span class="badge">Механика</span></div></div></section></main><footer><p>DOTA GUIDE — твой путь к мастерству. <span class="gold">Сделано с любовью</span> для новичков.</p><p style="margin-top:8px;font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p></footer><div class="hero-modal" id="heroModal"><div class="hero-modal-content"><button class="hero-modal-close" id="heroModalClose">✕</button><div class="hero-modal-body" id="heroModalBody"><div class="hero-modal-loading">Загрузка...</div></div></div></div><script src="{{ url_for('static', filename='js/news.js') }}"></script><script src="{{ url_for('static', filename='js/patches.js') }}"></script><script src="{{ url_for('static', filename='js/script.js') }}"></script></body></html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Предметы — Dota 2 Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Специфичные стили для страницы предметов */
+        .items-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .items-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+        }
+
+        .items-header h1 span {
+            color: var(--gold);
+            text-shadow: 0 0 30px var(--gold-glow);
+        }
+
+        .items-header p {
+            color: #b0b0c0;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 10px auto 0;
+        }
+
+        /* Категории предметов (табы) */
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .category-tab {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: #8888a0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-tab:hover {
+            color: #fff;
+            border-color: rgba(240, 185, 11, 0.3);
+            background: rgba(240, 185, 11, 0.05);
+        }
+
+        .category-tab.active {
+            background: rgba(240, 185, 11, 0.15);
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.05);
+        }
+
+        /* Сетка предметов */
+        .items-grid-container {
+            position: relative;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .items-grid.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Карточка предмета */
+        .item-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 20px 15px 18px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.9);
+            animation: itemAppear 0.4s forwards;
+        }
+
+        .item-card:nth-child(1) { animation-delay: 0.02s; }
+        .item-card:nth-child(2) { animation-delay: 0.04s; }
+        .item-card:nth-child(3) { animation-delay: 0.06s; }
+        .item-card:nth-child(4) { animation-delay: 0.08s; }
+        .item-card:nth-child(5) { animation-delay: 0.10s; }
+        .item-card:nth-child(6) { animation-delay: 0.12s; }
+        .item-card:nth-child(7) { animation-delay: 0.14s; }
+        .item-card:nth-child(8) { animation-delay: 0.16s; }
+        .item-card:nth-child(9) { animation-delay: 0.18s; }
+        .item-card:nth-child(10) { animation-delay: 0.20s; }
+        .item-card:nth-child(11) { animation-delay: 0.22s; }
+        .item-card:nth-child(12) { animation-delay: 0.24s; }
+        .item-card:nth-child(13) { animation-delay: 0.26s; }
+        .item-card:nth-child(14) { animation-delay: 0.28s; }
+        .item-card:nth-child(15) { animation-delay: 0.30s; }
+
+        @keyframes itemAppear {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .item-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            border-color: rgba(240, 185, 11, 0.25);
+            box-shadow: 0 20px 60px rgba(240, 185, 11, 0.1);
+            z-index: 5;
+        }
+
+        .item-card .item-icon-wrap {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+        }
+
+        .item-card:hover .item-icon-wrap {
+            border-color: rgba(240, 185, 11, 0.3);
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.05);
+        }
+
+        .item-card .item-icon-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .item-card:hover .item-icon-wrap img {
+            transform: scale(1.08);
+        }
+
+        .item-card .item-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .item-card .item-cost {
+            font-size: 0.75rem;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .item-card .item-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #8888a0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Тултип для предмета */
+        .item-tooltip {
+            position: fixed;
+            background: rgba(10, 10, 18, 0.97);
+            backdrop-filter: blur(16px);
+            color: #fff;
+            padding: 18px 22px;
+            border-radius: 14px;
+            border: 1px solid rgba(240, 185, 11, 0.2);
+            font-size: 0.85rem;
+            max-width: 320px;
+            min-width: 240px;
+            pointer-events: none;
+            z-index: 99999;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+            line-height: 1.6;
+            transition: opacity 0.15s ease;
+        }
+
+        .item-tooltip .tooltip-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .item-tooltip .tooltip-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .item-tooltip .tooltip-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-tooltip .tooltip-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--gold);
+        }
+
+        .item-tooltip .tooltip-cost {
+            font-size: 0.8rem;
+            color: #8888a0;
+        }
+
+        .item-tooltip .tooltip-cost span {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .item-tooltip .tooltip-desc {
+            color: #b0b0c0;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .item-tooltip .tooltip-recipe {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.75rem;
+            color: #8888a0;
+        }
+
+        .item-tooltip .tooltip-recipe span {
+            color: #fff;
+        }
+
+        .item-tooltip .tooltip-recipe .recipe-item {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 2px 2px;
+            font-size: 0.7rem;
+            color: #c8c8d0;
+        }
+
+        /* Адаптив */
+        @media (max-width: 768px) {
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 14px;
+            }
+
+            .item-card .item-icon-wrap {
+                width: 64px;
+                height: 64px;
+            }
+
+            .item-card .item-name {
+                font-size: 0.8rem;
+            }
+
+            .category-tab {
+                padding: 8px 16px;
+                font-size: 0.75rem;
+            }
+
+            .item-tooltip {
+                max-width: 280px;
+                min-width: 200px;
+                padding: 14px 16px;
+            }
+
+            .item-tooltip .tooltip-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .item-tooltip .tooltip-title {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 10px;
+            }
+
+            .item-card {
+                padding: 14px 10px 12px;
+                border-radius: 12px;
+            }
+
+            .item-card .item-icon-wrap {
+                width: 52px;
+                height: 52px;
+                margin-bottom: 8px;
+                border-radius: 8px;
+            }
+
+            .item-card .item-name {
+                font-size: 0.7rem;
+            }
+
+            .item-card .item-cost {
+                font-size: 0.65rem;
+            }
+
+            .category-tab {
+                padding: 6px 12px;
+                font-size: 0.65rem;
+            }
+
+            .item-tooltip {
+                max-width: 240px;
+                min-width: 180px;
+                padding: 12px 14px;
+                font-size: 0.75rem;
+            }
+
+            .item-tooltip .tooltip-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .item-tooltip .tooltip-title {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars"></div>
+    <div class="nebula"></div>
+    <div class="glow-orb"></div>
+    <div class="glow-orb orb2"></div>
+
+    <header>
+        <div class="logo">DOTA<span>GUIDE</span></div>
+        <nav>
+            <a href="/" data-page="home">Главная</a>
+            <a href="/" data-page="heroes">Герои</a>
+            <a href="#" data-page="items" class="active">Предметы</a>
+            <a href="/" data-page="news">Новости</a>
+            <a href="/" data-page="guides">Гайды</a>
+        </nav>
+    </header>
+
+    <main style="margin-top: 80px; max-width: 1400px; padding: 0 5%; margin-left: auto; margin-right: auto;">
+        <div class="items-header">
+            <h1><span>Предметы</span> Dota 2</h1>
+            <p>Изучи все предметы игры: от расходников до артефактов. Наведи на предмет, чтобы узнать детали.</p>
+        </div>
+
+        <!-- Категории -->
+        <div class="category-tabs" id="categoryTabs">
+            <button class="category-tab active" data-category="all">Все</button>
+            <button class="category-tab" data-category="consumables">Расходники</button>
+            <button class="category-tab" data-category="attributes">Атрибуты</button>
+            <button class="category-tab" data-category="equipment">Снаряжение</button>
+            <button class="category-tab" data-category="misc">Разное</button>
+            <button class="category-tab" data-category="secret">Потайные</button>
+            <button class="category-tab" data-category="accessories">Аксессуары</button>
+            <button class="category-tab" data-category="support">Поддержка</button>
+            <button class="category-tab" data-category="magic">Магия</button>
+            <button class="category-tab" data-category="armor">Броня</button>
+            <button class="category-tab" data-category="weapons">Оружие</button>
+            <button class="category-tab" data-category="artifacts">Артефакты</button>
+            <button class="category-tab" data-category="neutral">Нейтральные</button>
+        </div>
+
+        <!-- Сетка предметов -->
+        <div class="items-grid-container">
+            <div class="items-grid active" id="itemsGrid">
+                <!-- Предметы будут загружены через JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>DOTA GUIDE — твой путь к мастерству. <span class="gold">Сделано с любовью</span> для новичков.</p>
+        <p style="margin-top: 8px; font-size:0.7rem;">Dota 2 — торговая марка Valve Corporation. Сайт не является официальным.</p>
+    </footer>
+
+    <!-- Контейнер для тултипа -->
+    <div class="item-tooltip" id="itemTooltip" style="display: none;"></div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // ДАННЫЕ ПРЕДМЕТОВ (из Dota 2 Fandom Wiki + собственные знания)
+            // ============================================================
+            const ITEMS_DATA = {
+                // ===== РАСХОДНИКИ =====
+                'consumables': [
+                    { id: 'tango', name: 'Танго', cost: 90, icon: 'tango', desc: 'Восстанавливает 115 здоровья за 16 секунд. Можно использовать на союзника.', recipe: [] },
+                    { id: 'healing_salve', name: 'Целебная мазь', cost: 100, icon: 'healing_salve', desc: 'Восстанавливает 400 здоровья за 10 секунд.', recipe: [] },
+                    { id: 'clarity', name: 'Зелье ясности', cost: 50, icon: 'clarity', desc: 'Восстанавливает 150 маны за 30 секунд.', recipe: [] },
+                    { id: 'enchanted_mango', name: 'Зачарованное манго', cost: 70, icon: 'enchanted_mango', desc: 'Восстанавливает 110 маны мгновенно.', recipe: [] },
+                    { id: 'faerie_fire', name: 'Феерический огонёк', cost: 70, icon: 'faerie_fire', desc: '+2 урона. Восстанавливает 85 здоровья мгновенно.', recipe: [] },
+                    { id: 'smoke_of_deceit', name: 'Дым обмана', cost: 50, icon: 'smoke_of_deceit', desc: 'Делает вас и союзников невидимыми на 35 секунд.', recipe: [] },
+                    { id: 'dust_of_appearance', name: 'Пыль проявления', cost: 80, icon: 'dust', desc: 'Раскрывает невидимых врагов в радиусе 1050 на 12 секунд.', recipe: [] },
+                    { id: 'town_portal_scroll', name: 'Свиток телепортации', cost: 90, icon: 'town_portal_scroll', desc: 'Телепортирует к союзной постройке через 3 секунды.', recipe: [] },
+                ],
+                // ===== АТРИБУТЫ =====
+                'attributes': [
+                    { id: 'gauntlets_of_strength', name: 'Наручи силы', cost: 140, icon: 'gauntlets', desc: '+3 к силе.', recipe: [] },
+                    { id: 'slippers_of_agility', name: 'Тапочки ловкости', cost: 140, icon: 'slippers', desc: '+3 к ловкости.', recipe: [] },
+                    { id: 'mantle_of_intelligence', name: 'Плащ интеллекта', cost: 140, icon: 'mantle', desc: '+3 к интеллекту.', recipe: [] },
+                    { id: 'circlet', name: 'Ободок', cost: 155, icon: 'circlet', desc: '+2 ко всем атрибутам.', recipe: [] },
+                    { id: 'band_of_elvenskin', name: 'Повязка эльфийской кожи', cost: 450, icon: 'band_of_elvenskin', desc: '+6 к ловкости.', recipe: [] },
+                    { id: 'robe_of_magi', name: 'Мантия мага', cost: 450, icon: 'robe', desc: '+6 к интеллекту.', recipe: [] },
+                    { id: 'belt_of_strength', name: 'Пояс силы', cost: 450, icon: 'belt_of_strength', desc: '+6 к силе.', recipe: [] },
+                    { id: 'ogre_axe', name: 'Топор огров', cost: 1000, icon: 'ogre_axe', desc: '+10 к силе.', recipe: [] },
+                    { id: 'blade_of_alacrity', name: 'Клинок проворства', cost: 1000, icon: 'blade_of_alacrity', desc: '+10 к ловкости.', recipe: [] },
+                    { id: 'staff_of_wizardry', name: 'Посох чародея', cost: 1000, icon: 'staff_of_wizardry', desc: '+10 к интеллекту.', recipe: [] },
+                    { id: 'point_booster', name: 'Усилитель характеристик', cost: 1200, icon: 'point_booster', desc: '+175 здоровья, +75 маны.', recipe: [] },
+                ],
+                // ===== СНАРЯЖЕНИЕ =====
+                'equipment': [
+                    { id: 'boots_of_speed', name: 'Сапоги скорости', cost: 500, icon: 'boots_of_speed', desc: '+45 к скорости передвижения.', recipe: [] },
+                    { id: 'magic_wand', name: 'Волшебная палочка', cost: 450, icon: 'magic_wand', desc: 'Восстанавливает 15 здоровья и маны за заряд. До 20 зарядов.', recipe: ['magic_stick', 'iron_branch', 'iron_branch'] },
+                    { id: 'magic_stick', name: 'Волшебная палка', cost: 200, icon: 'magic_stick', desc: 'Восстанавливает 15 здоровья и маны за заряд. До 10 зарядов.', recipe: [] },
+                    { id: 'iron_branch', name: 'Железная ветвь', cost: 50, icon: 'iron_branch', desc: '+1 ко всем атрибутам. Можно посадить дерево.', recipe: [] },
+                    { id: 'quelling_blade', name: 'Лесорубный клинок', cost: 100, icon: 'quelling_blade', desc: '+12 урона крипам. Можно срубить дерево.', recipe: [] },
+                    { id: 'infused_raindrop', name: 'Насыщенная капля', cost: 225, icon: 'infused_raindrop', desc: 'Блокирует 120 магического урона. Восстанавливает 1.5 маны/сек.', recipe: [] },
+                ],
+                // ===== РАЗНОЕ =====
+                'misc': [
+                    { id: 'gem_of_true_sight', name: 'Самоцвет истинного зрения', cost: 900, icon: 'gem', desc: 'Раскрывает невидимость в радиусе 900.', recipe: [] },
+                    { id: 'observer_ward', name: 'Сторожевой вард', cost: 0, icon: 'observer_ward', desc: 'Даёт обзор в радиусе 1600 на 6 минут.', recipe: [] },
+                    { id: 'sentry_ward', name: 'Дозорный вард', cost: 50, icon: 'sentry_ward', desc: 'Раскрывает невидимость в радиусе 1000 на 4 минуты.', recipe: [] },
+                    { id: 'tome_of_knowledge', name: 'Фолиант знаний', cost: 150, icon: 'tome_of_knowledge', desc: 'Даёт опыт (175 + 20 за минуту).', recipe: [] },
+                ],
+                // ===== ПОТАЙНЫЕ =====
+                'secret': [
+                    { id: 'mystic_staff', name: 'Мистический посох', cost: 2700, icon: 'mystic_staff', desc: '+25 к интеллекту.', recipe: [] },
+                    { id: 'eaglesong', name: 'Песнь орла', cost: 2800, icon: 'eaglesong', desc: '+25 к ловкости.', recipe: [] },
+                    { id: 'reaver', name: 'Мститель', cost: 2800, icon: 'reaver', desc: '+25 к силе.', recipe: [] },
+                    { id: 'hyperstone', name: 'Гиперкамень', cost: 2000, icon: 'hyperstone', desc: '+55 к скорости атаки.', recipe: [] },
+                    { id: 'talisman_of_evasion', name: 'Талисман уклонения', cost: 1300, icon: 'talisman_of_evasion', desc: '+20% к уклонению.', recipe: [] },
+                ],
+                // ===== АКСЕССУАРЫ =====
+                'accessories': [
+                    { id: 'sange', name: 'Санг', cost: 2050, icon: 'sange', desc: '+16 к силе. Увеличивает замедление на 16%.', recipe: ['belt_of_strength', 'ogre_axe'] },
+                    { id: 'yasha', name: 'Яша', cost: 2050, icon: 'yasha', desc: '+16 к ловкости. +25 к скорости атаки.', recipe: ['band_of_elvenskin', 'blade_of_alacrity'] },
+                    { id: 'kaya', name: 'Кая', cost: 2050, icon: 'kaya', desc: '+16 к интеллекту. +10% к урону от заклинаний.', recipe: ['robe_of_magi', 'staff_of_wizardry'] },
+                    { id: 'sange_and_yasha', name: 'Санг и Яша', cost: 4100, icon: 'sange_and_yasha', desc: '+16 к силе и ловкости. +20 к скорости атаки.', recipe: ['sange', 'yasha'] },
+                    { id: 'yasha_and_kaya', name: 'Яша и Кая', cost: 4100, icon: 'yasha_and_kaya', desc: '+16 к ловкости и интеллекту. +20 к скорости атаки.', recipe: ['yasha', 'kaya'] },
+                    { id: 'kaya_and_sange', name: 'Кая и Санг', cost: 4100, icon: 'kaya_and_sange', desc: '+16 к силе и интеллекту. +10% к урону от заклинаний.', recipe: ['kaya', 'sange'] },
+                    { id: 'ultimate_orb', name: 'Изначальная сфера', cost: 2100, icon: 'ultimate_orb', desc: '+10 ко всем атрибутам.', recipe: [] },
+                ],
+                // ===== ПОДДЕРЖКА =====
+                'support': [
+                    { id: 'mekansm', name: 'Меканзм', cost: 1875, icon: 'mekansm', desc: 'Восстанавливает 250 здоровья союзникам в радиусе 1200.', recipe: ['headress', 'buckler'] },
+                    { id: 'arcane_boots', name: 'Таинственные сапоги', cost: 1450, icon: 'arcane_boots', desc: '+50 к скорости. Восстанавливает 160 маны союзникам.', recipe: ['boots_of_speed', 'energy_booster'] },
+                    { id: 'force_staff', name: 'Силовой посох', cost: 2225, icon: 'force_staff', desc: 'Толкает цель на 600 единиц в выбранном направлении.', recipe: ['staff_of_wizardry', 'ring_of_regen'] },
+                    { id: 'glimmer_cape', name: 'Мерцающий плащ', cost: 2150, icon: 'glimmer_cape', desc: 'Делает цель невидимой на 5 секунд.', recipe: ['shadow_amulet', 'cloak'] },
+                    { id: 'spirit_vessel', name: 'Сосуд духов', cost: 2900, icon: 'spirit_vessel', desc: 'Уменьшает регенерацию врага на 60% и наносит урон.', recipe: ['urn_of_shadows', 'vitality_booster'] },
+                ],
+                // ===== МАГИЯ =====
+                'magic': [
+                    { id: 'dagon', name: 'Дагон', cost: 2850, icon: 'dagon', desc: 'Наносит 400 магического урона цели.', recipe: ['staff_of_wizardry', 'null_talisman'] },
+                    { id: 'cyclone', name: 'Циклон', cost: 2750, icon: 'cyclone', desc: 'Поднимает цель в воздух на 2.5 секунды.', recipe: ['staff_of_wizardry', 'mithril_hammer'] },
+                    { id: 'orchid', name: 'Орхидея', cost: 3475, icon: 'orchid', desc: 'Затыкает цель на 5 секунд и увеличивает урон.', recipe: ['oblivion_staff', 'staff_of_wizardry'] },
+                    { id: 'sheepstick', name: 'Гекс', cost: 5675, icon: 'sheepstick', desc: 'Превращает цель в животное на 3.5 секунды.', recipe: ['mystic_staff', 'ultimate_orb', 'void_stone'] },
+                ],
+                // ===== БРОНЯ =====
+                'armor': [
+                    { id: 'shivas_guard', name: 'Защита Шивы', cost: 4850, icon: 'shivas_guard', desc: '+30 к броне. Активация наносит 200 урона и замедляет.', recipe: ['mystic_staff', 'platemail'] },
+                    { id: 'assault_cuirass', name: 'Штурмовая кираса', cost: 5125, icon: 'assault_cuirass', desc: '+15 к броне. Увеличивает броню и скорость атаки союзникам.', recipe: ['platemail', 'hyperstone'] },
+                    { id: 'crimson_guard', name: 'Багровый страж', cost: 3775, icon: 'crimson_guard', desc: 'Блокирует 75 урона союзникам в радиусе 1200.', recipe: ['vanguard', 'buckler'] },
+                    { id: 'guardian_greaves', name: 'Страж-гетры', cost: 4650, icon: 'guardian_greaves', desc: 'Лечит 300 здоровья и маны. Снимает дебаффы.', recipe: ['arcane_boots', 'mekansm'] },
+                ],
+                // ===== ОРУЖИЕ =====
+                'weapons': [
+                    { id: 'battlefury', name: 'Ярость битвы', cost: 4350, icon: 'battlefury', desc: '+55 урона. Наносит 70% урона по области при атаке.', recipe: ['claymore', 'broadsword', 'quarterstaff'] },
+                    { id: 'desolator', name: 'Дезинтегратор', cost: 3500, icon: 'desolator', desc: '+50 урона. Уменьшает броню цели на 6.', recipe: ['mithril_hammer', 'recipe'] },
+                    { id: 'daedalus', name: 'Дедал', cost: 5050, icon: 'daedalus', desc: '+75 урона. 30% шанс нанести 225% урона.', recipe: ['crystalys', 'demon_edge'] },
+                    { id: 'monkey_king_bar', name: 'Посох Короля-обезьяны', cost: 4700, icon: 'monkey_king_bar', desc: '+52 урона. Каждый удар наносит 70 дополнительного урона.', recipe: ['mithril_hammer', 'javelin', 'demon_edge'] },
+                ],
+                // ===== АРТЕФАКТЫ =====
+                'artifacts': [
+                    { id: 'aghanims_scepter', name: 'Скипетр Аганима', cost: 4200, icon: 'aghanims_scepter', desc: 'Улучшает ультимейт способность героя.', recipe: ['point_booster', 'ogre_axe', 'blade_of_alacrity', 'staff_of_wizardry'] },
+                    { id: 'aghanims_shard', name: 'Осколок Аганима', cost: 1400, icon: 'aghanims_shard', desc: 'Улучшает одну из способностей героя.', recipe: [] },
+                    { id: 'black_king_bar', name: 'Чёрная королевская булава', cost: 4050, icon: 'black_king_bar', desc: 'Даёт неуязвимость к магии на 6-9 секунд.', recipe: ['ogre_axe', 'mithril_hammer'] },
+                    { id: 'refresher_orb', name: 'Освежающая сфера', cost: 5000, icon: 'refresher_orb', desc: 'Сбрасывает перезарядку всех способностей.', recipe: ['perseverance', 'recipe'] },
+                ],
+                // ===== НЕЙТРАЛЬНЫЕ (из патча 7.41e) =====
+                'neutral': [
+                    { id: 'foragers_kit', name: 'Набор собирателя', cost: 0, icon: 'foragers_kit', desc: 'Тир 1. Ускоряет сбор урожая.', recipe: [] },
+                    { id: 'conjurers_catalyst', name: 'Катализатор иллюзиониста', cost: 0, icon: 'conjurers_catalyst', desc: 'Тир 2. Увеличивает урон иллюзий.', recipe: [] },
+                    { id: 'enchanters_bauble', name: 'Безделушка чародея', cost: 0, icon: 'enchanters_bauble', desc: 'Тир 2. Усиливает эффекты чар.', recipe: [] },
+                    { id: 'witchbane', name: 'Ведьмин клинок', cost: 0, icon: 'witchbane', desc: 'Тир 3. Снимает дебаффы с союзника.', recipe: [] },
+                    { id: 'greedy', name: 'Жадный', cost: 0, icon: 'greedy', desc: 'Тир 3. Даёт золото в минуту.', recipe: [] },
+                    { id: 'feverish', name: 'Лихорадочный', cost: 0, icon: 'feverish', desc: 'Тир 3. Увеличивает скорость атаки.', recipe: [] },
+                ]
+            };
+
+            // ============================================================
+            // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+            // ============================================================
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function getItemIconName(item) {
+                if (!item) return 'default';
+                return item.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '').replace(/[^a-z0-9_]/g, '');
+            }
+
+            function getItemIconUrl(itemId) {
+                return `https://cdn.steamstatic.com/apps/dota2/images/items/${itemId}_lg.png`;
+            }
+
+            function formatCost(cost) {
+                if (!cost || cost === 0) return 'Добывается';
+                return cost + ' 💰';
+            }
+
+            // ============================================================
+            // ПОЛУЧЕНИЕ ВСЕХ ПРЕДМЕТОВ С КАТЕГОРИЯМИ
+            // ============================================================
+            function getAllItems() {
+                const all = [];
+                for (const [category, items] of Object.entries(ITEMS_DATA)) {
+                    for (const item of items) {
+                        all.push({
+                            ...item,
+                            category: category,
+                            iconName: getItemIconName(item.id)
+                        });
+                    }
+                }
+                return all;
+            }
+
+            const allItems = getAllItems();
+
+            // ============================================================
+            // РЕНДЕР ПРЕДМЕТОВ
+            // ============================================================
+            const grid = document.getElementById('itemsGrid');
+            const tooltip = document.getElementById('itemTooltip');
+            let tooltipTimeout = null;
+
+            function renderItems(category = 'all') {
+                let filtered;
+                if (category === 'all') {
+                    filtered = allItems;
+                } else {
+                    filtered = allItems.filter(item => item.category === category);
+                }
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = '<div class="no-heroes"><p>Предметы в этой категории не найдены</p></div>';
+                    grid.classList.add('active');
+                    return;
+                }
+
+                let html = '';
+                for (const item of filtered) {
+                    const iconUrl = getItemIconUrl(item.iconName);
+                    const costText = formatCost(item.cost);
+                    const categoryLabel = item.category.charAt(0).toUpperCase() + item.category.slice(1);
+
+                    html += `
+                        <div class="item-card" 
+                             data-item-id="${escapeHtml(item.id)}"
+                             data-item-name="${escapeHtml(item.name)}"
+                             data-item-cost="${escapeHtml(item.cost)}"
+                             data-item-desc="${escapeHtml(item.desc)}"
+                             data-item-icon="${escapeHtml(item.iconName)}"
+                             data-item-recipe="${escapeHtml(JSON.stringify(item.recipe || []))}"
+                             data-item-category="${escapeHtml(categoryLabel)}">
+                            <div class="item-icon-wrap">
+                                <img src="${iconUrl}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:1.5rem;color:#666;\\'>?</span>'">
+                            </div>
+                            <div class="item-name">${escapeHtml(item.name)}</div>
+                            <div class="item-cost">${costText}</div>
+                            <span class="item-badge">${categoryLabel}</span>
+                        </div>
+                    `;
+                }
+
+                grid.innerHTML = html;
+                grid.classList.add('active');
+
+                // Добавляем обработчики для тултипов
+                addTooltipHandlers();
+            }
+
+            // ============================================================
+            // ТУЛТИПЫ
+            // ============================================================
+            function addTooltipHandlers() {
+                const cards = document.querySelectorAll('.item-card');
+
+                for (const card of cards) {
+                    card.addEventListener('mouseenter', function(e) {
+                        const name = this.dataset.itemName || 'Неизвестный предмет';
+                        const cost = parseInt(this.dataset.itemCost) || 0;
+                        const desc = this.dataset.itemDesc || '';
+                        const iconName = this.dataset.itemIcon || 'default';
+                        const recipeRaw = this.dataset.itemRecipe || '[]';
+                        const category = this.dataset.itemCategory || '';
+
+                        let recipe = [];
+                        try {
+                            recipe = JSON.parse(recipeRaw);
+                        } catch (e) {
+                            recipe = [];
+                        }
+
+                        const iconUrl = getItemIconUrl(iconName);
+                        const costText = cost > 0 ? cost + ' 💰' : 'Добывается';
+
+                        let recipeHtml = '';
+                        if (recipe && recipe.length > 0) {
+                            const recipeItems = recipe.map(r => `<span class="recipe-item">${escapeHtml(r)}</span>`).join(' ');
+                            recipeHtml = `<div class="tooltip-recipe">🔨 Крафт: ${recipeItems}</div>`;
+                        }
+
+                        tooltip.innerHTML = `
+                            <div class="tooltip-header">
+                                <div class="tooltip-icon">
+                                    <img src="${iconUrl}" alt="${escapeHtml(name)}" onerror="this.style.display='none'">
+                                </div>
+                                <div>
+                                    <div class="tooltip-title">${escapeHtml(name)}</div>
+                                    <div class="tooltip-cost">💰 <span>${costText}</span></div>
+                                </div>
+                            </div>
+                            <div class="tooltip-desc">${escapeHtml(desc)}</div>
+                            ${recipeHtml}
+                            <div style="font-size:0.6rem;color:#666;margin-top:4px;">${escapeHtml(category)}</div>
+                        `;
+
+                        tooltip.style.display = 'block';
+                        positionTooltip(e);
+                    });
+
+                    card.addEventListener('mousemove', function(e) {
+                        if (tooltip.style.display === 'block') {
+                            positionTooltip(e);
+                        }
+                    });
+
+                    card.addEventListener('mouseleave', function() {
+                        tooltip.style.display = 'none';
+                    });
+                }
+            }
+
+            function positionTooltip(e) {
+                let left = e.clientX + 18;
+                let top = e.clientY - 10;
+
+                const tooltipWidth = 320;
+                const tooltipHeight = 300;
+
+                if (left + tooltipWidth > window.innerWidth) {
+                    left = e.clientX - tooltipWidth - 18;
+                }
+                if (left < 10) left = 10;
+                if (top + tooltipHeight > window.innerHeight) {
+                    top = window.innerHeight - tooltipHeight - 10;
+                }
+                if (top < 10) top = 10;
+
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+            }
+
+            // ============================================================
+            // КАТЕГОРИИ (ТАБЫ)
+            // ============================================================
+            const tabs = document.querySelectorAll('.category-tab');
+
+            for (const tab of tabs) {
+                tab.addEventListener('click', function() {
+                    // Убираем активный класс у всех табов
+                    for (const t of tabs) {
+                        t.classList.remove('active');
+                    }
+                    this.classList.add('active');
+
+                    const category = this.dataset.category;
+                    grid.classList.remove('active');
+                    setTimeout(() => {
+                        renderItems(category);
+                    }, 50);
+                });
+            }
+
+            // ============================================================
+            // ЗАПУСК
+            // ============================================================
+            document.addEventListener('DOMContentLoaded', function() {
+                renderItems('all');
+                console.log('✅ Страница предметов загружена, предметов:', allItems.length);
+            });
+
+        })();
+    </script>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
